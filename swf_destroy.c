@@ -16,6 +16,12 @@
  *
  *
  * $Log: swf_destroy.c,v $
+ * Revision 1.16  2001/07/12 20:27:53  clampr
+ * more unchecked frees
+ *
+ * I guess these haven't shown themselves before now as glibc silently
+ * discards free(NULL) whereas on other systems it's a definate no-no
+ *
  * Revision 1.15  2001/07/12 20:08:22  clampr
  * in swf_destroy_textrecord check there are glyphs to destroy first, else you free(NULL) and badness occurs
  *
@@ -62,14 +68,14 @@ swf_destroy_parser (swf_parser * context)
         return;
     }
     fclose(context->file);
-    free(context->name);
-    free(context->header);
-    free (context);
+    if (context->name)   free(context->name);
+    if (context->header) free(context->header);
 
     for (i=0; i<context->number_of_fonts; i++) {
-        free (context->font_chars[i]);
+	  if (context->font_chars[i]) free (context->font_chars[i]);
     }
-    free (context->font_chars);
+    if (context->font_chars) free(context->font_chars);
+    free (context);
 
     return;
 }
