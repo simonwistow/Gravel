@@ -36,7 +36,9 @@ spew_out_bits(SWF_U8 n, SWF_U32 bits)
   int index;
   SWF_U32 mask;
 
-  mask = 1 << n;
+  mask = 1 << n-1;
+
+  //  fprintf(stderr, ":do %i bits as %i:", n, bits);
 
   for(index=0;index<n;index++) {
     if(bits & mask)
@@ -122,19 +124,19 @@ test_buffer_flush_bits (swf_buffer * context, int printing)
   /* FIXME: error handling... */
 
   bt = bitbuf >> 24;
-  test_buffer_put_byte(context, &error, bt, printing);
+  test_buffer_put_byte(context, &error, bt, 0);
   if (bitpos <= 8) { return; }
 
   bt = (bitbuf << 8) >> 24;
-  test_buffer_put_byte(context, &error, bt, printing);
+  test_buffer_put_byte(context, &error, bt, 0);
   if (bitpos <= 16) { return; }
 
   bt = (bitbuf << 16) >> 24;
-  test_buffer_put_byte(context, &error, bt, printing);
+  test_buffer_put_byte(context, &error, bt, 0);
   if (bitpos <= 24) { return; }
 
   bt = (bitbuf << 24) >> 24;
-  test_buffer_put_byte(context, &error, bt, printing);
+  test_buffer_put_byte(context, &error, bt, 0);
 }
 
 /* FIXME: error handling... */
@@ -159,18 +161,20 @@ test_buffer_put_bits (swf_buffer * context, SWF_U8 n, SWF_U32 bits, int printing
 
   if (i + n > 32) {
 
+    //    fprintf(stderr, "Buffer flush...");
+
     /* We need to flush the buffer and leave the residue */
     bitbuf = context->bitbuf;
     bitbuf += bits >> (i + n - 32);
 
     bt = bitbuf >> 24;
-    test_buffer_put_byte(context, &error, bt, printing);
+    test_buffer_put_byte(context, &error, bt, 0);
     bt = (bitbuf << 8) >> 24;
-    test_buffer_put_byte(context, &error, bt, printing);
+    test_buffer_put_byte(context, &error, bt, 0);
     bt = (bitbuf << 16) >> 24;
-    test_buffer_put_byte(context, &error, bt, printing);
+    test_buffer_put_byte(context, &error, bt, 0);
     bt = (bitbuf << 24) >> 24;
-    test_buffer_put_byte(context, &error, bt, printing);
+    test_buffer_put_byte(context, &error, bt, 0);
     test_buffer_initbits(context);
 
     context->bitbuf = bits << (64 - (i + n));
@@ -294,15 +298,18 @@ test_buffer_shapestyle(swf_buffer * buffer, int * error, swf_shapestyle * s, int
 	SWF_U8 i, type;
 
 	test_buffer_initbits(buffer);
+	fprintf(stderr, "\nPutting numfills\n");
 	if (s->nfills < 255) {
-		test_buffer_put_byte (buffer, error, (SWF_U8)s->nfills, printing);
+	  test_buffer_put_byte (buffer, error, (SWF_U8)s->nfills, printing);
 	} else {
-		test_buffer_put_word (buffer, error, s->nfills, printing);
+	  test_buffer_put_word (buffer, error, s->nfills, printing);
 	}
 
 	/* FIXME: Alpha channels... */
 	for (i=0; i < s->nfills; i++) {
-	  printf("putting fill %i\n", i);
+	  fprintf(stderr, "\nputting fill %i:\n", i);
+
+	  s->fills[i]->fill_style += 10;
 	  
 	  type = s->fills[i]->fill_style;
 	  test_buffer_put_byte (buffer, error, type, printing);
@@ -317,6 +324,7 @@ test_buffer_shapestyle(swf_buffer * buffer, int * error, swf_shapestyle * s, int
 	  } else {
 	    /* Solid Fill */
 	    /* Test code */
+	    fprintf(stderr, "\nputting colour data for fill %i:\n", i);
 	    test_buffer_put_byte(buffer, error, 0, printing);
 	    test_buffer_put_byte(buffer, error, 0, printing);
 	    test_buffer_put_byte(buffer, error, 0, printing);
@@ -324,6 +332,7 @@ test_buffer_shapestyle(swf_buffer * buffer, int * error, swf_shapestyle * s, int
 	  }
 	}
 
+	fprintf(stderr, "\nPutting numlines\n");
 	if (s->nlines < 255) {
 	  test_buffer_put_byte (buffer, error, (SWF_U8)s->nlines, printing);
 	} else {
@@ -332,16 +341,19 @@ test_buffer_shapestyle(swf_buffer * buffer, int * error, swf_shapestyle * s, int
 
 	/* FIXME: Alpha channels... */
 	for (i=0; i < s->nlines; i++) {
-	  printf("putting line %i\n", i);
+	  fprintf(stderr, "\nputting line width for line%i\n", i);
 	  test_buffer_put_word (buffer, error, s->lines[i]->width, printing);
 	  /* Test code */
+	  fprintf(stderr, "\nputting line colour for line%i\n", i);
 	  test_buffer_put_byte(buffer, error, 0, printing);
 	  test_buffer_put_byte(buffer, error, 0, printing);
 	  test_buffer_put_byte(buffer, error, 0, printing);
 
 	}
 
+	fprintf(stderr, "\nputting fillbits\n");
 	test_buffer_put_bits(buffer, 4, s->fillbits, printing);
+	fprintf(stderr, "\nputting linebits\n");
 	test_buffer_put_bits(buffer, 4, s->linebits, printing);
 
 	test_buffer_flush_bits(buffer, printing);
@@ -368,112 +380,114 @@ test_buffer_shaperecord(swf_buffer * buffer, int * error, swf_shaperecord * s, s
       return;
     }
     
-        /* TODO: Process a move to. */
-        if (s->flags & eflagsMoveTo) {
-	  max = 0;
-	  if (abs(s->y) > max) {
-	    max = abs(s->y);
-	  }
-	  if (abs(s->x) > max) {
-	    max = abs(s->x);
-	  }
-	  
-	  i = 2; /* 2 for sbits */
-	  while (1 < max) {
-	    i++;
-	    max = max >> 1;
-	  }
-	  test_buffer_put_bits(buffer, 5, i, printing);
-	  
-	  test_buffer_put_sbits(buffer, i, s->x, printing);
-	  test_buffer_put_sbits(buffer, i, s->y, printing);  	        }
+    /* TODO: Process a move to. */
+    if (s->flags & eflagsMoveTo) {
+      max = 0;
+      if (abs(s->y) > max) {
+	max = abs(s->y);
+      }
+      if (abs(s->x) > max) {
+	max = abs(s->x);
+      }
+      
+      i = 2; /* 2 for sbits */
+      while (1 < max) {
+	i++;
+	max = max >> 1;
+      }
+      test_buffer_put_bits(buffer, 5, i, printing);
+      
+      test_buffer_put_sbits(buffer, i, s->x, printing);
+      test_buffer_put_sbits(buffer, i, s->y, printing);  	        }
+    
+    /* Process new fill info. */
+    if (s->flags & eflagsFill0) {
+      test_buffer_put_bits(buffer, st->fillbits, s->fillstyle0, printing);
+    }
 
-        /* Process new fill info. */
-        if (s->flags & eflagsFill0) {
-	  test_buffer_put_bits(buffer, st->fillbits, s->fillstyle0, printing);
-        }
-
-        if (s->flags & eflagsFill1) {
-	  test_buffer_put_bits(buffer, st->fillbits, s->fillstyle1, printing);
-        }
-
-        /* Get new line info */
-        if (s->flags & eflagsLine) {
-	  test_buffer_put_bits(buffer, st->linebits, s->linestyle, printing);
-        }
-
-        /* TODO: Process new styles*/
-        if (s->flags & eflagsNewStyles) {
-	  fprintf(stderr, "Unsupported New Styles Flag\n");
-        }
-
+    if (s->flags & eflagsFill1) {
+      test_buffer_put_bits(buffer, st->fillbits, s->fillstyle1, printing);
+    }
+    
+    /* Get new line info */
+    if (s->flags & eflagsLine) {
+      test_buffer_put_bits(buffer, st->linebits, s->linestyle, printing);
+    }
+    
+    /* TODO: Process new styles*/
+    if (s->flags & eflagsNewStyles) {
+      fprintf(stderr, "Unsupported New Styles Flag\n");
+    }
+    
+    return;
+  } else {
+    printf("Putting edge..\n");
+    
+    if (s->x | s->y) {
+      if (s->ax | s->ay | s->cx | s->cy) {
+	printf("Putting weirdness..\n");
+	/* We're trying to be a line and a curve all at once */
+	*error = SWF_ENotValidSWF;
 	return;
-	} else {
-	  printf("Putting edge..\n");
-
-	  if (s->x | s->y) {
-	    if (s->ax | s->ay | s->cx | s->cy) {
-	      printf("Putting weirdness..\n");
-/* We're trying to be a line and a curve all at once */
-	      *error = SWF_ENotValidSWF;
-	      return;
-	    }
-	    
-	    /* we're a straight line */
-	    printf("Putting line..\n");
-	    
-	    test_buffer_put_bits(buffer, 1, 1, printing);
-	    
-	    max = 0;
-	    if (abs(s->y) > max) {
+      }
+      
+      /* we're a straight line */
+      printf("Putting line..\n");
+      
+      test_buffer_put_bits(buffer, 1, 1, printing);
+      
+      max = 0;
+      if (abs(s->y) > max) {
 	      max = abs(s->y);
-	    }
-	    if (abs(s->x) > max) {
-	      max = abs(s->x);
-	    }
+      }
+      if (abs(s->x) > max) {
+	max = abs(s->x);
+      }
+      
+      i = 0; /* 2 for sbits, -2 from spec */
+      while (1 < max) {
+	printf("max = %i ; i = %i\n", max, i);
+	i++;
+	max = max >> 1;
+      }
+      printf("putting bits : %i\n", i);
+      test_buffer_put_bits(buffer, 4, i, printing);
+      i += 2;
 	    
-	    i = 0; /* 2 for sbits, -2 from spec */
-	    while (1 < max) {
-	      printf("max = %i ; i = %i\n", max, i);
-	      i++;
-	      max = max >> 1;
-	    }
-	    printf("putting bits : %i\n", i);
-	    test_buffer_put_bits(buffer, 4, i, printing);
-	    i += 2;
-	    
-	    if ((0 == s->x) || (0 == s->y)) {
+      if ((0 == s->x) || (0 == s->y)) {
 				/* Vertical / Horizontal line */
-	      test_buffer_put_bits(buffer, 1, 0, printing);
-	      
-	      if (0 == s->x) {
-		printf("Putting vert line..\n");
-		test_buffer_put_bits(buffer, 1, 1, printing);
-		test_buffer_put_sbits(buffer, i, s->y, printing);
-	      } else {
-		printf("Putting horiz line..\n");
-		test_buffer_put_bits(buffer, 1, 0, printing);
-		test_buffer_put_sbits(buffer, i, s->x, printing);
-	      }
-
-	    } else {
-				/* General Line */
-	      test_buffer_put_bits(buffer, 1, 1, printing);
-	      
-	      test_buffer_put_sbits(buffer, i, s->x, printing);
-	      test_buffer_put_sbits(buffer, i, s->y, printing);
-	    }
-
-	  } else {
-	    /* TODO: Curves... */
-	    /* we're a curve */
-	    test_buffer_put_bits(buffer, 1, 0, printing);
-	    printf("Putting curve..\n");
-	    
-	  }
-	  
-	}
+	test_buffer_put_bits(buffer, 1, 0, printing);
 	
+	if (0 == s->x) {
+	  fprintf(stderr,"\n  Putting vert line..: %i as %i bits:\n", s->y, i);
+	  test_buffer_put_bits(buffer, 1, 1, printing);
+	  test_buffer_put_sbits(buffer, i, s->y, printing);
+	} else {
+	  fprintf(stderr, "\n  Putting horiz line..: %i as %i bits:\n", s->x, i);
+	  test_buffer_put_bits(buffer, 1, 0, printing);
+	  test_buffer_put_sbits(buffer, i, s->x, printing);
+	}
+	fprintf(stderr, "\nDone Putting 'special' line..\n");
+      } else {
+				/* General Line */
+	test_buffer_put_bits(buffer, 1, 1, printing);
+	fprintf(stderr,"\n  Putting general line..: %i, %i as %i bits:\n  ", s->x, s->y, i);
+	fprintf(stderr, "Putting horizontal comp..\n");
+	test_buffer_put_sbits(buffer, i, s->x, printing);
+	fprintf(stderr, "\nPutting vertical comp..\n");
+	test_buffer_put_sbits(buffer, i, s->y, printing);
+      }
+      
+    } else {
+	    /* TODO: Curves... */
+      /* we're a curve */
+      test_buffer_put_bits(buffer, 1, 0, printing);
+      printf("Putting curve..\n");
+      
+    }
+    
+  }
+  
 }
 
 
