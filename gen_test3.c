@@ -234,6 +234,7 @@ int main (int argc, char *argv[]) {
     swf_free(mycx);
     swf_free(matrix);
     swf_destroy_movie(movie);
+    swf_destroy_parser(parser);
 
     fprintf (stderr, "OK\n");
     return 0;

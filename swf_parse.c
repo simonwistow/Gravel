@@ -154,9 +154,12 @@ swf_parse_get_byte(swf_parser * context)
     return byte;
 }
 
+
+
 /*
  * Ensure the parse head is byte-aligned and read the specified
  * number of bytes from the stream.
+ * NOTE: we do calloc'ing here....
  */
 
 SWF_U8 *
@@ -951,6 +954,9 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
 
 /*
  * $Log: swf_parse.c,v $
+ * Revision 1.50  2002/06/03 22:28:34  kitty_goth
+ * Fix memory leask and a couple of minor nits
+ *
  * Revision 1.49  2002/05/20 17:05:26  kitty_goth
  * Minor nits. sync to carry on at home.
  *

@@ -37,8 +37,6 @@ swf_destroy_parser (swf_parser * context)
     if (!context) return;
 
     fclose(context->file);
-//    swf_free(context->name);
-    swf_free(context->header);
 
 	extra = context->font_extras;
 	while (extra) {
@@ -49,17 +47,35 @@ swf_destroy_parser (swf_parser * context)
 		swf_free(last);		
 	}
 
-//	swf_free (context->file);
-	swf_free (context->buffer);
+    swf_destroy_header(context->header);
+    swf_destroy_buffer(context->buffer);
+
 	swf_free (context->src_adpcm);
+    swf_free (context->name);
     swf_free (context);
 }
+
+void
+swf_destroy_buffer (swf_buffer * buffy)
+{
+	if (buffy) { swf_free(buffy->raw); }
+	swf_free(buffy);
+}
+
+/* FIXME:
+ * I really want to pass shiva back as the return of this
+ * function but trying to write the declaration made my head hurt
+ */
 
 void
 init_destructors(void (**shiva)(), int * error) 
 {
 
   shiva[tagDefineShape]         = swf_destroy_defineshape;
+  /* Next two are test code */
+  shiva[tagDefineShape2]        = swf_destroy_defineshape;
+  shiva[tagDefineShape3]        = swf_destroy_defineshape;
+
   shiva[tagSetBackgroundColour] = swf_destroy_setbackgroundcolour;
   shiva[tagDefineButton]        = swf_destroy_definebutton;
   shiva[tagPlaceObject]         = swf_destroy_placeobject;

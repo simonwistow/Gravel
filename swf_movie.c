@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.24 2002/05/31 10:08:20 muttley Exp $	
+ * 	$Id: swf_movie.c,v 1.25 2002/06/03 22:28:34 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -97,12 +97,9 @@ swf_destroy_movie (swf_movie * movie)
 	swf_destroy_tagrecord(tmp);
     }
 
-//    swf_destroy_tagrecord(movie->first);
-    swf_destroy_tagrecord(*movie->lastp);
 
-    swf_free(movie->buffer);
-//    swf_free(*movie->lastp);
-    swf_free(movie->first);
+    swf_destroy_buffer(movie->buffer);
+
     swf_free(movie);
     swf_free(shiva);
 
@@ -145,19 +142,6 @@ swf_get_raw_shape (swf_parser * swf, int * error)
 	goto FAIL;
     }
 
-    if ((mytag->buffer = (swf_buffer *) calloc (1, sizeof (swf_buffer))) == NULL) {
-	*error = SWF_EMallocFailure;
-	goto FAIL;
-    }
-
-    if ((mytag->buffer->raw = (SWF_U8 *) calloc (length, sizeof (SWF_U8))) == NULL) {
-	*error = SWF_EMallocFailure;
-	goto FAIL;
-    }
-
-/* CHECKME: Do we need this ? */
-//    swf_parse_seek(swf, startpos);
-    
     mytag->buffer->raw = swf_parse_get_bytes(swf, length);
     mytag->buffer->size = length;
 
@@ -169,20 +153,17 @@ swf_get_raw_shape (swf_parser * swf, int * error)
 }
 
 
-swf_tagrecord *
-swf_get_nth_shape (swf_parser * swf, int * error, int which_shape) 
-{
 /*
  * Get a raw shape from the define shape frames.
  */
 
-
+swf_tagrecord *
+swf_get_nth_shape (swf_parser * swf, int * error, int which_shape) 
+{
     int next_id, i, done;
     swf_tagrecord * temp = NULL;
 	
 
-    /* attempt to make a new tag record */
-    //temp  = swf_make_tagrecord(error, 0);
     if (*error != SWF_ENoError) 
     {
 	fprintf(stderr,"error wasn't reset in get_nth_shape\n");

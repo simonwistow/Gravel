@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_destroy.h,v $
+ * Revision 1.12  2002/06/03 22:28:34  kitty_goth
+ * Fix memory leask and a couple of minor nits
+ *
  * Revision 1.11  2002/05/29 16:40:47  kitty_goth
  * Carry on at home
  *
@@ -101,6 +104,7 @@ extern void swf_destroy_colour (swf_colour *);
 extern void swf_destroy_gradcolour (swf_gradcolour *);
 extern void swf_destroy_cxform (swf_cxform *);
 extern void swf_destroy_matrix (swf_matrix *);
+extern void swf_destroy_buffer (swf_buffer * buffy);
 
 #endif
 
