@@ -16,6 +16,9 @@
  *
  *
  * $Log: lib_swfextract.c,v $
+ * Revision 1.18  2001/07/19 23:12:18  clampr
+ * dereference the pointer
+ *
  * Revision 1.17  2001/07/19 23:05:07  clampr
  * less returning from void functions
  *
@@ -345,7 +348,7 @@ examine_doactions (swf_extractor * swf, int * error, swf_doaction_list * list)
 {
     swf_doaction * node;
 
-    if (list == NULL || error != SWF_ENoError)
+    if (list == NULL || *error != SWF_ENoError)
     {
         return;
     }
