@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.34 2002/06/26 21:36:45 kitty_goth Exp $	
+ * 	$Id: swf_movie.c,v 1.35 2002/07/06 08:45:28 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -221,16 +221,14 @@ swf_get_nth_shape (swf_parser * swf, int * error, int which_shape)
 
     return temp;
 
-    FAIL:
+FAIL:
     swf_destroy_tagrecord(temp);
     return NULL;
 
 }
 
-/* FIXME: TESTCODE */
-
 swf_fillstyle * 
-swf_make_fillstyle(int * error) 
+swf_make_solid_fillstyle(int * error) 
 {
     swf_fillstyle * mystyle;
 
@@ -238,28 +236,101 @@ swf_make_fillstyle(int * error)
 	*error = SWF_EMallocFailure;
 	return NULL;
     }
-    if ((mystyle->colours = (swf_rgba_pos **) calloc (1, sizeof (swf_rgba_pos *))) == NULL) {
+    if ((mystyle->col = (swf_colour *) calloc (1, sizeof (swf_colour))) == NULL) {
 	*error = SWF_EMallocFailure;
-	return NULL;
-    }
-    if ((mystyle->col = (swf_colour *) calloc (1, sizeof (swf_colour *))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
+	goto FAIL;
     }
 
-    mystyle->fill_style = 0; /* Just do solid fill for now */
-    mystyle->ncolours = 1; /* Just do solid fill for now */
-    mystyle->bitmap_id = 0; /* Just do solid fill for now */
-    mystyle->matrix = NULL; /* Just do solid fill for now */
-    mystyle->colours = (swf_rgba_pos **) &(mystyle->matrix); /* Just do solid fill for now */
-
-    mystyle->col->r = 0xff; 
-    mystyle->col->g = 0; 
-    mystyle->col->b = 0; 
-    mystyle->col->a = 0xff; 
+    mystyle->fill_style = fillSolid; 
 
     return mystyle;
+
+FAIL:
+    swf_destroy_fillstyle(mystyle);
+    return NULL;
 }
+
+swf_fillstyle * 
+swf_make_gradient_fillstyle(int * error, SWF_U8 ncols, SWF_U8 type) 
+{
+    swf_fillstyle * mystyle;
+
+    if ((type != fillLinearGradient) && (type != fillRadialGradient) ) {
+	*error = SWF_EIncorrectFillType;
+	return NULL;
+    }
+    if (ncols > fillMaxGradientColours) {
+	*error = SWF_EIncorrectFillType;
+	return NULL;
+    }
+
+    if ((mystyle = (swf_fillstyle *) calloc (1, sizeof (swf_fillstyle))) == NULL) {
+	*error = SWF_EMallocFailure;
+	return NULL;
+    }
+    if ((mystyle->colours = (swf_rgba_pos **) calloc (2, sizeof (swf_rgba_pos *))) == NULL) {
+	*error = SWF_EMallocFailure;
+	goto FAIL;
+    }
+    if ((mystyle->colours[0] = (swf_rgba_pos *) calloc (1, sizeof (swf_rgba_pos *))) == NULL) {
+	*error = SWF_EMallocFailure;
+	goto FAIL;
+    }
+    if ((mystyle->colours[1] = (swf_rgba_pos *) calloc (1, sizeof (swf_rgba_pos *))) == NULL) {
+	*error = SWF_EMallocFailure;
+	goto FAIL;
+    }
+    if ((mystyle->colours[0]->col = (swf_colour *) calloc (1, sizeof (swf_colour))) == NULL) {
+	*error = SWF_EMallocFailure;
+	goto FAIL;
+    }
+    if ((mystyle->colours[1]->col = (swf_colour *) calloc (1, sizeof (swf_colour))) == NULL) {
+	*error = SWF_EMallocFailure;
+	goto FAIL;
+    }
+    if ((mystyle->matrix = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
+	*error = SWF_EMallocFailure;
+	goto FAIL;
+    }
+
+    mystyle->fill_style = type; 
+    mystyle->ncolours = ncols; 
+
+    return mystyle;
+
+FAIL:
+    swf_destroy_fillstyle(mystyle);
+    return NULL;
+}
+
+swf_fillstyle * 
+swf_make_bitmap_fillstyle(int * error, SWF_U8 type) 
+{
+    swf_fillstyle * mystyle;
+
+    if ((type != fillBitsTiled) && (type != fillBitsClipped) ) {
+	*error = SWF_EIncorrectFillType;
+	return NULL;
+    }
+
+    if ((mystyle = (swf_fillstyle *) calloc (1, sizeof (swf_fillstyle))) == NULL) {
+	*error = SWF_EMallocFailure;
+	return NULL;
+    }
+    if ((mystyle->matrix = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
+	*error = SWF_EMallocFailure;
+	goto FAIL;
+    }
+
+    mystyle->fill_style = type; 
+
+    return mystyle;
+
+FAIL:
+    swf_destroy_fillstyle(mystyle);
+    return NULL;
+}
+
 
 /* FIXME: TESTCODE */
 
@@ -277,12 +348,12 @@ swf_make_linestyle(int * error)
 	return NULL;
     }
 
-    mystyle->col->r = 0; 
+    mystyle->col->r = 0xff; 
     mystyle->col->g = 0; 
-    mystyle->col->b = 0xff; 
+    mystyle->col->b = 0; 
     mystyle->col->a = 0xff; 
 
-    mystyle->width = 2 * 20; /* Thin lines, 2 pixels wide */
+    mystyle->width = 6 * 20; /* Thin lines, 2 pixels wide */
 
     return mystyle;
 }

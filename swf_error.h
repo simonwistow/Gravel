@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_error.h,v $
+ * Revision 1.10  2002/07/06 08:45:28  kitty_goth
+ * Fix fills stuff, move test code out of the lower level functions.
+ *
  * Revision 1.9  2002/05/23 14:45:15  kitty_goth
  * Simon's change
  *
@@ -53,6 +56,7 @@
 #define SWF_EByGum                          (14)
 #define SWF_EFontNotSet                     (15)
 #define SWF_ENoSuchShape                    (16)
+#define SWF_EIncorrectFillType              (17)
 
 
 extern const char * swf_error_code_to_string (int);

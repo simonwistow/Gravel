@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: triangle.c,v 1.4 2002/06/25 11:26:53 kitty_goth Exp $	
+ * 	$Id: triangle.c,v 1.5 2002/07/06 08:45:29 kitty_goth Exp $	
  */
 
 #include "swf_types.h"
@@ -45,7 +45,6 @@ swf_make_shaperecords_for_triangle(int * error)
 /* First, we need a non-edge, change of style record */ 
     record = swf_make_shaperecord(error, 0);
     record->flags = eflagsFill1 | eflagsMoveTo;
-//    record->flags = eflagsFill1 | eflagsLine;
 
     record->fillstyle0 = 0;
     record->fillstyle1 = 1;
@@ -63,6 +62,7 @@ swf_make_shaperecords_for_triangle(int * error)
     /* */
     record = swf_make_shaperecord(error, 1);
     record->x = 75 * 20;
+    record->y = 20 * 20;
     swf_add_shaperecord(list, error, record);
     list->record_count++;
 
@@ -74,19 +74,8 @@ swf_make_shaperecords_for_triangle(int * error)
 
     /* */
     record = swf_make_shaperecord(error, 1);
-    record->x = -50 * 20;
-//    record->y = -50 * 20;
-    swf_add_shaperecord(list, error, record);
-    list->record_count++;
-
-    record = swf_make_shaperecord(error, 1);
-    record->y = -25 * 20;
-    swf_add_shaperecord(list, error, record);
-    list->record_count++; 
-
-    record = swf_make_shaperecord(error, 1);
-    record->x = -25 * 20;
-    record->y = -25 * 20;
+    record->x = -75 * 20;
+    record->y = -70 * 20;
     swf_add_shaperecord(list, error, record);
     list->record_count++;
 
@@ -152,8 +141,6 @@ swf_make_triangle(swf_movie * movie, int * error)
 	goto FAIL;
     }
 
-
-
     shape->tagid = ++(movie->max_obj_id);
 
     canvas->xmin = -200 * 20;
@@ -166,9 +153,29 @@ swf_make_triangle(swf_movie * movie, int * error)
     mystyle->nfills = 1;
     mystyle->nlines = 1;
 
-    *(mystyle->fills) = swf_make_fillstyle(error);
+    *(mystyle->fills) = swf_make_gradient_fillstyle(error, 2, fillLinearGradient);
     *(mystyle->lines) = swf_make_linestyle(error);
-//    *(mystyle->lines) = NULL;
+
+    /* Now populate the fill and line styles */
+    mystyle->fills[0]->matrix->a  = 128;
+    mystyle->fills[0]->matrix->d  = 2 * 256;
+    mystyle->fills[0]->matrix->b  = 128;
+    mystyle->fills[0]->matrix->c  = 0;
+    mystyle->fills[0]->matrix->tx = 147 * 20;
+    mystyle->fills[0]->matrix->ty = 10 * 20;
+
+    
+    mystyle->fills[0]->colours[0]->col->r = 0xff; 
+    mystyle->fills[0]->colours[0]->col->g = 0; 
+    mystyle->fills[0]->colours[0]->col->b = 0; 
+    mystyle->fills[0]->colours[0]->col->a = 0x7f; 
+    mystyle->fills[0]->colours[0]->pos = 235;
+
+    mystyle->fills[0]->colours[1]->col->r = 0;
+    mystyle->fills[0]->colours[1]->col->g = 0; 
+    mystyle->fills[0]->colours[1]->col->b = 0xff;  
+    mystyle->fills[0]->colours[1]->col->a = 0xff;
+    mystyle->fills[0]->colours[1]->pos = 20;
 
     shape->style = mystyle;
 

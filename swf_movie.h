@@ -84,5 +84,10 @@ void swf_dump_shape (swf_movie * movie, int * error, swf_tagrecord * temp);
 
 
 swf_linestyle * swf_make_linestyle(int * error);
+swf_fillstyle * swf_make_solid_fillstyle(int * error);
+swf_fillstyle * swf_make_gradient_fillstyle(int * error, SWF_U8 ncols, SWF_U8 type);
+swf_fillstyle * swf_make_bitmap_fillstyle(int * error, SWF_U8 type);
+
+// DEPRECATED. Will go away soon. Use the type-specific ones instead.
 swf_fillstyle * swf_make_fillstyle(int * error);
 

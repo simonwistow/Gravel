@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.39  2002/07/06 08:45:29  kitty_goth
+ * Fix fills stuff, move test code out of the lower level functions.
+ *
  * Revision 1.38  2002/07/04 15:45:46  kitty_goth
  * some test stuff for PNG support. A ways to go yet.
  *
@@ -216,12 +219,15 @@
 #define sfontFlagsShiftJIS      (0x40)
 #define sfontFlagsHasLayout     (0x80)
 
+#define fillSolid           (0x00)
 #define fillGradient        (0x10)
 #define fillLinearGradient  (0x10)
 #define fillRadialGradient  (0x12)
-#define fillMaxGradientColors   (8)
-/* Texture/bitmap fills */
-#define fillBits            (0x40)    /* if this bit is set) must be a bitmap pattern */
+#define fillBits            (0x40) 
+#define fillBitsTiled       (0x40) 
+#define fillBitsClipped     (0x41) 
+
+#define fillMaxGradientColours   (8)
 
 
 /* Start Sound Flags */
@@ -627,7 +633,6 @@ struct swf_fillstyle {
     swf_matrix * matrix;         /* the transformation matrix for the bitmap */
     swf_rgba_pos ** colours;     /* the colours used in the gradient
 									fill and the positions they're in */
-
     swf_colour * col;            /* the colour used in the solid fill */
 };
 
@@ -637,8 +642,6 @@ struct swf_linestyle {
 };
 
 struct swf_rgba_pos {
-	/* FIXME: This is supposed to be a proper colour */
-//    SWF_U32 rgba;              /* an rgba value */ 
     swf_colour * col;            /* the colour used in the solid fill */
     SWF_U8 pos;                  /* the position of the colour */
                                  /* TODO: I'm not sure, looking at the
