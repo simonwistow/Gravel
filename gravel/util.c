@@ -31,8 +31,15 @@ gravel_parse_colour (char * s)
 {
 	swf_colour * col;
 	char * t = s;
+	int has_alpha = 0;
 
 	if ('#' != s[0]) {
+		return NULL;
+	}
+
+	if (9 == strlen(s)) {
+		has_alpha = 1;
+	} else if (7 != strlen(s)) {
 		return NULL;
 	}
 
@@ -45,6 +52,13 @@ gravel_parse_colour (char * s)
 	col->g = gravel_parse_hex(++t);
 	++t;
 	col->b = gravel_parse_hex(++t);
+
+	if (has_alpha) {
+		++t;
+		col->a = gravel_parse_hex(++t);
+	} else {
+		col->a = 255;
+	}
 
 	return col;
 }

@@ -213,6 +213,7 @@ void _bake_header(SV* obj, SV* self) {
 	p_name = hv_fetch(h, "_name", 5, 0);
 	if (NULL != p_name) {
 		m->movie->name = (char *)SvPVX(*p_name);
+		m->movie->header->rate = 25 * 256;
 	}
 }
 
@@ -223,7 +224,7 @@ void _bake_preamble(SV* obj, SV* self, U32 protect) {
 	HV* h = (HV *)SvRV(self); 
 
 	// FIXME: Get background colour from self
-    swf_add_setbackgroundcolour(m->movie, &error, 0, 255, 0, 255);
+    swf_add_setbackgroundcolour(m->movie, &error, 0, 255, 255, 255);
 	if (protect) {
 		swf_add_protect(m->movie, &error);
 	}
@@ -358,11 +359,46 @@ void _get_to_start(int * error, swf_defineshape * mytag, HV * h_sh)
 void _bake_edge(int * error, swf_defineshape * mytag, HV * h_edge) 
 {
 	swf_shaperecord * record;
+	SWF_S32 x1, y1, x2, y2;
+	SV** p_type;
+	const char * type;
+	SV** p_num;
 
-	record = swf_make_shaperecord(error, 0);
+	record = swf_make_shaperecord(error, 1);
 
+	fprintf(stderr, "Doing an edge...\n");
 
+	p_type = hv_fetch(h_edge, "_EDGE_TYPE", 10, 0);	
+	if (NULL != p_type) {
+		type = (const char *)SvPVX(*p_type);		
+		if ( (0 == strcmp(type, "STRAIGHT")) 
+			 || (0 == strcmp(type, "LINE")) ){
+			p_num = hv_fetch(h_edge, "_x1", 3, 0);	
+			if (NULL != p_num) {
+				x1 = (SWF_S32)(SvIV(*p_num));
+			}
 
+			p_num = hv_fetch(h_edge, "_x2", 3, 0);	
+			if (NULL != p_num) {
+				x2 = (SWF_S32)(SvIV(*p_num));
+			}
+
+			p_num = hv_fetch(h_edge, "_y1", 3, 0);	
+			if (NULL != p_num) {
+				y1 = (SWF_S32)(SvIV(*p_num));
+			}
+
+			p_num = hv_fetch(h_edge, "_y2", 3, 0);	
+			if (NULL != p_num) {
+				y2 = (SWF_S32)(SvIV(*p_num));
+			}
+
+			record->x = x2 - x1;
+			record->y = y2 - y1;
+
+		} /* FIXME: Do curved edges soon */
+
+	}
 
 	swf_add_shaperecord(mytag->record, error, record);
 	++mytag->record->record_count;
@@ -374,6 +410,8 @@ void _bake_edges(int * error, swf_defineshape * mytag, HV * h_sh)
 	AV*  a_edges;
 	SV** ph_edge;
 	I32  j, num_edges;
+	swf_shaperecord * record;
+
 
     pa_edges = hv_fetch(h_sh, "_edges", 6, 0);	
 	if (NULL != pa_edges) {
@@ -386,6 +424,11 @@ void _bake_edges(int * error, swf_defineshape * mytag, HV * h_sh)
 				_bake_edge(error, mytag, (HV *)SvRV(*ph_edge));
 			}
 		}
+
+
+		record = swf_make_shaperecord(error, 0);
+		swf_add_shaperecord(mytag->record, error, record);
+		++mytag->record->record_count;
 	}
 }
 
@@ -447,7 +490,9 @@ void _bake_library(SV* obj, SV* self)
 		/* Now do the edge records */
 
 		_bake_edges(&error, mytag, h_sh);
+		
 
+		
 
 		/* Need to calloc a (raw) buffer for temp... */
 		if ((temp->buffer->raw = (SWF_U8 *) calloc (10240, sizeof (SWF_U8))) == NULL) {
@@ -455,7 +500,6 @@ void _bake_library(SV* obj, SV* self)
 			return;
 		}
 
-		fprintf(stderr, "Getting to serialise...\n");
 
 		/* Now serialise and dump */
 		swf_serialise_defineshape(temp->buffer, &error, (swf_defineshape *) temp->tag);
@@ -490,10 +534,24 @@ SV* _bake_rest(SV* obj, SV* self) {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
     int error;
     swf_tagrecord * temp;
+	swf_matrix * matrix;
 
     error = 0;
 
+    if ((matrix = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
+		error = SWF_EMallocFailure;
+		return 1;
+    }
+
+/* FIXME: Do object IDs properly */
+
+/* FIXME: Test matrix */
+    matrix->a  = matrix->d  = 512 * 1000;
+	matrix->tx = matrix->ty = 100 * 20;
+
+	swf_add_placeobject(m->movie, &error, matrix, 1, 1);
     swf_add_showframe(m->movie, &error);
+
     swf_add_end(m->movie, &error);
 
     swf_make_finalise(m->movie, &error);

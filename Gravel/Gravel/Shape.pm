@@ -6,6 +6,7 @@ use warnings;
 use lib '../';
 
 use Gravel::Edge;
+use Gravel::Constants qw(:all);
 
 use Data::Dumper qw/DumperX/;
 
@@ -20,10 +21,6 @@ use Cwd qw(cwd abs_path);
 #  OPTIMIZE => '-g';
 #use Inline C => Config => STRUCTS => 'swf_header';
 
-
-# FIXME
-
-use constant BLACK => '#000000';
 
 sub new {
     my $proto = shift;
