@@ -16,6 +16,9 @@
  *
  *
  * $Log: lib_swfextract.h,v $
+ * Revision 1.5  2001/07/13 14:04:51  clampr
+ * use one of the debug targets if you want debugging messages on
+ *
  * Revision 1.4  2001/07/13 13:26:55  muttley
  * Added handling for button2actions.
  * We should be able to parse all URLs now
@@ -32,8 +35,6 @@
  *
  *
  */
-
-#define DEBUG
 
 #include "swf_types.h"
 #include "swf_parse.h"
