@@ -24,7 +24,7 @@ config.guess
 config.sub
 configure 
 install-sh 
-lt-main.sh
+ltmain.sh
 swfs/
 swfs/button.swf    
 swfs/profero.swf  

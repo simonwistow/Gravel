@@ -13,7 +13,7 @@ SOURCES=swf_parse.c parser.c swf_destroy.c swf_error.c print_utils.c lib_swfextr
 HEADERS=swf_parse.h parser.h swf_destroy.h swf_error.h print_utils.h  swf_types.h lib_swfextract.h
 MISC=Makefile readme todo gpl.txt dos.pl oldswfparse.cpp \
      configure.ac sizes.h.in aclocal.m4 config.guess config.sub \
-     configure install-sh lt-main.sh 
+     configure install-sh ltmain.sh 
 DIR=$(shell  pwd | perl -ne 's!^.*/!!;')
 DATE=$(shell perl -MPOSIX -e 'print POSIX::strftime("%Y-%m-%d", localtime);')
 
