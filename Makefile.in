@@ -73,11 +73,13 @@ text_extract_ktrace: $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS)
 
 
 install: all
+	$(INSTALL) -c swf_tags.h    $(INC_PATH)
 	$(INSTALL) -c swf_types.h   $(INC_PATH)
 	$(INSTALL) -c swf_sizes.h   $(INC_PATH)
 	$(INSTALL) -c swf_parse.h   $(INC_PATH)
 	$(INSTALL) -c swf_error.h   $(INC_PATH)
 	$(INSTALL) -c swf_destroy.h $(INC_PATH)
+
 	$(LIBTOOL) $(INSTALL) -c libswfparse.la $(LIB_PATH)
 	$(LIBTOOL) $(INSTALL) -c swf_parse $(BIN_PATH)
 	$(LIBTOOL) $(INSTALL) -c text_extract $(BIN_PATH)
