@@ -323,27 +323,22 @@ struct swf_setbackgroundcolour {
 
 
 struct swf_definefont {
-
-	U32 fontid;
-	int offset;
-	int glyph_count;
+    U32 fontid;
+    int offset;
+    int glyph_count;
     swf_shaperecord_list ** shape_records;
-
 };
 
 
 struct swf_definefontinfo {
-
-	U32 fontid;
-	U8 flags;
-	int namelen;
-	int * code_table;
-	char * fontname;
-
+    U32 fontid;
+    U8 flags;
+    int namelen;
+    int * code_table;
+    char * fontname;
 };
 
 struct swf_placeobject {
-
     U32 tagid;
     U32 depth;
     swf_matrix * matrix;
@@ -351,22 +346,23 @@ struct swf_placeobject {
 
 };
 
+/* 
+ * Should we change the property tag to be called tagid to 
+ * match swf_placeobject? --BE 
+ */
+
 struct swf_placeobject2 {
-
-	U8 flags;
-	U32 depth;
-	U32 tag;
-	swf_matrix * matrix;
-	swf_cxform * cxform;
-	U32 ratio;
-	U32 clip_depth;
-	char * name;
-
-
+    U8 flags;
+    U32 depth;
+    U32 tag;
+    swf_matrix * matrix;
+    swf_cxform * cxform;
+    U32 ratio;
+    U32 clip_depth;
+    char * name;
 };
 
 struct swf_defineshape {
-
     U32 tagid;
     swf_rect * rect;
     swf_shapestyle * style;
@@ -375,7 +371,6 @@ struct swf_defineshape {
 };
 
 struct swf_shapestyle {
-
     U16 nfills;
     swf_fillstyle ** fills;
 
@@ -384,50 +379,40 @@ struct swf_shapestyle {
 };
 
 struct swf_fillstyle {
-
     U16 fill_style;
     U16 ncolours;
     U16 bitmap_id;
     swf_matrix * matrix;
     swf_rgba_pos ** colours;
     U32 colour;
-
 };
 
 struct swf_linestyle {
-
     U16 width;
     U32 colour;
-
 };
 
 struct swf_rgba_pos {
-
     U32 rgba;
     U8 pos;
-
 };
 
 
 struct swf_freecharacter {
-
     U32 tagid;
 };
 
 
 struct swf_removeobject {
-
     U32 tagid;
     U32 depth;
 };
 
 struct swf_removeobject2 {
-
     U32 depth;
 };
 
 struct swf_startsound {
-
     U32 tagid;
     U32 code;
     U32 inpoint;
@@ -435,52 +420,43 @@ struct swf_startsound {
     U32 loops;
     U8  npoints;
     swf_soundpoint ** points;
-
 };
 
 struct swf_soundpoint {
-
     U32 mark;
     U32 lc;
     U32 rc;
-
 };
 
 struct swf_definebits {
-
     U32 tagid;
     swf_imageguts * guts;
 
 };
 
 struct swf_definebitsjpeg2 {
-
     U32 tagid;
     swf_imageguts * guts;
 
 };
 
 struct swf_definebitsjpeg3 {
-
     U32 tagid;
     swf_imageguts * guts;
 
 };
 
 struct swf_imageguts {
-
     U32 nbytes;
     U8  * data;
 };
 
 struct swf_jpegtables {
-
     swf_imageguts * guts;
 
 };
 
 struct swf_definetext {
-
     U32 tagid;
     swf_rect    * rect;
     swf_matrix  * matrix;
@@ -489,7 +465,6 @@ struct swf_definetext {
 
 
 struct swf_definetext2 {
-
     U32 tagid;
     swf_rect    * rect;
     swf_matrix  * matrix;
@@ -498,16 +473,13 @@ struct swf_definetext2 {
 
 
 struct swf_definebutton {
-
     U32 tagid;
     swf_buttonrecord_list * records;
     swf_doaction_list     * actions;
-
 };
 
 
 struct swf_definebutton2 {
-
     U32 tagid;
     swf_buttonrecord_list * records;
     //swf_doaction_list     * actions;
@@ -517,26 +489,23 @@ struct swf_definebutton2 {
 
 
 struct swf_defineedittext {
-
-	U32 tagid;
-	swf_rect * bounds;
-	U16 flags;
-	U16 font_id;
-	U16 font_height;
-	U32 colour;
-	int max_length;
-	int align;
-	U16 left_margin;
-	U16 right_margin;
-	U16 indent;
-	U16 leading;
-	char * variable;
-	char * initial_text;
-
+    U32 tagid;
+    swf_rect * bounds;
+    U16 flags;
+    U16 font_id;
+    U16 font_height;
+    U32 colour;
+    int max_length;
+    int align;
+    U16 left_margin;
+    U16 right_margin;
+    U16 indent;
+    U16 leading;
+    char * variable;
+    char * initial_text;
 };
 
 struct swf_definefont2 {
-
 	U32 tagid;
 	U16 flags;
 	int name_len;

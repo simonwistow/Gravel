@@ -42,8 +42,8 @@ swf_destroy_parser (swf_parser * context)
 }
 
 void
-swf_destroy_shapestyle (swf_shapestyle * style) {
-
+swf_destroy_shapestyle (swf_shapestyle * style) 
+{
     int i;
 
     if (style==NULL) {
@@ -62,12 +62,13 @@ swf_destroy_shapestyle (swf_shapestyle * style) {
     free (style->fills);
 
     free (style);
+
     return;
 }
 
 void
-swf_destroy_fillstyle (swf_fillstyle * style) {
-
+swf_destroy_fillstyle (swf_fillstyle * style) 
+{
     int i;
 
     if (style==NULL) {
@@ -81,10 +82,7 @@ swf_destroy_fillstyle (swf_fillstyle * style) {
 
     free (style->matrix);
 
-
-
     free (style);
-
 }
 
 void
@@ -101,8 +99,8 @@ swf_destroy_defineshape (swf_defineshape * shape)
 }
 
 void
-swf_destroy_shaperecord_list (swf_shaperecord_list * list) {
-
+swf_destroy_shaperecord_list (swf_shaperecord_list * list) 
+{
     int i = 0;
 
     if (list==NULL) {
@@ -121,27 +119,27 @@ swf_destroy_shaperecord_list (swf_shaperecord_list * list) {
 }
 
 void
-swf_destroy_definemorphshape (swf_definemorphshape * shape) {
+swf_destroy_definemorphshape (swf_definemorphshape * shape) 
+{
     int i, j;
 
     if (shape==NULL) {
         return;
     }
+
     swf_destroy_rect (shape->r1);
     swf_destroy_rect (shape->r2);
 
     for (i=0; i<shape->nfills; i++) {
-
         free (shape->fills[i]->matrix1);
     	free (shape->fills[i]->matrix2);
 
-	    for (j=0; j<shape->fills[i]->ncolours; j++)
-        {
+	    for (j=0; j<shape->fills[i]->ncolours; j++) {
 	        free (shape->fills[i]->colours[j]);
 	    }
 	    free (shape->fills[i]->colours);
     }
-
+    
     free (shape->fills);
 
     for (i=0; i<shape->nlines; i++) {
@@ -187,9 +185,10 @@ swf_destroy_header (swf_header * header)
         return;
     }
     swf_destroy_rect (header->bounds);
+    
     free (header);
 
-	return;
+    return;
 }
 
 void
@@ -201,7 +200,7 @@ swf_destroy_colour (swf_colour * colour)
 
     free (colour);
 
-	return;
+    return;
 }
 
 void
@@ -212,7 +211,7 @@ swf_destroy_gradcolour (swf_gradcolour * colour)
     }
 
     free (colour);
-	return;
+    return;
 }
 
 void
@@ -224,7 +223,7 @@ swf_destroy_cxform (swf_cxform * cxform)
 
     free (cxform);
 
-	return;
+    return;
 }
 
 void
@@ -233,8 +232,9 @@ swf_destroy_matrix (swf_matrix * matrix)
     if (matrix==NULL) {
         return;
     }
+
     free (matrix);
-	return;
+    return;
 }
 
 
@@ -246,7 +246,7 @@ swf_destroy_linestyle (swf_linestyle * style)
     }
 
     free (style);
-	return;
+    return;
 }
 
 void
@@ -254,7 +254,7 @@ swf_destroy_linestyle2 (swf_linestyle2 * style)
 {
 
     free (style);
-	return;
+    return;
 }
 
 
@@ -277,11 +277,9 @@ swf_destroy_fillstyle2 (swf_fillstyle2 * style)
 
     free (style->colours);
 
-
     free (style);
 
-
-	return;
+    return;
 }
 
 void
@@ -438,7 +436,8 @@ swf_destroy_buttonrecord_list (swf_buttonrecord_list * list)
     free (list->records);
 
     free (list);
-	return;
+	
+    return;
 }
 
 void
@@ -448,7 +447,8 @@ swf_destroy_doaction (swf_doaction * action)
         return;
     }
     free (action);
-	return;
+	
+    return;
 }
 
 void
@@ -466,7 +466,8 @@ swf_destroy_doaction_list (swf_doaction_list * list)
     free (list->actions);
 
     free (list);
-	return;
+    
+    return;
 }
 
 void
@@ -475,10 +476,11 @@ swf_destroy_shaperecord (swf_shaperecord * record)
     if (record==NULL) {
         return;
     }
+    
     swf_destroy_shapestyle (record->shapestyle);
     free (record);
 
-	return;
+    return;
 }
 
 
@@ -490,7 +492,7 @@ swf_destroy_button2action (swf_button2action * action)
     }
     free (action);
 
-	return;
+    return;
 }
 
 void
@@ -510,7 +512,7 @@ swf_destroy_button2action_list (swf_button2action_list * list)
 
     free (list);
 
-	return;
+    return;
 }
 
 void
@@ -827,7 +829,7 @@ swf_destroy_definebutton2 (swf_definebutton2 * button)
     swf_destroy_button2action_list (button->actions);
     free (button);
 
-	return;
+    return;
 }
 
 void
