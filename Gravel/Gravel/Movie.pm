@@ -155,19 +155,10 @@ sub bake_movie {
 	$b->_bake_header($self);
 	$b->_bake_preamble($self, 0);
 	$b->_bake_library($self);
-#	print STDERR DumperX $self->{_library};
 
 #	print STDERR DumperX $self;
 
 	$b->_bake_frames($self);
-
-	my $num = $b->_count_frames($self);
-
-	print STDERR "Tags found: $num\n";
-
-#	$b->_bake_test($self);
-#	$b->_bake_test($self);
-#	$b->_bake_test($self);
 
 	$b->_bake_end($self);
 	$b->_finalise($self);
@@ -240,6 +231,9 @@ void _bake_header(SV* obj, SV* self) {
 	}
 
     swf_make_header(m->movie, &error, x1, x2, y1, y2);
+	if (SWF_ENoError != error) {
+		fprintf(stderr, "Non-zero error condition 0 detected\n");
+	}
 
 	p_name = hv_fetch(h, "_name", 5, 0);
 	if (NULL != p_name) {
@@ -256,6 +250,9 @@ void _bake_preamble(SV* obj, SV* self, U32 protect) {
 
 	// FIXME: Get background colour from self
     swf_add_setbackgroundcolour(m->movie, &error, 0, 255, 255, 255);
+	if (SWF_ENoError != error) {
+		fprintf(stderr, "Non-zero error condition 1 detected\n");
+	}
 	if (protect) {
 		swf_add_protect(m->movie, &error);
 	}
@@ -281,8 +278,12 @@ void _bake_styles(int * error, swf_defineshape * mytag, HV * h_sh)
 		mytag->style->nlines = 1 + num_styles;
 		
 		for (j=0; j<=num_styles; ++j) {
+			*error = SWF_ENoError;
 			mytag->style->lines[j] = swf_make_linestyle(error);
-			
+			if (SWF_ENoError != *error) {
+				fprintf(stderr, "Non-zero error condition 2 detected\n");
+			}
+
 			ph_sty = av_fetch(a_sty, j, 0);
 			if (NULL != ph_sty) {
 				h_sty = (HV *)SvRV(*ph_sty); 
@@ -313,6 +314,9 @@ void _bake_fills(int * error, swf_defineshape * mytag, HV * h_sh)
 	const char * fill_type;
 	SV** p_col;
 
+	/* paranoia */
+	*error = SWF_ENoError;
+
 	/* Now populate the fill styles */
     p_sty = hv_fetch(h_sh, "_fills", 6, 0);
 	if (NULL != p_sty) {
@@ -332,6 +336,10 @@ void _bake_fills(int * error, swf_defineshape * mytag, HV * h_sh)
 			if ( (0 == strcmp(fill_type, "solid")) 
 				 || (0 == strcmp(fill_type, "SOLID")) ){
 				mytag->style->fills[j] = swf_make_solid_fillstyle(error);
+				if (SWF_ENoError != *error) {
+					fprintf(stderr, "Non-zero error condition 3 detected\n");
+				}
+
 				p_col = hv_fetch(h_fill, "colour", 6, 0);
 				if (NULL != p_col) {
 					mytag->style->fills[j]->col = gravel_parse_colour((char *)SvPVX(*p_col));
@@ -351,8 +359,14 @@ void _get_to_start(int * error, swf_defineshape * mytag, HV * h_sh)
 	AV*  a_num;
 	swf_shaperecord * record;
 
+	/* paranoia */
+	*error = SWF_ENoError;
+
 	/* First, we need a non-edge, change of style record */ 
 	record = swf_make_shaperecord(error, 0);
+	if (SWF_ENoError != *error) {
+		fprintf(stderr, "Non-zero error condition 4 detected\n");
+	}
 	record->flags = eflagsFill1 | eflagsMoveTo;
 
 	record->fillstyle0 = 0;
@@ -384,22 +398,33 @@ void _get_to_start(int * error, swf_defineshape * mytag, HV * h_sh)
 	}
 
 	swf_add_shaperecord(mytag->record, error, record);
+	if (SWF_ENoError != *error) {
+		fprintf(stderr, "Non-zero error condition 5 detected\n");
+	}
 	++mytag->record->record_count;
 }
 
 void _bake_edge(int * error, swf_defineshape * mytag, HV * h_edge) 
 {
 	swf_shaperecord * record;
-	SWF_S32 x1, y1, x2, y2;
+	SWF_S32 x1, y1, x2, y2, ax, ay;
 	SV** p_type;
 	const char * type;
 	SV** p_num;
 
+	/* paranoia */
+	*error = SWF_ENoError;
+
 	record = swf_make_shaperecord(error, 1);
+	if (SWF_ENoError != *error) {
+		fprintf(stderr, "Non-zero error condition 6 detected\n");
+	}
 
 	p_type = hv_fetch(h_edge, "_EDGE_TYPE", 10, 0);	
 	if (NULL != p_type) {
+
 		type = (const char *)SvPVX(*p_type);		
+
 		if ( (0 == strcmp(type, "STRAIGHT")) 
 			 || (0 == strcmp(type, "LINE")) ){
 			p_num = hv_fetch(h_edge, "_x1", 3, 0);	
@@ -425,11 +450,54 @@ void _bake_edge(int * error, swf_defineshape * mytag, HV * h_edge)
 			record->x = x2 - x1;
 			record->y = y2 - y1;
 
-		} /* FIXME: Do curved edges soon */
+		} else if ( (0 == strcmp(type, "QUADRATIC"))  
+					|| (0 == strcmp(type, "ARC"))
+					|| (0 == strcmp(type, "CURVED")) ) {
+			p_num = hv_fetch(h_edge, "_x1", 3, 0);	
+			if (NULL != p_num) {
+				x1 = (SWF_S32)(SvIV(*p_num));
+			}
+
+			p_num = hv_fetch(h_edge, "_x2", 3, 0);	
+			if (NULL != p_num) {
+				x2 = (SWF_S32)(SvIV(*p_num));
+			}
+
+			p_num = hv_fetch(h_edge, "_y1", 3, 0);	
+			if (NULL != p_num) {
+				y1 = (SWF_S32)(SvIV(*p_num));
+			}
+
+			p_num = hv_fetch(h_edge, "_y2", 3, 0);	
+			if (NULL != p_num) {
+				y2 = (SWF_S32)(SvIV(*p_num));
+			}
+
+			p_num = hv_fetch(h_edge, "_ax", 3, 0);	
+			if (NULL != p_num) {
+				ax = (SWF_S32)(SvIV(*p_num));
+			}
+
+			p_num = hv_fetch(h_edge, "_ay", 3, 0);	
+			if (NULL != p_num) {
+				ay = (SWF_S32)(SvIV(*p_num));
+			}
+
+			record->cx = x2 - x1;
+			record->cy = y2 - y1;
+
+			/* spec says these are expressed as deltas */
+			record->ax = ax - x1;
+			record->ay = ay - y1;
+		}
+
 
 	}
 
 	swf_add_shaperecord(mytag->record, error, record);
+	if (SWF_ENoError != *error) {
+		fprintf(stderr, "Non-zero error condition 7 detected\n");
+	}
 	++mytag->record->record_count;
 }
 
@@ -441,6 +509,8 @@ void _bake_edges(int * error, swf_defineshape * mytag, HV * h_sh)
 	I32  j, num_edges;
 	swf_shaperecord * record;
 
+	/* paranoia */
+	*error = SWF_ENoError;
 
     pa_edges = hv_fetch(h_sh, "_edges", 6, 0);	
 	if (NULL != pa_edges) {
@@ -456,6 +526,9 @@ void _bake_edges(int * error, swf_defineshape * mytag, HV * h_sh)
 
 
 		record = swf_make_shaperecord(error, 0);
+		if (SWF_ENoError != *error) {
+			fprintf(stderr, "Non-zero error condition 8 detected\n");
+		}
 		swf_add_shaperecord(mytag->record, error, record);
 		++mytag->record->record_count;
 	}
@@ -513,6 +586,9 @@ void _bake_library(SV* obj, SV* self)
 
 	    temp = gravel_create_shape(m->movie, &error, x1, x2, y1, y2);
 		mytag = (swf_defineshape *) temp->tag;
+		if (SWF_ENoError != error) {
+			fprintf(stderr, "Non-zero error condition 9 detected\n");
+		}
 
         tag_id = newSViv((IV)mytag->tagid);
 
@@ -534,6 +610,9 @@ void _bake_library(SV* obj, SV* self)
 		swf_serialise_defineshape(temp->buffer, &error, (swf_defineshape *) temp->tag);
 		temp->serialised = 1;
 		swf_dump_shape(m->movie, &error, temp);
+		if (SWF_ENoError != error) {
+			fprintf(stderr, "Non-zero error condition 10 detected\n");
+		}
 	}
 
 }
@@ -551,7 +630,10 @@ SV* _create_baked(char* class) {
 	if ((m->movie = swf_make_movie(&error)) == NULL) {
 		return NULL;
     }
-
+	if (SWF_ENoError != error) {
+		fprintf(stderr, "Non-zero error condition 11 detected\n");
+		return NULL;
+	}
 
 	sv_setiv(obj, (IV)m);
 	SvREADONLY_on(obj);
@@ -608,7 +690,6 @@ void _bake_place(swf_movie * movie, int * error, HV * h_place) {
 		/* Paranoia */
 		*error = 0;
 		swf_add_placeobject(movie, error, matrix, obj_id, 1);
-		fprintf(stderr, "baking a place for %i, with error code %i\n", obj_id, *error);		
 	}
 	return;
 }
@@ -637,14 +718,15 @@ void _bake_frames(SV* obj, SV* self) {
 				for (j=0; j<=av_len(a_frame); ++j) {
 					ph_shape = av_fetch(a_frame, j, 0);
 					if (NULL != ph_shape) {
-						fprintf(stderr, "baking a shape for frame %i\n", i);
 						_bake_place(m->movie, &error, (HV *)SvRV(*ph_shape));
 					}
 				}
 				swf_add_showframe(m->movie, &error);
+				if (SWF_ENoError != error) {
+					fprintf(stderr, "Non-zero error condition 12 detected\n");
+				}
 			}
 			tmp = swf_movie_tag_count(m->movie, &error);
-			fprintf(stderr, "tags so far %i\n", tmp);
 		}
 	}
 	return;
@@ -652,10 +734,10 @@ void _bake_frames(SV* obj, SV* self) {
 
 void _bake_test(SV* obj, SV* self) {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
-    int error;
+	int error = SWF_ENoError;
 	swf_matrix * matrix;
 
-    error = 0;
+//    error = 0;
 
     if ((matrix = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
 		error = SWF_EMallocFailure;
@@ -676,17 +758,23 @@ void _bake_test(SV* obj, SV* self) {
 
 void _bake_end(SV* obj, SV* self) {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
-    int error;
+	int error = SWF_ENoError;
 
     swf_add_end(m->movie, &error);
+	if (SWF_ENoError != error) {
+		fprintf(stderr, "Non-zero error condition 13 detected\n");
+	}
 }
 
 
 void _finalise(SV* obj, SV* self) {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
-    int error;
+	int error = SWF_ENoError;
 
     swf_make_finalise(m->movie, &error);
+	if (SWF_ENoError != error) {
+		fprintf(stderr, "Non-zero error condition 14 detected\n");
+	}
 
     swf_destroy_movie(m->movie);
 }

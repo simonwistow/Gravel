@@ -25,14 +25,14 @@ sub new {
 
     bless $self => $class;
 
-    $self->{_x1} = $conf{x1} || $conf{X1};
-    $self->{_y1} = $conf{y1} || $conf{Y1};
-    $self->{_x2} = $conf{x2} || $conf{X2};
-    $self->{_y2} = $conf{y2} || $conf{Y2};
+    $self->{_x1} = $conf{x1} || $conf{X1} || 0;
+    $self->{_y1} = $conf{y1} || $conf{Y1} || 0;
+    $self->{_x2} = $conf{x2} || $conf{X2} || 0;
+    $self->{_y2} = $conf{y2} || $conf{Y2} || 0;
 
     unless ($self->is_straight) {
-	$self->{_ax} = $conf{ax} || $conf{AX};
-	$self->{_ay} = $conf{ay} || $conf{AY};
+		$self->{_ax} = $conf{ax} || $conf{AX} || 0;
+		$self->{_ay} = $conf{ay} || $conf{AY} || 0;
     }
 
     return $self;

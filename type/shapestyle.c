@@ -158,14 +158,13 @@ swf_buffer_shapestyle(swf_buffer * buffer, int * error, swf_shapestyle * s)
 		swf_buffer_put_word (buffer, error, s->nfills);
 	}
 
-	/* FIXME: Alpha channels... */
+	/* TODO: Alpha channels... */
 	for (i=0; i < s->nfills; i++) {
-		printf("putting fill %i\n", i);
 
 		type = s->fills[i]->fill_style;
 		swf_buffer_put_byte (buffer, error, type);
 
-		/* FIXME: Do the bitmap fill type */
+		/* TODO: bitmap fill type */
         if (type & fillGradient) {
 			/* Gradient Fill */
 
@@ -193,9 +192,8 @@ swf_buffer_shapestyle(swf_buffer * buffer, int * error, swf_shapestyle * s)
 		swf_buffer_put_word (buffer, error, s->nlines);
 	}
 
-	/* FIXME: Alpha channels... */
+	/* TODO: Alpha channels... */
 	for (i=0; i < s->nlines; i++) {
-		printf("putting line %i\n", i);
 		swf_buffer_put_word (buffer, error, s->lines[i]->width);
 		swf_buffer_colour(buffer, error, s->lines[i]->col, NO_ALPHA);
 	}

@@ -97,8 +97,10 @@ sub line_to {
     my ($x, $y) = @_;
 
     my $ra_v = $self->last_vertex();
-    
-    my $e = Gravel::Edge->new({x1 => $ra_v->[0], y1 => $ra_v->[1], x2 => $x, y2 => $y});
+	my $rh = {x1 => $ra_v->[0], y1 => $ra_v->[1], x2 => $x, y2 => $y};
+   
+	my $e = Gravel::Edge->new($rh);
+
     push @{$self->{_edges}}, $e;
     push @{$self->{_vertices}}, [$x, $y];
 
