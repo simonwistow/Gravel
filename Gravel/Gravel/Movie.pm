@@ -155,9 +155,13 @@ sub bake_movie {
 	$b->_bake_header($self);
 	$b->_bake_preamble($self, 0);
 	$b->_bake_library($self);
-	$b->_bake_frames($self);
+#	print STDERR DumperX $self->{_library};
 
-#	$b->_bake_test($self);
+#	print STDERR DumperX $self;
+
+#	$b->_bake_frames($self);
+
+	$b->_bake_test($self);
 
 	$b->_bake_end($self);
 	$b->_finalise($self);
@@ -486,28 +490,21 @@ void _bake_library(SV* obj, SV* self)
 	    temp = gravel_create_shape(m->movie, &error, x1, x2, y1, y2);
 		mytag = (swf_defineshape *) temp->tag;
 
-/* Grab this value and set it in the perl hash. 
-		mytag->tagid;
-*/
-	    hv_store(h_sh, "_obj_id", 6, tag_id, 0);
+        tag_id = newSViv((IV)mytag->tagid);
+
+	    hv_store(h_sh, "_obj_id", 7, tag_id, 0);
 
 		_bake_styles(&error, mytag, h_sh);
 		_bake_fills(&error, mytag, h_sh);
 
 		_get_to_start(&error, mytag, h_sh);
-		/* Now do the edge records */
-
 		_bake_edges(&error, mytag, h_sh);
 		
-
-		
-
 		/* Need to calloc a (raw) buffer for temp... */
 		if ((temp->buffer->raw = (SWF_U8 *) calloc (10240, sizeof (SWF_U8))) == NULL) {
 			fprintf (stderr, "Calloc Fail\n");
 			return;
 		}
-
 
 		/* Now serialise and dump */
 		swf_serialise_defineshape(temp->buffer, &error, (swf_defineshape *) temp->tag);
@@ -537,6 +534,56 @@ SV* _create_baked(char* class) {
 	return obj_ref;
 }
 
+/* This prototype uses a SV* rather than a HV* to allow us to
+ * change to a method call way of getting this instead. Am
+ * thinking clips here.
+ */
+
+SWF_U16 _shape_id(int * error, SV* shape) {
+	HV*  h_shape;
+	SV** p_id;
+
+	h_shape = (HV *)SvRV(shape); 
+	p_id = hv_fetch(h_shape, "_obj_id", 7, 0);	
+	if (NULL != p_id) {
+		return (SWF_U16)(SvIV(*p_id));
+	}
+
+	return 0;
+}
+
+void _bake_place(swf_movie * m, int * error, HV * h_place) {
+	swf_matrix * matrix;
+	SWF_U16 depth, obj_id;
+	SV** ph_details;
+	HV*  h_details;
+	SV** p_shape;
+	SV*  shape;
+
+	obj_id = 0;
+
+    if ((matrix = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
+		*error = SWF_EMallocFailure;
+		return;
+    }
+
+	/* test code */
+    matrix->a  = matrix->d  = 512 * 1000;
+	matrix->tx = matrix->ty = 100 * 20;
+
+
+	ph_details = hv_fetch(h_place, "_contents", 9, 0);	
+	if (NULL != ph_details) {  
+		h_details = (HV *)SvRV(*ph_details); 
+
+		p_shape = hv_fetch(h_details, "shape", 5, 0);	
+		if (NULL != p_shape) {  
+			obj_id = _shape_id(error, *p_shape);
+		}
+
+		swf_add_placeobject(m, error, matrix, obj_id, 1);
+	}
+}
 
 void _bake_frames(SV* obj, SV* self) {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
@@ -546,7 +593,7 @@ void _bake_frames(SV* obj, SV* self) {
 	AV*  a_frames;
 	SV** pa_frame;
 	AV*  a_frame;
-	SV** p_shape;
+	SV** ph_shape;
 	I32  i, j, num_frames;
 
     pa_frames = hv_fetch(h_tl, "_timeline", 9, 0);	
@@ -559,10 +606,13 @@ void _bake_frames(SV* obj, SV* self) {
 				a_frame = (AV *)SvRV(*pa_frame);
 
 				for (j=0; j<=av_len(a_frame); ++j) {
-					p_shape = av_fetch(a_frame, j, 0);
-					if (NULL != p_shape) {
+					ph_shape = av_fetch(a_frame, j, 0);
+					if (NULL != ph_shape) {
+						fprintf(stderr, "adding baking a shape for frame %i\n", i);
+						_bake_place(m->movie, &error, (HV *)SvRV(*ph_shape));
 					}
 				}
+				swf_add_showframe(m->movie, &error);
 			}
 		}
 	}
