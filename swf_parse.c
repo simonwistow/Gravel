@@ -943,6 +943,9 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
 
 /*
  * $Log: swf_parse.c,v $
+ * Revision 1.45  2001/07/23 22:34:45  muttley
+ * Fix warning about comment like text in the logs
+ *
  * Revision 1.44  2001/07/20 01:59:18  clampr
  * move cvs log to the end of the file
  *
@@ -960,7 +963,7 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
  * move the mp3 stuff to definesound
  *
  * Revision 1.40  2001/07/15 14:09:46  clampr
- * slice swf_parse.c and swf_destroy.c into tag/*.c files
+ * slice swf_parse.c and swf_destroy.c into tag/.c files
  *
  * Revision 1.39  2001/07/14 23:45:48  clampr
  * one bigass layout delta
