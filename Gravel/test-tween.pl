@@ -28,7 +28,7 @@ my $g2 = Gravel::Shape->new({fills => [{colour => BLUE, type => 'solid'}]});
 $g2->poly(0, 0, 0, 1000, 1000, 1000,);
 my $e2 = Gravel::Effect::Tween->new($g2, $s);
 
-#$m->event($e2);
+$m->event($e2);
 
 $m->make_timeline();
 

@@ -159,9 +159,11 @@ sub bake_movie {
 
 #	print STDERR DumperX $self;
 
-#	$b->_bake_frames($self);
+	$b->_bake_frames($self);
 
-	$b->_bake_test($self);
+#	$b->_bake_test($self);
+#	$b->_bake_test($self);
+#	$b->_bake_test($self);
 
 	$b->_bake_end($self);
 	$b->_finalise($self);
@@ -552,7 +554,7 @@ SWF_U16 _shape_id(int * error, SV* shape) {
 	return 0;
 }
 
-void _bake_place(swf_movie * m, int * error, HV * h_place) {
+void _bake_place(swf_movie * movie, int * error, HV * h_place) {
 	swf_matrix * matrix;
 	SWF_U16 depth, obj_id;
 	SV** ph_details;
@@ -581,8 +583,10 @@ void _bake_place(swf_movie * m, int * error, HV * h_place) {
 			obj_id = _shape_id(error, *p_shape);
 		}
 
-		swf_add_placeobject(m, error, matrix, obj_id, 1);
+		fprintf(stderr, "baking a place for %i\n", obj_id);
+		swf_add_placeobject(movie, error, matrix, obj_id, 1);
 	}
+	return;
 }
 
 void _bake_frames(SV* obj, SV* self) {
@@ -608,7 +612,7 @@ void _bake_frames(SV* obj, SV* self) {
 				for (j=0; j<=av_len(a_frame); ++j) {
 					ph_shape = av_fetch(a_frame, j, 0);
 					if (NULL != ph_shape) {
-						fprintf(stderr, "adding baking a shape for frame %i\n", i);
+						fprintf(stderr, "baking a shape for frame %i\n", i);
 						_bake_place(m->movie, &error, (HV *)SvRV(*ph_shape));
 					}
 				}
@@ -616,6 +620,7 @@ void _bake_frames(SV* obj, SV* self) {
 			}
 		}
 	}
+	return;
 }
 
 void _bake_test(SV* obj, SV* self) {
