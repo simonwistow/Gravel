@@ -19,7 +19,7 @@ todo
 dos.pl		  
 configure.ac 
 sizes.h.in 
-aclocl.m4 
+aclocal.m4 
 config.guess 
 config.sub
 configure 

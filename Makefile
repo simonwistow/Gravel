@@ -12,7 +12,7 @@ D_OBJECTS=swf_parse_d.o parser_d.o swf_destroy_d.o swf_error_d.o print_utils_d.o
 SOURCES=swf_parse.c parser.c swf_destroy.c swf_error.c print_utils.c lib_swfextract.c text_extract.c
 HEADERS=swf_parse.h parser.h swf_destroy.h swf_error.h print_utils.h  swf_types.h lib_swfextract.h
 MISC=Makefile readme todo gpl.txt dos.pl oldswfparse.cpp \
-     configure.ac sizes.h.in aclocl.m4 config.guess config.sub \
+     configure.ac sizes.h.in aclocal.m4 config.guess config.sub \
      configure install-sh lt-main.sh 
 DIR=$(shell  pwd | perl -ne 's!^.*/!!;')
 DATE=$(shell perl -MPOSIX -e 'print POSIX::strftime("%Y-%m-%d", localtime);')
