@@ -1,0 +1,79 @@
+# external programs
+CC = @CC@
+LIBTOOL = ./libtool
+INSTALL = ./install.sh
+
+#flags
+CFLAGS =  -Wall -Wwrite-strings -Wmissing-prototypes  -O3
+DEBUG = -DDEBUG -g
+
+#other stuff
+LIB_OBJECTS=swf_parse.lo swf_destroy.lo swf_error.lo
+OBJECTS=parser.o print_utils.o
+TEXT_OBJECTS=text_extract.o lib_swfextract.o
+D_OBJECTS=swf_parse.do parser.do swf_destroy.do swf_error.do print_utils.do
+ALL_OBJECTS=$(LIB_OBJECTS) $(OBJECTS) $(TEXT_OBJECTS) $(D_OBJECTS)
+
+LIB_PATH=/usr/local/lib
+BIN_PATH=/usr/local/bin
+INC_PATH=/usr/local/include
+
+DATE=$(shell date +%Y-%m-%d)
+
+# production rules
+%.do: %.c
+	$(CC) $(CFLAGS) -c $(DEBUG) -o $@ $<
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+%.lo: %.c
+	$(LIBTOOL) $(CC) $(CFLAGS) -c -o $@ $<
+
+## Targets
+
+all: swf_parse text_extract
+
+debug: swf_parse_debug
+
+libswfparse.la: $(LIB_OBJECTS)
+	$(LIBTOOL) $(CC) $(CFLAGS) -o libswfparse.la $(LIB_OBJECTS) -rpath $(LIB_PATH)
+
+swf_parse: libswfparse.la $(OBJECTS)
+	$(LIBTOOL) $(CC) $(CFLAGS) -o swf_parse $(OBJECTS) libswfparse.la
+
+text_extract: libswfparse.la $(TEXT_OBJECTS)
+	$(LIBTOOL) $(CC) $(CFLAGS) -o text_extract $(TEXT_OBJECTS) libswfparse.la
+
+swf_parse_debug: $(D_OBJECTS)
+	$(CC) $(CFLAGS) -I . $(DEBUG) -o swf_parse_debug $(D_OBJECTS)
+
+install: all
+	echo richardc is really slack
+
+snapshot:
+	mkdir libswfparse-snapshot-$(DATE)
+	rsync -a --cvs-exclude ./. libswfparse-snapshot-$(DATE)
+	find libswfparse-snapshot-$(DATE) | sed 's|^libswfparse-snapshot-$(DATE)/||' > libswfparse-snapshot-$(DATE)/MANIFEST
+	tar cvf - libswfparse-snapshot-$(DATE) | gzip -9 -c > libswfparse-snapshot-$(DATE).tar.gz
+	rm -rf libswfparse-snapshot-$(DATE)
+
+clean:
+	rm -f *.do *.o *.la *.lo *.tar.gz swf_parse_debug swf_parse text_extract swfparse
+
+reallyclean: clean
+	rm -f *~
+
+# dependencies - you don't need to be explicit about .c to .o, that's
+# handled by the default rules
+# it's .*o to glom together all the depencies for .o .do and .lo
+$(ALL_OBJECTS): 	swf_types.h
+swf_destroy.*o:		swf_destroy.h
+swf_error.*o: 				swf_error.h
+swf_parse.*o:		swf_destroy.h	swf_error.h	swf_parse.h
+
+print_utils.*o:								print_utils.h
+parser.*o:		swf_destroy.h 			swf_parse.h	print_utils.h
+
+lib_swfextract.*o:	swf_destroy.h			swf_parse.h			lib_swfextract.h
+text_extract.*o:									lib_swfextract.h

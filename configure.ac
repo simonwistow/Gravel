@@ -1,5 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT
+dnl When you can seen swf_parse.c, you're in the source directory
 AC_CONFIG_SRCDIR([swf_parse.c])
 
 dnl Library versioning
@@ -49,7 +50,6 @@ case 2 in
         $ac_cv_sizeof_char)  U16="unsigned char";   S16="signed char";;
         $ac_cv_sizeof_short) U16="unsigned short";  S16="signed short";;
         $ac_cv_sizeof_int)   U16="unsigned int";    S16="signed int";;
-
 esac
 
 case 4 in
@@ -68,6 +68,7 @@ if test -z "$U32"; then
         AC_MSG_ERROR(No 32 bit type found on this platform!)
 fi
 
+AC_SUBST(CC)
 AC_SUBST(U8)
 AC_SUBST(S8)
 AC_SUBST(U16)
@@ -77,6 +78,6 @@ AC_SUBST(S32)
 
 dnl What to do with all this information
 
-AC_CONFIG_FILES([sizes.h])
+AC_CONFIG_FILES([Makefile sizes.h])
 AC_OUTPUT
 
