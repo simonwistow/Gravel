@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.25  2001/08/09 10:18:36  acme
+ * Added todo for simon ;-)
+ *
  * Revision 1.24  2001/07/16 15:05:16  clampr
  * get rid of glib due to randomness (I suspect it may have been a dynamic linking issue)
  *
@@ -890,7 +893,7 @@ struct swf_textrecord {
     swf_textrecord * next;  /* pointer to the next text record in the linked list */
     SWF_U8 flags;           /* the flags for this text record */ /* todo simon : is this necessary */
     long font_id;           /* the id of the font we use */ /* todo simon : long? */
-    SWF_U32 colour;         /* the colour of this text */
+    SWF_U32 colour;         /* the colour of this text */ /* todo simon: break into swf_colour */
     int xoffset;            /* the xoffset of this text */
     int yoffset;            /* the yoffset of this text */
     int font_height;        /* the height of the text */
