@@ -139,7 +139,7 @@ int main (int argc, char *argv[]) {
 	fprintf (stderr, "ERROR: parsing id : '%s'\n",  swf_error_code_to_string(error));
       }
     
-      fprintf (stderr, "[%d] (%d) %s %s\n", frames, swf_parse_tell(parser), swf_tag_to_string(next_id), (1==longtag)?"*":"");
+      printf ("[%d] (%d) %s %s\n", frames, swf_parse_tell(parser), swf_tag_to_string(next_id), (1==longtag)?"*":"");
       if (1 == next_id) {
       	frames++;
 	//	fprintf (stderr, "--------------------[ %d ]-------------------\n", frames++);

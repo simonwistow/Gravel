@@ -1,0 +1,61 @@
+#!/usr/bin/perl -w
+
+use strict;
+use Digest::MD5 qw(md5);
+
+# warning this is a security risk, probably
+my $file = shift;
+
+# make a temp name
+my $tmp =  $$.time;
+
+# perform a write through an generate the first loads of tags
+my @first = `./write_through $file $tmp`;
+# do the second one
+my @second = `./write_through $tmp $tmp`;
+
+# the current difference
+my $diff = 0;
+
+for (my $i=0; $i<scalar @first; $i++)
+{
+	# clean up
+	chomp ($first[$i]);
+	chomp ($second[$i]);
+	
+	# don't want anything that isn't debug output
+	next unless $first[$i] =~ /^\[/;
+
+	# grab the info
+	my @a = ($first[$i]  =~ /^\[(\d+)\] \((\d+)\) (.+) (\**)$/);
+	my @b = ($second[$i] =~ /^\[(\d+)\] \((\d+)\) (.+) (\**)$/);
+
+	# work out where the tags were in the file and what the difference
+        # is between them. 
+	my $tdiff = $a[1] - $b[1];
+
+	# normalise
+	$tdiff *= -1 if ($tdiff < 0);
+
+	# if it's different to the last difference
+	# (if you get what I mean) then the tag before 
+	# must have been longer (I think, it could be 
+	# this one) 
+	if ($tdiff > $diff) {
+	
+		my @c = ($first[$i-1]   =~ /^\[(\d+)\] \((\d+)\) (.+) (\**)$/);
+		my @d = ($second[$i-1]  =~ /^\[(\d+)\] \((\d+)\) (.+) (\**)$/);
+		print "$c[2] changed by ".($tdiff-$diff)." bytes in frame $c[0] ";
+		print "(longtag)" if (defined $c [3] && $c[3] eq '*');
+		print ".\n";
+		print "Original tag started at ".$c[1]." and the next tag starts at ".$a[1]." size=".($a[1]-$c[1])."\n";
+		print "The new  tag started at ".$d[1]." and the next tag starts at ".$b[1]." size=".($b[1]-$d[1])."\n";
+		print "\n"; 
+		$diff = $tdiff;
+
+	}
+		
+}
+
+
+exit 0;
