@@ -12,6 +12,16 @@ use Data::Dumper qw/DumperX/;
 
 our $VERSION = '0.10';
 
+use Cwd qw(cwd abs_path);
+
+use Inline C => 'DATA',
+#  VERSION => '0.10',
+  NAME => 'Gravel::Movie',
+  LIBS => ' -lswfparse',
+  INC => '-I' . abs_path(cwd . '/../'),
+  OPTIMIZE => '-g';
+#use Inline C => Config => STRUCTS => 'swf_header';
+
 
 sub new {
     my $proto = shift;
@@ -77,6 +87,25 @@ sub make {
 
 #
 
-
 1;
+
+__DATA__
+
+__C__
+
+#include "swf_types.h"
+#include "swf_movie.h"
+#include "swf_parse.h"
+#include "swf_destroy.h"
+#include "gravel/util.h"
+#include "gravel.h"
+
+void _bake (SV * shape, SV * mov) 
+{
+	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(mov));
+	int error = SWF_ENoError;
+	
+}
+
+
 

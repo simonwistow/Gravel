@@ -25,3 +25,10 @@ struct gravel_cubic {
     SWF_S32 dx;
     SWF_S32 dy;
 };
+
+/* Helper typedef for perl/XS */
+
+typedef struct {
+  swf_movie * movie;
+} SWF_Movie;
+
