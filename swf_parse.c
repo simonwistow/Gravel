@@ -400,7 +400,7 @@ swf_parse_definefontinfo (swf_parser * context, int * error)
     info->namelen = swf_parse_get_byte (context);
 
     /* Allocate enough space to hold the name of the font */
-    if ( ( info->fontname = (char *) malloc ((info->namelen+1) * sizeof(char))) == NULL ){
+    if ( ( info->fontname = (char *) calloc ((1 + info->namelen), sizeof(char))) == NULL ){
 	*error = SWF_EMallocFailure;
 	goto FAIL;
     }
@@ -418,7 +418,7 @@ swf_parse_definefontinfo (swf_parser * context, int * error)
        presumably already been read into place by a DefineFont tag */
     glyph_count = context->glyph_counts[info->fontid];
 
-    if ((info->code_table = (int *) malloc (glyph_count * sizeof(int) ) ) == NULL) {
+    if ((info->code_table = (int *) calloc (glyph_count, sizeof(int) ) ) == NULL) {
         *error = SWF_EMallocFailure;
         goto FAIL;
     }
@@ -442,7 +442,9 @@ swf_parse_definefontinfo (swf_parser * context, int * error)
 }
 
 /*
- * This is very similar to swf_parse_placeobject, except that it 
+ * This is very similar to swf_parse_placeobject, except that this more
+ * complicated type includes ratio, clipdepth, a name and some
+ * additional flags. 
  */
 
 swf_placeobject2 *
@@ -506,96 +508,114 @@ swf_parse_placeobject2 (swf_parser * context, int * error)
     return NULL;
 }
 
+/*
+ * Flash has an idea of a 'matrix' which is not strictly a matrix
+ * in the mathematical sense, but rather a general 2D transformation
+ * with translation terms.
+ *
+ * This function grabs such a transformation from the input stream
+ * and stores it. 
+ */
 
 swf_matrix *
 swf_parse_get_matrix (swf_parser * context, int * error)
 {
-	swf_matrix * matrix;
-	int n_bits;
-
-	if ((matrix = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
-	    *error = SWF_EMallocFailure;
-	    return NULL;
+    swf_matrix * matrix;
+    int n_bits;
+    
+    if ((matrix = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
+	*error = SWF_EMallocFailure;
+	return NULL;
     }
-
-	swf_parse_initbits (context);
-
-	/* Scale terms */
-	if (swf_parse_get_bits (context, 1)) {
-            n_bits = (int) swf_parse_get_bits (context, 5);
-            matrix->a = swf_parse_get_sbits(context, n_bits);
-            matrix->d = swf_parse_get_sbits(context, n_bits);
-	} else {
-            matrix->a = matrix->d = 0x00010000L;
-	}
-	
-	/* Rotate/skew terms */
-	if (swf_parse_get_bits (context, 1)) {
-            n_bits = swf_parse_get_bits (context, 5);
-            matrix->b = swf_parse_get_sbits(context, n_bits);
-            matrix->c = swf_parse_get_sbits(context, n_bits);
-	} else {
-            matrix->b = matrix->c = 0;
-	}
-
-	/* Translate terms */
+    
+    swf_parse_initbits (context);
+    
+    /* Scale terms */
+    if (swf_parse_get_bits (context, 1)) {
 	n_bits = (int) swf_parse_get_bits (context, 5);
-	matrix->tx = swf_parse_get_sbits(context, n_bits);
-	matrix->ty = swf_parse_get_sbits(context, n_bits);
-
-	return matrix;
+	matrix->a = swf_parse_get_sbits(context, n_bits);
+	matrix->d = swf_parse_get_sbits(context, n_bits);
+    } else {
+	matrix->a = matrix->d = 0x00010000L;
+    }
+    
+    /* Rotate/skew terms */
+    if (swf_parse_get_bits (context, 1)) {
+	n_bits = swf_parse_get_bits (context, 5);
+	matrix->b = swf_parse_get_sbits(context, n_bits);
+	matrix->c = swf_parse_get_sbits(context, n_bits);
+    } else {
+	matrix->b = matrix->c = 0;
+    }
+    
+    /* Translate terms */
+    n_bits = (int) swf_parse_get_bits (context, 5);
+    matrix->tx = swf_parse_get_sbits(context, n_bits);
+    matrix->ty = swf_parse_get_sbits(context, n_bits);
+    
+    return matrix;
 }
 
+
+/*
+ * 
+ */
 
 swf_cxform *
 swf_parse_get_cxform (swf_parser * context, int * error, int has_alpha)
 {
-	swf_cxform * cxform;
-
-	int need_add, need_mul, n_bits;
-
-	if ((cxform = (swf_cxform *) calloc (1, sizeof (swf_cxform))) == NULL) {
-            *error = SWF_EMallocFailure;
-    	    return NULL;
+    swf_cxform * cxform;
+    
+    int need_add, need_mul, n_bits;
+    
+    if ((cxform = (swf_cxform *) calloc (1, sizeof (swf_cxform))) == NULL) {
+	*error = SWF_EMallocFailure;
+	return NULL;
+    }
+    
+    swf_parse_initbits (context);
+    
+    /* !!! The spec has these bits reversed !!! */
+    need_add = swf_parse_get_bits (context, 1);
+    need_mul = swf_parse_get_bits (context, 1);
+    /* !!! The spec has these bits reversed !!! */
+    
+    
+    n_bits = (int) swf_parse_get_bits(context, 4);
+    
+    cxform->aa = 256;
+    cxform->ab = 0;
+    
+    if (need_mul) {
+	cxform->ra = (S16) swf_parse_get_sbits (context, n_bits);
+	cxform->ga = (S16) swf_parse_get_sbits (context, n_bits);
+	cxform->ba = (S16) swf_parse_get_sbits (context, n_bits);
+	if (has_alpha) { 
+	    cxform->aa = (S16) swf_parse_get_sbits (context, n_bits); 
 	}
-
-	swf_parse_initbits (context);
-
-	/* !!! The spec has these bits reversed !!! */
-	need_add = swf_parse_get_bits (context, 1);
-    	need_mul = swf_parse_get_bits (context, 1);
-	/* !!! The spec has these bits reversed !!! */
-
-
-    	n_bits = (int) swf_parse_get_bits(context, 4);
-
-	cxform->aa = 256;
-	cxform->ab = 0;
-
-	if (need_mul) {
-	    cxform->ra = (S16) swf_parse_get_sbits (context, n_bits);
-	    cxform->ga = (S16) swf_parse_get_sbits (context, n_bits);
-	    cxform->ba = (S16) swf_parse_get_sbits (context, n_bits);
-	    if (has_alpha) { 
-		cxform->aa = (S16) swf_parse_get_sbits (context, n_bits); 
-	    }
-	} else {
-	    cxform->ra = cxform->ga = cxform->ba = 256;
-    	}
-
-    	if (need_add) {
-	    cxform->rb = (S16) swf_parse_get_sbits (context, n_bits);
-	    cxform->gb = (S16) swf_parse_get_sbits (context, n_bits);
-	    cxform->bb = (S16) swf_parse_get_sbits (context, n_bits);
-	    if (has_alpha) { 
-		cxform->ab = (S16)swf_parse_get_sbits (context, n_bits); 
-	    }
-    	} else {
-	    cxform->rb = cxform->gb = cxform->bb = 0;
-    	}
-	
-	return cxform;
+    } else {
+	cxform->ra = cxform->ga = cxform->ba = 256;
+    }
+    
+    if (need_add) {
+	cxform->rb = (S16) swf_parse_get_sbits (context, n_bits);
+	cxform->gb = (S16) swf_parse_get_sbits (context, n_bits);
+	cxform->bb = (S16) swf_parse_get_sbits (context, n_bits);
+	if (has_alpha) { 
+	    cxform->ab = (S16)swf_parse_get_sbits (context, n_bits); 
+	}
+    } else {
+	cxform->rb = cxform->gb = cxform->bb = 0;
+    }
+    
+    return cxform;
 }
+
+/*
+ * Grabs a string of chars out of the stream.
+ * NOTE - uses a hard-coded value of 255 for the maximum
+ * length of a string buffer.
+ */
 
 char *
 swf_parse_get_string (swf_parser * context, int * error)
@@ -607,7 +627,7 @@ swf_parse_get_string (swf_parser * context, int * error)
     char byte = (char) NULL;
     int sp    = 0;
     
-    if ((string = (char *) malloc (sizeof (char) * 255)) == NULL) {
+    if ( (string = (char *) calloc( 255, sizeof(char) )) == NULL) {
         *error = SWF_EMallocFailure;
 	return NULL;
     }
@@ -650,7 +670,7 @@ swf_parse_definefont (swf_parser * context, int * error)
     font->glyph_count = font->offset/2;
     context->glyph_counts[font->fontid] = font->glyph_count;
 
-    if  ((offset_table =  (int *) malloc (font->glyph_count * sizeof (int))) == NULL) {
+    if  ((offset_table =  (int *) calloc (font->glyph_count, sizeof (int))) == NULL) {
 	*error = SWF_EMallocFailure;
 	goto FAIL;
     }
@@ -736,7 +756,9 @@ swf_parse_setbackgroundcolour (swf_parser * context, int * error)
 
 
 /*
- * Thin wrapper over swf_parse_defineshape
+ * Thin wrapper over swf_parse_defineshape_aux.
+ * The spec has defineshape, defineshape2, etc but rather than
+ * aping that, I think it's better to have these thin wrappers. --BE
  */
 
 swf_defineshape *
@@ -745,13 +767,18 @@ swf_parse_defineshape (swf_parser * context, int * error)
     return (swf_defineshape *) swf_parse_defineshape_aux (context, error, FALSE);
 }
 
+/*
+ * Get the shapestyle from the input stream. We need the linestyles and the
+ * fillstyles from the stream.
+ */
+
 swf_shapestyle *
 swf_parse_get_shapestyle (swf_parser * context, int * error, int with_alpha)
 {
     U16 i = 0;
     U16 j = 0;
     swf_shapestyle * styles;
-
+    
     if ((styles = (swf_shapestyle *) calloc (1, sizeof (swf_shapestyle))) == NULL) {
 	*error = SWF_EMallocFailure;
 	return NULL;
@@ -765,20 +792,18 @@ swf_parse_get_shapestyle (swf_parser * context, int * error, int with_alpha)
     /* Get the number of fills. */
     styles->nfills = swf_parse_get_byte (context);
     
-
+    
     /* Do we have a larger number? */
     if (styles->nfills == 255) {
         /* Get the larger number. */
         styles->nfills = swf_parse_get_word(context);
     }
-
+    
     if ((styles->fills = (swf_fillstyle **) calloc (styles->nfills, sizeof (swf_fillstyle *))) == NULL) {
 	*error = SWF_EMallocFailure;
 	goto FAIL;
     }
-
-
-
+    
     /* Get each of the fill style. */
     for (i = 0; i <styles->nfills; i++) {
         if ((styles->fills[i] = (swf_fillstyle *) calloc (1, sizeof (swf_fillstyle))) == NULL) {
@@ -804,9 +829,8 @@ swf_parse_get_shapestyle (swf_parser * context, int * error, int with_alpha)
                 goto FAIL;
             }
 	    
-            /* Get each of the colors. */
-            for (j = 0; j< styles->fills[i]->ncolours; j++)
-            {
+            /* Get each of the colours. */
+            for (j = 0; j< styles->fills[i]->ncolours; j++) {
                 if ((styles->fills[i]->colours[j] = (swf_rgba_pos *) calloc (1, sizeof (swf_rgba_pos))) == NULL) {
                     *error = SWF_EMallocFailure;
                     goto FAIL;
@@ -886,12 +910,12 @@ swf_parse_defineshape_aux (swf_parser * context, int * error, int with_alpha)
         goto FAIL;
     }
 
+/* 
+ * Bug!  this was not in the original swf_parse.cpp     
+ * Required to reset bit counters and read byte aligned. 
+ */
 
-
-    swf_parse_initbits (context);     /* Bug!  this was not in the original swf_parse.cpp       *
-                                      * Required to reset bit counters and read byte aligned. */
-
-
+    swf_parse_initbits (context);     
 
     context->fill_bits = (U16) swf_parse_get_bits (context, 4);
     context->line_bits = (U16) swf_parse_get_bits (context, 4);
@@ -1868,7 +1892,7 @@ swf_parse_get_mp3headers (swf_parser * context, int * error, int samples_per_fra
     int i;
 
 
-    if ((header_list = (swf_mp3header_list *) malloc (sizeof (swf_mp3header_list))) == NULL) {
+    if ((header_list = (swf_mp3header_list *) calloc (1, sizeof (swf_mp3header_list))) == NULL) {
         *error = SWF_EMallocFailure;
         return NULL;
     }
@@ -1889,7 +1913,7 @@ swf_parse_get_mp3headers (swf_parser * context, int * error, int samples_per_fra
             }
 
             header_list->headers[frame_count] = NULL;
-            if ((header_list->headers[frame_count] = (swf_mp3header *) malloc (sizeof(swf_mp3header))) == NULL)
+            if ((header_list->headers[frame_count] = (swf_mp3header *) calloc (1, sizeof(swf_mp3header))) == NULL)
             {
                 *error = SWF_EMallocFailure;
                 goto FAIL;
@@ -1969,7 +1993,7 @@ swf_parse_framelabel (swf_parser * context, int * error)
 {
     swf_framelabel * label;
 
-    if ((label = (swf_framelabel *) malloc (sizeof(swf_framelabel))) == NULL) {
+    if ((label = (swf_framelabel *) calloc (1, sizeof(swf_framelabel))) == NULL) {
         *error = SWF_EMallocFailure;
         return NULL;
     }
@@ -1985,7 +2009,7 @@ swf_parse_namecharacter (swf_parser * context, int * error)
 {
     swf_namecharacter * name;
 
-    if ((name = (swf_namecharacter *) malloc (sizeof(swf_namecharacter))) == NULL) {
+    if ((name = (swf_namecharacter *) calloc (1, sizeof(swf_namecharacter))) == NULL) {
         *error = SWF_EMallocFailure;
         return NULL;
     }
@@ -2006,7 +2030,7 @@ swf_parse_definebuttoncxform (swf_parser * context, int * error)
     int size=0;
     swf_definebuttoncxform * button;
 
-    if ((button = (swf_definebuttoncxform *) malloc (sizeof (swf_definebuttoncxform))) == NULL) {
+    if ((button = (swf_definebuttoncxform *) calloc (1, sizeof (swf_definebuttoncxform))) == NULL) {
         *error = SWF_EMallocFailure;
         return NULL;
     }
@@ -2044,7 +2068,7 @@ swf_parse_soundstreamblock (swf_parser * context, int * error)
 {
     swf_soundstreamblock * block;
 
-    if ((block = (swf_soundstreamblock *) malloc (sizeof (swf_soundstreamblock))) == NULL) {
+    if ((block = (swf_soundstreamblock *) calloc (1, sizeof (swf_soundstreamblock))) == NULL) {
         *error = SWF_EMallocFailure;
         return NULL;
     }
@@ -2103,7 +2127,7 @@ swf_parse_definebuttonsound (swf_parser * context, int * error)
     int i;
     swf_startsound * state;
 
-    if ((button = (swf_definebuttonsound *) malloc (sizeof (swf_definebuttonsound))) == NULL) {
+    if ((button = (swf_definebuttonsound *) calloc (1, sizeof (swf_definebuttonsound))) == NULL) {
         *error = SWF_EMallocFailure;
         return NULL;
     }
@@ -2154,7 +2178,7 @@ swf_soundstreamhead *
 swf_parse_soundstreamhead (swf_parser * context, int * error)
 {
     swf_soundstreamhead * head;
-    if ((head = (swf_soundstreamhead *) malloc (sizeof(swf_soundstreamhead))) == NULL) {
+    if ((head = (swf_soundstreamhead *) calloc (1, sizeof(swf_soundstreamhead))) == NULL) {
         *error = SWF_EMallocFailure;
         return NULL;
     }
@@ -2184,7 +2208,7 @@ swf_parse_definebitslossless (swf_parser * context, int * error)
 {
     swf_definebitslossless * bits;
 
-    if ((bits = (swf_definebitslossless *) malloc (sizeof(swf_definebitslossless))) == NULL) {
+    if ((bits = (swf_definebitslossless *) calloc (1, sizeof(swf_definebitslossless))) == NULL) {
         *error = SWF_EMallocFailure;
         return NULL;
     }
@@ -2229,7 +2253,7 @@ swf_parse_get_textrecord (swf_parser * context, int * error, int has_alpha, int 
 
     if (flags == 0) { return NULL; }
 
-    if ((record = (swf_textrecord *) malloc (sizeof(swf_textrecord))) == NULL) {
+    if ((record = (swf_textrecord *) calloc (1, sizeof(swf_textrecord))) == NULL) {
 
         *error = SWF_EMallocFailure;
         return NULL;
@@ -2297,7 +2321,7 @@ swf_parse_get_textrecords (swf_parser * context, int * error, int has_alpha, int
 
     return NULL;
 
-    if ((list = (swf_textrecord_list *) malloc (sizeof (swf_textrecord_list))) == NULL) {
+    if ((list = (swf_textrecord_list *) calloc (1, sizeof (swf_textrecord_list))) == NULL) {
         *error = SWF_EMallocFailure;
         return NULL;
     }
@@ -2348,9 +2372,7 @@ swf_parse_get_shaperecords (swf_parser * context, int * error)
 
     swf_shaperecord_list * list;
 
-
-
-    if ((list = (swf_shaperecord_list *) malloc (sizeof (swf_shaperecord_list))) == NULL) {
+    if ((list = (swf_shaperecord_list *) calloc (1, sizeof (swf_shaperecord_list))) == NULL) {
         *error = SWF_EMallocFailure;
         return NULL;
     }
@@ -2358,7 +2380,7 @@ swf_parse_get_shaperecords (swf_parser * context, int * error)
 
     while (!at_end)
     {
-        if (list->record_count>block_size) {
+        if (list->record_count > block_size) {
             block_size += 10;
             if ((list->records = (swf_shaperecord **) realloc (list->records, sizeof (swf_shaperecord *) * block_size)) == NULL)
             {
@@ -2378,7 +2400,7 @@ swf_parse_get_shaperecords (swf_parser * context, int * error)
 
     return list;
 
-    FAIL:
+ FAIL:
     swf_destroy_shaperecord_list (list);
     return NULL;
 
@@ -2392,7 +2414,7 @@ swf_parse_get_buttonrecords (swf_parser * context, int * error, int with_alpha)
     U32 button_end;
     swf_buttonrecord_list * list;
 
-    if ((list = (swf_buttonrecord_list *) malloc (sizeof (swf_buttonrecord_list))) == NULL)
+    if ((list = (swf_buttonrecord_list *) calloc (1, sizeof (swf_buttonrecord_list))) == NULL)
     {
         *error = SWF_EMallocFailure;
         return NULL;
@@ -2447,7 +2469,7 @@ swf_parse_get_buttonrecord (swf_parser * context, int * error, int byte, int wit
     U32 pad;
     int i;
 
-    if ((button = (swf_buttonrecord *) malloc (sizeof (swf_buttonrecord))) == NULL) {
+    if ((button = (swf_buttonrecord *) calloc (1, sizeof (swf_buttonrecord))) == NULL) {
         *error = SWF_EMallocFailure;
         return NULL;
     }
@@ -2496,10 +2518,9 @@ swf_parse_get_buttonrecord (swf_parser * context, int * error, int byte, int wit
 
     return button;
 
-    FAIL:
+ FAIL:
     swf_destroy_buttonrecord (button);
     return NULL;
-
 }
 
 
@@ -2510,7 +2531,7 @@ swf_parse_get_shaperecord (swf_parser * context, int * error, int at_end, int xl
     swf_shaperecord * record;
     S16 nbits;
 
-    if ((record = (swf_shaperecord *) malloc (sizeof (swf_shaperecord))) == NULL) {
+    if ((record = (swf_shaperecord *) calloc (1, sizeof (swf_shaperecord))) == NULL) {
         *error = SWF_EMallocFailure;
         at_end = FALSE;
         return NULL;
@@ -2519,16 +2540,15 @@ swf_parse_get_shaperecord (swf_parser * context, int * error, int at_end, int xl
     record->is_edge = swf_parse_get_bits (context, 1);
 
 
-    if (!record->is_edge)
-    {
+    if (!record->is_edge) {
 
         /* Handle a state change */
         record->flags = swf_parse_get_bits(context, 5);
 
         /* Are we at the end? */
-        if (record->flags == 0)
-        {
+        if (record->flags == 0) {
             fprintf(stderr, "\tEnd of shape.\n\n");
+
             at_end = TRUE;
             return record;
         }
@@ -2580,17 +2600,14 @@ swf_parse_get_shaperecord (swf_parser * context, int * error, int at_end, int xl
             nbits = (U16) swf_parse_get_bits(context, 4) + 2;   /* nbits is biased by 2 */
 
             /* Save the deltas */
-            if (swf_parse_get_bits(context, 1))
-            {
+            if (swf_parse_get_bits(context, 1)) {
                 /* Handle a general line. */
                 record->x = swf_parse_get_sbits(context, nbits);
                 record->y = swf_parse_get_sbits(context, nbits);
                 xlast += record->x;
                 ylast += record->y;
 
-            }
-            else
-            {
+            } else {
                 /* Handle a vert or horiz line. */
                 if (swf_parse_get_bits(context, 1))
                 {

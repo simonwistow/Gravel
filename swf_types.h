@@ -200,7 +200,6 @@ typedef struct swf_definefontinfo swf_definefontinfo;
 typedef struct swf_placeobject swf_placeobject;
 typedef struct swf_placeobject2 swf_placeobject2;
 typedef struct swf_defineshape swf_defineshape;
-typedef struct swf_defineshape2 swf_defineshape2;
 typedef struct swf_definemorphshape swf_definemorphshape;
 typedef struct swf_freecharacter swf_freecharacter;
 typedef struct swf_namecharacter swf_namecharacter;
@@ -347,6 +346,7 @@ struct swf_placeobject {
 };
 
 /* 
+ * TODO
  * Should we change the property tag to be called tagid to 
  * match swf_placeobject? --BE 
  */

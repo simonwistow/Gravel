@@ -28,7 +28,7 @@ swf_error_code_to_string (int code)
                 return "No error";
 				break;
         case SWF_EMallocFailure:
-                return "Failure in malloc";
+                return "Failure in memory allocation";
 				break;
         case SWF_EReallocFailure:
                 return "Failure in realloc";

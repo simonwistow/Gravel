@@ -36,10 +36,23 @@ swf_destroy_parser (swf_parser * context)
     }
     fclose(context->file);
     free(context->name);
-	free(context->header);
+    free(context->header);
     free (context);
 
+    return;
 }
+
+/*
+ * Shapestyle's are reasonably complicated types.
+ *
+ * I think what is needed here is for the ith line/fillstyle
+ * to be free'd (with a check to make sure it points at something)
+ * 
+ * There's no need to keep track of how many we've actually allocated
+ * (for the case where we crash out halfway through) as we're
+ * using calloc for memory allocation, so test-for-NULL will do
+ * it for us.
+ */
 
 void
 swf_destroy_shapestyle (swf_shapestyle * style) 
@@ -50,13 +63,13 @@ swf_destroy_shapestyle (swf_shapestyle * style)
         return;
     }
 
-    for (i=0; i<style->nlines && style->lines != NULL; i++) {
+    for (i=0; i<style->nlines && style->lines[i] != NULL; i++) {
        free (style->lines[i]);
     }
 
     free (style->lines);
 
-    for (i=0; i<style->nfills && style->fills != NULL; i++) {
+    for (i=0; i<style->nfills && style->fills[i] != NULL; i++) {
         swf_destroy_fillstyle (style->fills[i]);
     }
     free (style->fills);
@@ -76,13 +89,15 @@ swf_destroy_fillstyle (swf_fillstyle * style)
     }
 
     for (i=0; i<style->ncolours && style->colours!=NULL; i++) {
-            free (style->colours[i]);
+	free (style->colours[i]);
     }
     free (style->colours);
 
     free (style->matrix);
 
     free (style);
+
+    return;
 }
 
 void
@@ -96,6 +111,7 @@ swf_destroy_defineshape (swf_defineshape * shape)
     swf_destroy_shapestyle (shape->style);
     swf_destroy_shaperecord_list (shape->record);
 
+    return;
 }
 
 void
@@ -165,7 +181,8 @@ swf_destroy_tag (swf_tag * tag)
         return;
     }
     free (tag);
-	return;
+
+    return;
 }
 
 void
@@ -174,8 +191,10 @@ swf_destroy_rect (swf_rect * rect)
     if (rect==NULL) {
         return;
     }
+
     free (rect);
-	return;
+
+    return;
 }
 
 void
@@ -211,6 +230,7 @@ swf_destroy_gradcolour (swf_gradcolour * colour)
     }
 
     free (colour);
+
     return;
 }
 
@@ -290,7 +310,7 @@ swf_destroy_rgba_pos (swf_rgba_pos * colour)
     }
     free (colour);
 
-	return;
+    return;
 }
 
 void
@@ -323,7 +343,7 @@ swf_destroy_kerningpair (swf_kerningpair * pair)
         return;
     }
     free (pair);
-	return;
+    return;
 }
 
 void
@@ -333,7 +353,7 @@ swf_destroy_adpcm (swf_adpcm * adpcm)
         return;
     }
     free (adpcm);
-	return;
+    return;
 }
 
 void
@@ -344,7 +364,8 @@ swf_destroy_mp3header (swf_mp3header * header)
     }
     free (header->data);
     free (header);
-	return;
+
+    return;
 }
 
 void
@@ -361,7 +382,8 @@ swf_destroy_mp3header_list (swf_mp3header_list * list)
     }
     free (list->headers);
     free (list);
-	return;
+
+    return;
 }
 
 void
@@ -380,7 +402,7 @@ swf_destroy_textrecord (swf_textrecord * record)
 
     free (record);
 
-	return;
+    return;
 }
 
 void
@@ -399,7 +421,7 @@ swf_destroy_textrecord_list (swf_textrecord_list * list)
     free (list->records);
     free (list);
 
-	return;
+    return;
 }
 
 void
@@ -418,7 +440,7 @@ swf_destroy_buttonrecord (swf_buttonrecord * record)
     free (record->characters);
     free (record);
 
-	return;
+    return;
 }
 
 void
@@ -523,7 +545,8 @@ swf_destroy_setbackgroundcolour (swf_setbackgroundcolour * tag)
     }
     swf_destroy_colour (tag->colour);
     free (tag);
-	return;
+
+    return;
 }
 
 void
@@ -537,7 +560,7 @@ swf_destroy_definesound (swf_definesound * sound)
     swf_destroy_adpcm (sound->adpcm);
     free (sound);
 
-	return;
+    return;
 }
 
 void
@@ -556,7 +579,7 @@ swf_destroy_definefont (swf_definefont * font)
     free (font->shape_records);
     free (font);
 
-	return;
+    return;
 }
 
 void
@@ -586,7 +609,7 @@ swf_destroy_definefont2 (swf_definefont2 * font)
 
     free (font);
 
-	return;
+    return;
 }
 
 void
@@ -599,7 +622,8 @@ swf_destroy_definefontinfo (swf_definefontinfo * info)
     free (info->code_table);
     free (info->fontname);
     free (info);
-	return;
+
+    return;
 }
 
 void
@@ -611,8 +635,10 @@ swf_destroy_placeobject (swf_placeobject * object)
 
     swf_destroy_matrix (object->matrix);
     swf_destroy_cxform (object->cxform);
+
     free (object);
-	return;
+
+    return;
 }
 
 void
@@ -628,16 +654,9 @@ swf_destroy_placeobject2 (swf_placeobject2 * object)
     free (object->name);
     free (object);
 
-	return;
+    return;
 }
 
-
-void
-swf_destroy_defineshape2 (swf_defineshape2 * object)
-{
-
-	return;
-}
 
 
 void
@@ -648,7 +667,8 @@ swf_destroy_freecharacter (swf_freecharacter * object)
     }
 
     free (object);
-	return;
+
+    return;
 }
 
 void
@@ -729,7 +749,7 @@ swf_destroy_jpegtables (swf_jpegtables * bits)
     free (bits);
 
 
-	return;
+    return;
 }
 
 void
@@ -744,7 +764,7 @@ swf_destroy_definebitsjpeg2 (swf_definebitsjpeg2 * bits)
     free (bits);
 
 
-	return;
+    return;
 }
 
 void
@@ -758,7 +778,7 @@ swf_destroy_definebitsjpeg3 (swf_definebitsjpeg3 * bits)
     free (bits);
 
 
-	return;
+    return;
 }
 
 void
@@ -769,7 +789,7 @@ swf_destroy_definebitslossless (swf_definebitslossless * object)
     }
 
 
-	return;
+    return;
 }
 
 void
@@ -785,7 +805,7 @@ swf_destroy_definetext (swf_definetext * text)
     swf_destroy_textrecord_list (text->records);
     free (text);
 
-	return;
+    return;
 }
 
 void
@@ -801,7 +821,7 @@ swf_destroy_definetext2 (swf_definetext2 * text)
     free (text);
 
 
-	return;
+    return;
 }
 
 void
@@ -815,7 +835,7 @@ swf_destroy_definebutton (swf_definebutton * button)
     swf_destroy_doaction_list (button->actions);
     free (button);
 
-	return;
+    return;
 }
 
 void
@@ -847,7 +867,7 @@ swf_destroy_defineedittext (swf_defineedittext * text)
 
     free (text);
 
-	return;
+    return;
 }
 
 void
@@ -859,7 +879,7 @@ swf_destroy_framelabel (swf_framelabel * label)
 
     free (label->label);
     free (label);
-	return;
+    return;
 }
 
 void
@@ -918,7 +938,8 @@ swf_destroy_soundstreamhead (swf_soundstreamhead * head)
     }
 
     free (head);
-	return;
+
+    return;
 }
 
 

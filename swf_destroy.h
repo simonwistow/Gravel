@@ -60,7 +60,6 @@ extern void swf_destroy_definefontinfo (swf_definefontinfo *);
 extern void swf_destroy_placeobject (swf_placeobject *);
 extern void swf_destroy_placeobject2 (swf_placeobject2 *);
 extern void swf_destroy_defineshape (swf_defineshape *);
-extern void swf_destroy_defineshape2 (swf_defineshape2 *);
 extern void swf_destroy_definemorphshape (swf_definemorphshape *);
 extern void swf_destroy_freecharacter (swf_freecharacter *);
 extern void swf_destroy_namecharacter (swf_namecharacter *);

@@ -27,7 +27,7 @@ const char **
 init_tags (void)
 {
 
-    const char ** tag  = (const char **) malloc (sizeof (char *) * 49);
+    const char ** tag  = (const char **) calloc (49, sizeof (char *));
 
     tag[0] = "End";
     tag[1] = "ShowFrame";
