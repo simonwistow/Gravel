@@ -14,6 +14,7 @@ LIBS=
 #other stuff
 LIB_OBJECTS=	\
 	swf_parse.o 			\
+	swf_movie.o 			\
 	swf_destroy.o 			\
 	swf_error.o 			\
 	swf_tags.o 			\
@@ -102,6 +103,11 @@ swf_parse: libswfparse.la $(OBJECTS)
 text_extract: libswfextract.la $(TEXT_OBJECTS)
 	$(LIBTOOL) $(CC) $(CFLAGS) -o text_extract $(TEXT_OBJECTS) libswfextract.la $(LIBS)
 
+
+## Gen stuff. Someone more versed in build procedure than I can fix this
+
+gen_test1: gen_test1.do $(D_LIB_OBJECTS)
+	$(CC) $(CFLAGS) -I . $(DEBUG) -o gen_test1 gen_test1.do $(D_LIB_OBJECTS) $(LIBS)
 
 ## static, but quiet
 

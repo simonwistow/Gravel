@@ -18,7 +18,7 @@
 #include "tag_handy.h"
 
 void 
-swf_add_tag_end(swf_movie * movie, int * error) 
+swf_add_end(swf_movie * movie, int * error) 
 {
     swf_tagrecord * temp;
 
