@@ -16,6 +16,9 @@
  *
  *
  * $Log: lib_swfextract.c,v $
+ * Revision 1.16  2001/07/16 00:39:07  clampr
+ * goddammit - dereferenced pointers!
+ *
  * Revision 1.15  2001/07/16 00:37:14  clampr
  * dereference error before it's tested
  *
@@ -445,7 +448,7 @@ parse_definetext (swf_extractor * swf, int * error)
     fprintf (stderr, "[parse_definetext: text record is '%s']\n", string);
     #endif
 
-    if (error == SWF_ENoError)
+    if (*error == SWF_ENoError)
     {
         add_string (swf, error, string);
     }
@@ -472,7 +475,7 @@ parse_definetext2 (swf_extractor * swf, int * error)
     swf_definetext2 * text = swf_parse_definetext2 (swf->parser, error);
     char * string = NULL;
 
-    if (text == NULL || error != SWF_ENoError)
+    if (text == NULL || *error != SWF_ENoError)
     {
         return;
     }
@@ -503,7 +506,7 @@ parse_definebutton (swf_extractor * swf, int * error)
 
 
 
-    if (button == NULL || error != SWF_ENoError)
+    if (button == NULL || *error != SWF_ENoError)
     {
         return;
     }
@@ -532,7 +535,7 @@ parse_definebutton2 (swf_extractor * swf, int * error)
     fprintf (stderr, "[definebutton2 : checking to see if valid button2]\n");
     #endif
 
-    if (!button || !button->actions|| error != SWF_ENoError)
+    if (!button || !button->actions|| *error != SWF_ENoError)
     {
         return;
     }
@@ -564,7 +567,7 @@ parse_definefont  (swf_extractor * swf, int * error)
 {
 	swf_definefont * font = swf_parse_definefont(swf->parser, error);
 
-	if (font == NULL || error != SWF_ENoError)
+	if (font == NULL || *error != SWF_ENoError)
 	{
 		return;
 	}
@@ -579,7 +582,7 @@ parse_definefont2 (swf_extractor * swf, int * error)
 {
     swf_definefont2 * font = swf_parse_definefont2(swf->parser, error);
 
-    if (font == NULL || error != SWF_ENoError)
+    if (font == NULL || *error != SWF_ENoError)
     {
 	    return;
     }
@@ -593,7 +596,7 @@ parse_definefontinfo (swf_extractor * swf, int * error)
 
 	swf_definefontinfo * info = swf_parse_definefontinfo(swf->parser, error);
 
-	if (info == NULL || error != SWF_ENoError)
+	if (info == NULL || *error != SWF_ENoError)
 	{
 		return;
 	}
