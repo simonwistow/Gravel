@@ -28,7 +28,7 @@ extern void swf_serialise_matrix (swf_buffer * buffer, int * error, swf_matrix *
 extern void swf_serialise_cxform(swf_buffer * buffer, int * error, swf_cxform * mycx);
 extern void swf_serialise_cxform_force_alpha (swf_buffer * buffer, int * error, swf_cxform * mycx);
 
-
+extern void swf_serialise_definebutton (swf_tagrecord * temp, int * error, SWF_U16 button_id, SWF_U16 char_id);
 extern void swf_serialise_defineshape (swf_buffer * buffer, int * error, swf_defineshape * shape);
 
 extern void swf_buffer_shapestyle(swf_buffer * buffer, int * error, swf_shapestyle * s);

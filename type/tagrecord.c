@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: tagrecord.c,v 1.3 2002/06/07 17:18:01 kitty_goth Exp $	
+ * 	$Id: tagrecord.c,v 1.4 2002/07/01 08:23:53 muttley Exp $	
  */
 
 #include <stdlib.h>
@@ -23,6 +23,7 @@
 #include "swf_types.h"
 #include "swf_error.h"
 #include "swf_destroy.h"
+#include "swf_movie.h"
 
 
 swf_tagrecord * 

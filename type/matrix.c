@@ -16,6 +16,10 @@
  */
 
 #include "tag_handy.h"
+
+extern swf_matrix * swf_matrix_mult(swf_matrix * m1, swf_matrix * m2);
+
+
 /*
  * Flash has an idea of a 'matrix' which is not strictly a matrix
  * in the mathematical sense, but rather a general 2D transformation

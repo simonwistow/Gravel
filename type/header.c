@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: header.c,v 1.2 2002/06/26 20:37:33 kitty_goth Exp $	
+ * 	$Id: header.c,v 1.3 2002/07/01 08:23:53 muttley Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -25,6 +25,9 @@
 #include "swf_movie.h"
 #include "swf_destroy.h"
 #include "swf_serialise.h"
+
+
+extern void swf_print_header (swf_header * hdr, int * error);
 
 #define SWF_DESTROY_MAX_TAG_ID 48
 

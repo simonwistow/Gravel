@@ -201,7 +201,7 @@ swf_parse_get_shaperecords (swf_parser * context, int * error)
 void
 swf_buffer_shaperecord(swf_buffer * buffer, int * error, swf_shaperecord * s, swf_shapestyle * st)
 {
-	SWF_U8 i, n;	
+	SWF_U8 i;	
 	SWF_U32 max;
 
 	swf_buffer_put_bits(buffer, 1, s->is_edge);
