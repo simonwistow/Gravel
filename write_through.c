@@ -148,10 +148,10 @@ int main (int argc, char *argv[]) {
       error = SWF_ENoError;
       
       if (next_id <= SWF_PARSER_MAX_TAG_ID) {
-	temp = (swf_tagrecord*) (parse[next_id](parser, error, next_id));
-	if (temp) {
-	  swf_dump_shape(movie, &error, temp);
-	}
+		temp = (swf_tagrecord*) (parse[next_id](parser, error, next_id));
+		if (temp) {
+		  swf_dump_tag(movie, &error, temp);
+		}
       }
 
       if (error != SWF_ENoError) {

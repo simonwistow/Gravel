@@ -156,7 +156,7 @@ swf_add_doaction (swf_movie * movie, int * error, SWF_U8 saction)
 	swf_buffer_put_byte(temp->buffer, error, 0);
     temp->serialised = 1;
 
-	swf_dump_shape(movie, error, temp);
+	swf_dump_tag(movie, error, temp);
 
     return;
 }   

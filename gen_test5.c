@@ -533,7 +533,7 @@ int main (int argc, char *argv[]) {
 		fprintf(stderr, "Failed to read PNG: %i\n", error);
 	}
 
-    swf_dump_shape(movie, &error, temp);
+    swf_dump_tag(movie, &error, temp);
 
 	temp = swf_make_box(movie, &error);
 
@@ -551,7 +551,7 @@ int main (int argc, char *argv[]) {
     swf_serialise_defineshape(temp->buffer, &error, (swf_defineshape *) temp->tag);
     temp->serialised = 1;
 
-    swf_dump_shape(movie, &error, temp);
+    swf_dump_tag(movie, &error, temp);
 
     m3->a  = m3->d  = 1 * 256 * 256;
     m3->b  = m3->c  = 0;

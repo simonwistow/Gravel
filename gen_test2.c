@@ -134,7 +134,7 @@ int main (int argc, char *argv[]) {
     movie->header->rate = 25 * 256;
 
     swf_add_setbackgroundcolour(movie, &error, 0, 255, 0, 255);
-    swf_dump_shape(movie, &error, temp);
+    swf_dump_tag(movie, &error, temp);
 
     /* Start doing the frames */
 

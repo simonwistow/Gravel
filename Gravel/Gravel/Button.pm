@@ -213,7 +213,7 @@ void _call_foreign_method(SV* shape, char* method, SV * mov) {
 				_bake_button(&error, tmp_tag, h_sh);
 				swf_serialise_definebutton(tmp->buffer, &error, tmp_tag);
 				tmp->serialised = 1;
-				swf_dump_shape(m->movie, &error, tmp);
+				swf_dump_tag(m->movie, &error, tmp);
 				if (SWF_ENoError != error) {
 					fprintf(stderr, "Non-zero error condition 10a detected\n");
 				}

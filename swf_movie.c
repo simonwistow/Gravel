@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.40 2003/03/27 09:16:08 kitty_goth Exp $	
+ * 	$Id: swf_movie.c,v 1.41 2003/05/20 10:25:29 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -58,7 +58,7 @@ swf_make_movie (int * error)
 /* add a tagrecord to a movie */
 /* Turn this into a macro */
 void 
-swf_dump_shape (swf_movie * movie, int * error, swf_tagrecord * temp) 
+swf_dump_tag (swf_movie * movie, int * error, swf_tagrecord * temp) 
 {
     *(movie->lastp) = temp;
     movie->lastp = &(temp->next);

@@ -56,7 +56,7 @@ swf_add_removeobject2 (swf_movie * movie, int * error, SWF_U16 depth)
 	swf_buffer_put_word(temp->buffer, error, depth);
     temp->buffer->size = 2;
 
-    swf_dump_shape(movie, error, temp);
+    swf_dump_tag(movie, error, temp);
 
     return;
 }

@@ -84,7 +84,7 @@ swf_add_setbackgroundcolour(swf_movie * movie, int * error, SWF_U8 red, SWF_U8 g
     temp->serialised = 1;
     temp->buffer->size = 4;
 
-    swf_dump_shape(movie, error, temp);
+    swf_dump_tag(movie, error, temp);
 
     return;
 }
@@ -130,7 +130,7 @@ swf_add_setbackgroundcolour_noalpha(swf_movie * movie, int * error, SWF_U8 red, 
     temp->serialised = 1;
     temp->buffer->size = 3;
 
-    swf_dump_shape(movie, error, temp);
+    swf_dump_tag(movie, error, temp);
 
     return;
 }
@@ -165,7 +165,7 @@ swf_add_setbgcol(swf_movie * movie, int * error, swf_colour * bgcol)
     temp->serialised = 1;
     temp->buffer->size = 4;
 
-    swf_dump_shape(movie, error, temp);
+    swf_dump_tag(movie, error, temp);
 
     return;
 }

@@ -557,7 +557,7 @@ void _bake (SV * shape, SV * mov)
 	/* Now serialise and dump */
 	swf_serialise_defineshape(temp->buffer, &error, (swf_defineshape *) temp->tag);
 	temp->serialised = 1;
-	swf_dump_shape(m->movie, &error, temp);
+	swf_dump_tag(m->movie, &error, temp);
 	if (SWF_ENoError != error) {
 		fprintf(stderr, "Non-zero error condition 10 detected\n");
 	}

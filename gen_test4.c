@@ -123,7 +123,7 @@ int main (int argc, char *argv[]) {
 
     /* Do the frames */
     swf_add_setbackgroundcolour(movie, &error, 0, 255, 0, 255);
-    swf_dump_shape(movie, &error, temp);
+    swf_dump_tag(movie, &error, temp);
 
     m3->a  = m3->d  = 1 * 256 * 256;
     m3->b  = m3->c  = 0;

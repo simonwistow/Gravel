@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.42  2003/05/20 10:25:29  kitty_goth
+ * Begin name refactor
+ *
  * Revision 1.41  2003/05/15 16:09:09  kitty_goth
  * more stuff, mostly buttons-related
  *
@@ -63,7 +66,7 @@
  * start doing some lowlevel stuff (I was bored...)
  *
  * Revision 1.27  2002/05/27 21:58:45  kitty_goth
- * Make tags use the swf_movie function swf_dump_shape
+ * Make tags use the swf_movie function swf_dump_tag
  *
  * Revision 1.26  2002/05/10 17:07:51  kitty_goth
  * Right, this leaks like a son of a bitch, and I've only tested it against

@@ -30,7 +30,7 @@ swf_add_end(swf_movie * movie, int * error)
 
     temp->serialised = 1;
 
-    swf_dump_shape(movie, error, temp);
+    swf_dump_tag(movie, error, temp);
 
     return;
 }

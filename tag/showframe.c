@@ -7,12 +7,12 @@ swf_add_showframe(swf_movie * movie, int * error)
     temp = swf_make_tagrecord(error, tagShowFrame);
 
     if (*error) {
-	return;
+	    return;
     }
 
     temp->serialised = 1;
 
-    swf_dump_shape(movie, error, temp);
+    swf_dump_tag(movie, error, temp);
 
     return;
 }

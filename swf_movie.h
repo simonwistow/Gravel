@@ -82,7 +82,7 @@ swf_tagrecord * swf_get_raw_shape (swf_parser * swf, int * error);
 swf_tagrecord * swf_get_nth_shape (swf_parser * swf, int * error, int which_shape);
 
 
-void swf_dump_shape (swf_movie * movie, int * error, swf_tagrecord * temp);
+void swf_dump_tag (swf_movie * movie, int * error, swf_tagrecord * temp);
 
 
 
