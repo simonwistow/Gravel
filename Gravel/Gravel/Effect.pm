@@ -36,7 +36,7 @@ sub new {
 
 # start and end refer to start and end frames
 
-sub shape {return (shift)->{_shape};}
+#sub shape {return (shift)->{_shape};}
 sub start {return (shift)->{_start};}
 sub end   {return (shift)->{_end};}
 

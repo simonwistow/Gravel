@@ -13,8 +13,6 @@ use Data::Dumper qw/DumperX/;
 
 my $m = Gravel::Movie->new();
 
-print STDERR DumperX $m;
-
 $m->name('foo.swf');
 $m->size(0, 0, 10000, 10000);
 
@@ -47,7 +45,8 @@ $m->event($a);
 
 $m->make_timeline();
 
-print STDERR DumperX $e;
+#print STDERR DumperX $m;
+#print STDERR DumperX $e;
 
 my $a2 = $m->bake_movie();
 

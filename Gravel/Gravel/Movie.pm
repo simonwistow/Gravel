@@ -150,14 +150,14 @@ sub bake_movie {
 
 	$self->_prepare();
 
-#	print STDERR DumperX $self;
-
 	my $b = Gravel::Movie->_create_baked();
 	$b->_bake_header($self);
 	$b->_bake_preamble($self, 0);
 	$b->_bake_library($self);
 
 	$b->_bake_frames($self);
+
+	print STDERR DumperX $self;
 
 	$b->_bake_end($self);
 	$b->_finalise($self);

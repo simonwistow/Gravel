@@ -50,6 +50,7 @@ sub new {
 
 sub frames {
 	my $self = shift;
+	my $shape = shift;
 	
 	my $ra_f = [];
 
@@ -62,7 +63,7 @@ sub frames {
 	for (my $i = $self->{_start}; $i < $self->{_end}; ++$i) {
 		my $f = Gravel::Frame->new();
 
-		$f->shape($self->shape);
+		$f->shape($shape);
 		$f->place($x, $y);
 
 		$ra_f->[$i] = $f;

@@ -91,7 +91,7 @@ sub end {
 # FIXME: Multiple effects
 sub frames {
 	my $self = shift;
-	return $self->{_effects}->[0]->frames;
+	return $self->{_effects}->[0]->frames($self->{_shape});
 }
 
 #
