@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_destroy.c,v $
+ * Revision 1.18  2001/07/13 00:42:16  clampr
+ * more leak plugginng
+ *
  * Revision 1.17  2001/07/12 23:24:29  clampr
  * fixed a leak found by kmtrace
  *
@@ -151,7 +154,7 @@ swf_destroy_defineshape (swf_defineshape * shape)
     swf_destroy_rect (shape->rect);
     swf_destroy_shapestyle (shape->style);
     swf_destroy_shaperecord_list (shape->record);
-
+    free(shape);
     return;
 }
 
