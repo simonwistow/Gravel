@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.14  2001/06/30 09:55:35  kitty_goth
+ * Synch with Simons mods
+ *
  * Revision 1.13  2001/06/29 15:10:11  muttley
  * The printing of the actual text of a DefineText (and DefineText2 now)
  * is no longer such a big hack. Font information is kept in the swf_parser
@@ -972,13 +975,10 @@ swf_parse_defineshape_aux (swf_parser * context, int * error, int with_alpha)
     context->fill_bits = (U16) swf_parse_get_bits (context, 4);
     context->line_bits = (U16) swf_parse_get_bits (context, 4);
 
-/* todo simon
+/* TODO simon */
     if ((shape->record = swf_parse_get_shaperecords (context,error)) == NULL) {
         goto FAIL;
-
     }
-*/
-
 
     return shape;
 
