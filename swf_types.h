@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.28  2002/05/28 17:12:21  kitty_goth
+ * start doing some lowlevel stuff (I was bored...)
+ *
  * Revision 1.27  2002/05/27 21:58:45  kitty_goth
  * Make tags use the swf_movie function swf_dump_shape
  *
@@ -576,16 +579,19 @@ struct swf_fillstyle {
     SWF_U16 bitmap_id;                /* the id of bitmap used in a bitmap fill */
     swf_matrix * matrix;              /* the transformation matrix for the bitmap */
     swf_rgba_pos ** colours;          /* the colours used in the gradient fill and the positions they're in*/
+	/* FIXME: This is supposed to be a proper colour */
     SWF_U32 colour;                   /* the colour used in the solid fill */
 };
 
 struct swf_linestyle {
     SWF_U16 width;                    /* the width of the line */
+	/* FIXME: This is supposed to be a proper colour */
     SWF_U32 colour;                   /* the colour fo the line */
 };
 
 struct swf_rgba_pos {
-    SWF_U32 rgba;                    /* an rgba value */ /* todo simon : shoudl this be a swf_colour type? */
+	/* FIXME: This is supposed to be a proper colour */
+    SWF_U32 rgba;                    /* an rgba value */ 
     SWF_U8 pos;                      /* the position of the colour */
                                      /* todo simon : I'm not sure, looking at the spec, that this is correct. */
 };

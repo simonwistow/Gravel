@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.21 2002/05/27 23:35:08 kitty_goth Exp $	
+ * 	$Id: swf_movie.c,v 1.22 2002/05/28 17:12:21 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -253,72 +253,6 @@ swf_destroy_movie (swf_movie * movie)
     return;
 }
 
-swf_fillstyle * 
-swf_make_fillstyle(int * error) 
-{
-    swf_fillstyle * mystyle;
-
-    if ((mystyle = (swf_fillstyle *) calloc (1, sizeof (swf_fillstyle))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
-    }
-
-    mystyle->fill_style = 0; /* Just do solid fill for now */
-    mystyle->ncolours = 0; /* Just do solid fill for now */
-    mystyle->bitmap_id = 0; /* Just do solid fill for now */
-    mystyle->matrix = NULL; /* Just do solid fill for now */
-    mystyle->colours = (swf_rgba_pos **) &(mystyle->matrix); /* Just do solid fill for now */
-
-    mystyle->colour = 0; /* Black shape */
-
-    return mystyle;
-}
-
-swf_linestyle * swf_make_linestyle(int * error) {
-    swf_linestyle * mystyle;
-
-    if ((mystyle = (swf_linestyle *) calloc (1, sizeof (swf_linestyle))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
-    }
-
-    mystyle->colour = 0; /* Black shape */
-    mystyle->width = 2; /* Thin lines */
-
-    return mystyle;
-}
-
-
-swf_shaperecord_list * 
-swf_make_shaperecords_for_triangle(int * error) 
-{
-    swf_shaperecord_list * list;
-
-    if ((list = (swf_shaperecord_list *) calloc (1, sizeof (swf_shaperecord_list))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
-    }
-
-    list->record_count = 0;
-
-/* First, we need a non-edge, change of linestyle record, to select a linestyle from our array */ 
-
-/* UB[1] = 0, UB[1] = 0, UB[1] = 1, UB[1] = 0, UB[1] = 0, UB[1] = 0 */
-
-/*    00100000 == 32 == 0x20 */
-
-/* Then we need a non-edge, change of fillstyle record. */ 
-
-/* Then we need three edges */
-
-/* Then we need an end-of-shape edge */
-
-//    list->first) = ;
-
-    *(list->lastp) = NULL;
-
-    return list;
-}
 
 swf_tagrecord *
 swf_get_raw_shape (swf_parser * swf, int * error) 
@@ -456,6 +390,127 @@ swf_get_nth_shape (swf_parser * swf, int * error, int which_shape)
 
 }
 
+/* FIXME: TESTCODE */
+
+swf_fillstyle * 
+swf_make_fillstyle(int * error) 
+{
+    swf_fillstyle * mystyle;
+
+    if ((mystyle = (swf_fillstyle *) calloc (1, sizeof (swf_fillstyle))) == NULL) {
+	*error = SWF_EMallocFailure;
+	return NULL;
+    }
+
+    mystyle->fill_style = 0; /* Just do solid fill for now */
+    mystyle->ncolours = 0; /* Just do solid fill for now */
+    mystyle->bitmap_id = 0; /* Just do solid fill for now */
+    mystyle->matrix = NULL; /* Just do solid fill for now */
+    mystyle->colours = (swf_rgba_pos **) &(mystyle->matrix); /* Just do solid fill for now */
+
+    mystyle->colour = 0; /* Black shape */
+
+    return mystyle;
+}
+
+/* FIXME: TESTCODE */
+
+swf_linestyle * 
+swf_make_linestyle(int * error) 
+{
+    swf_linestyle * mystyle;
+
+    if ((mystyle = (swf_linestyle *) calloc (1, sizeof (swf_linestyle))) == NULL) {
+	*error = SWF_EMallocFailure;
+	return NULL;
+    }
+
+    /* FIXME: This is borken in swf_types.h */
+    mystyle->colour = 0; /* Black lines */
+    mystyle->width = 2 * 20; /* Thin lines, 2 pixels wide */
+
+    return mystyle;
+}
+
+swf_shaperecord *
+swf_make_shaperecord(int * error) 
+{
+    swf_shaperecord * record;
+
+    if ((record = (swf_shaperecord *) calloc (1, sizeof (swf_shaperecord))) == NULL) {
+      *error = SWF_EMallocFailure;
+      return NULL;
+    }
+
+    return record;
+}
+
+// FIXME: Macro-ise this type of function
+void 
+swf_add_shaperecord (swf_shaperecord_list * list, int * error, swf_shaperecord * temp) 
+{
+    *(list->lastp) = temp;
+    list->lastp = &(temp->next);
+}
+
+swf_shaperecord_list * 
+swf_make_shaperecords_for_triangle(int * error) 
+{
+    swf_shaperecord_list * list;
+    swf_shaperecord * record;
+
+    if ((list = (swf_shaperecord_list *) calloc (1, sizeof (swf_shaperecord_list))) == NULL) {
+	*error = SWF_EMallocFailure;
+	return NULL;
+    }
+
+    list->record_count = 0;
+    list->first = NULL;
+    list->lastp = &(list->first);
+
+    /* This list has five records in it */
+
+/* First, we need a non-edge, change of style record */ 
+    record = swf_make_shaperecord(error);
+
+
+
+
+    swf_add_shaperecord(list, error, record);
+
+/* Then we need three edges */
+    record = swf_make_shaperecord(error);
+
+
+
+    swf_add_shaperecord(list, error, record);
+
+    record = swf_make_shaperecord(error);
+
+
+
+
+    swf_add_shaperecord(list, error, record);
+
+    record = swf_make_shaperecord(error);
+
+
+
+
+    swf_add_shaperecord(list, error, record);
+
+/* Then we need an end-of-shape edge */
+    record = swf_make_shaperecord(error);
+
+
+
+
+    swf_add_shaperecord(list, error, record);
+
+    return list;
+}
+
+
 
 /* To make a triangle, we need
    A shaperecord, comprising...
@@ -469,8 +524,9 @@ swf_tagrecord * swf_make_triangle_as_tag(swf_movie * movie, int * error) {
     swf_rect * canvas;
     swf_shapestyle * mystyle;
 
-    if ((triangle = (swf_tagrecord *) calloc (1, sizeof (swf_tagrecord))) == NULL) {
-	*error = SWF_EMallocFailure;
+    triangle = swf_make_tagrecord(error, tagDefineShape);
+
+    if (*error) {
 	return NULL;
     }
 
@@ -491,10 +547,10 @@ swf_tagrecord * swf_make_triangle_as_tag(swf_movie * movie, int * error) {
 
     shape->tagid = ++(movie->max_obj_id);
 
-    canvas->xmin = -20;
-    canvas->xmax = 20;
-    canvas->ymin = -20;
-    canvas->ymax = 20;
+    canvas->xmin = 0 * 20;
+    canvas->xmax = 50 * 20;
+    canvas->ymin = 0 * 20;
+    canvas->ymax = 50 * 20;
 
     shape->rect = canvas;
 
@@ -506,13 +562,7 @@ swf_tagrecord * swf_make_triangle_as_tag(swf_movie * movie, int * error) {
 
     shape->style = mystyle;
 
-/* TODO: implement this shit... */
-
-
     shape->record = swf_make_shaperecords_for_triangle(error);
-
-    triangle->id = tagDefineShape;
-    triangle->next = NULL;
 
     triangle->tag = (void *) shape;
 
