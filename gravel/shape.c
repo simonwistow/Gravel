@@ -25,20 +25,12 @@
 
 #include <stdio.h>
 
-swf_shaperecord_list * 
-gravel_make_shaperecords(int * error) 
+void
+gravel_add_edge(swf_tagrecord* tag, int* error, SV* edge) 
 {
-    swf_shaperecord_list * list;
+	swf_defineshape * shape = (swf_defineshape *) tag;
+    swf_shaperecord_list * list = shape->record;
     swf_shaperecord * record;
-
-    if ((list = (swf_shaperecord_list *) calloc (1, sizeof (swf_shaperecord_list))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
-    }
-
-    list->record_count = 0;
-    list->first = NULL;
-    list->lastp = &(list->first);
 
 /* First, we need a non-edge, change of style record */ 
     record = swf_make_shaperecord(error, 0);
@@ -95,12 +87,12 @@ gravel_make_shaperecords(int * error)
 swf_tagrecord * 
 gravel_create_shape(swf_movie * movie, int * error, SCOORD xmin, SCOORD xmax, SCOORD ymin, SCOORD ymax)
 {
-    swf_tagrecord * tag;
+    swf_tagrecord * tag = swf_make_tagrecord(error, tagDefineShape);
     swf_defineshape * shape;
     swf_rect * canvas;
     swf_shapestyle * mystyle;
+    swf_shaperecord_list * list;
 
-    tag = swf_make_tagrecord(error, tagDefineShape);
 
     if (*error) {
 	  return NULL;
@@ -121,13 +113,14 @@ gravel_create_shape(swf_movie * movie, int * error, SCOORD xmin, SCOORD xmax, SC
     canvas->xmax = xmax;
     canvas->ymin = ymin;
     canvas->ymax = ymax;
+
     shape->rect = canvas;
 
-
+	/* Now set up the styles */
 
     if ((mystyle = (swf_shapestyle *) calloc (1, sizeof (swf_shapestyle))) == NULL) {
-	*error = SWF_EMallocFailure;
-	goto FAIL;
+	  *error = SWF_EMallocFailure;
+	  goto FAIL;
     }
     if ((mystyle->fills = (swf_fillstyle **) calloc (1, sizeof (swf_fillstyle *))) == NULL) {
 	  *error = SWF_EMallocFailure;
@@ -138,10 +131,24 @@ gravel_create_shape(swf_movie * movie, int * error, SCOORD xmin, SCOORD xmax, SC
 	  goto FAIL;
     }
 
-
-
-
 	shape->style = mystyle;
+
+
+	/* Now prep the edge records */
+
+    if ((list = (swf_shaperecord_list *) calloc (1, sizeof (swf_shaperecord_list))) == NULL) {
+	  *error = SWF_EMallocFailure;
+	  return NULL;
+    }
+
+    list->record_count = 0;
+    list->first = NULL;
+    list->lastp = &(list->first);
+
+	shape->record = list;
+
+
+	/* Now save the shape, and return */
 
     tag->tag = (void *) shape;
 

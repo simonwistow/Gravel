@@ -93,6 +93,15 @@ sub name {
 
 #
 
+sub protect {
+	my $self = shift;
+	my $pt = shift;
+	$self->{_protect} = $pt if $pt;
+	return $self->{_protect};
+}
+
+#
+
 sub size {
     my $self = shift;
 
@@ -137,6 +146,7 @@ sub bake_movie {
 
 	my $b = Gravel::Movie->_create_baked();
 	$b->_bake_header($self);
+	$b->_bake_preamble($self, $self->{_protect});
 	$b->_bake_library($self);
 
 
@@ -200,6 +210,20 @@ void _bake_header(SV* obj, SV* self) {
 }
 
 
+void _bake_preamble(SV* obj, SV* self, U32 protect) {
+	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
+	int error = SWF_ENoError;
+	HV* h = (HV *)SvRV(self); 
+
+	// FIXME: Get background colour from self
+    swf_add_setbackgroundcolour(m->movie, &error, 0, 255, 0, 255);
+	if (protect) {
+		swf_add_protect(m->movie, &error);
+	}
+
+}
+
+
 void _bake_library(SV* obj, SV* self) {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
 	int error = SWF_ENoError;
@@ -248,7 +272,15 @@ void _bake_library(SV* obj, SV* self) {
 
 	    temp = gravel_create_shape(m->movie, &error, x1, x2, y1, y2);
 
+		/* Need to calloc a (raw) buffer for temp... */
+		if ((temp->buffer->raw = (SWF_U8 *) calloc (10240, sizeof (SWF_U8))) == NULL) {
+			fprintf (stderr, "Calloc Fail\n");
+			return NULL;
+		}
 
+		swf_serialise_defineshape(temp->buffer, &error, (swf_defineshape *) temp->tag);
+		temp->serialised = 1;
+		swf_dump_shape(m->movie, &error, temp);
 	}
 
 }
@@ -281,25 +313,7 @@ SV* _bake_rest(SV* obj, SV* self) {
 
     error = 0;
 
-    temp = swf_make_triangle(m->movie, &error);
 
-    /* Need to calloc a (raw) buffer for temp... */
-    if ((temp->buffer->raw = (SWF_U8 *) calloc (10240, sizeof (SWF_U8))) == NULL) {
-		fprintf (stderr, "Calloc Fail\n");
-        return NULL;
-    }
-
-	fprintf(stderr, "Foo 4\n");
-
-    swf_serialise_defineshape(temp->buffer, &error, (swf_defineshape *) temp->tag);
-    temp->serialised = 1;
-
-
-	fprintf(stderr, "Foo 5\n");
-
-//    swf_add_protect(movie, &error);
-    swf_add_setbackgroundcolour(m->movie, &error, 0, 255, 0, 255);
-    swf_dump_shape(m->movie, &error, temp);
 
     swf_add_showframe(m->movie, &error);
     swf_add_end(m->movie, &error);

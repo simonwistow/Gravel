@@ -66,7 +66,8 @@ LIB_OBJECTS=	\
 	type/shaperecord.o              \
 	type/tagrecord.o                \
 	type/colour.o           		\
-	shape/triangle.o		
+	shape/triangle.o		\
+	gravel/shape.o		
 
 DLIB_OBJECTS=$(LIB_OBJECTS:.o=.lo)
 ELIB_OBJECTS=lib_swfextract.lo
