@@ -16,6 +16,9 @@
  *
  *
  * $Log: parser.c,v $
+ * Revision 1.15  2001/07/14 22:16:41  clampr
+ * fix up an ugly switch statement
+ *
  * Revision 1.14  2001/07/13 15:55:29  muttley
  * Fix for font chars
  *
@@ -1211,26 +1214,20 @@ parse_soundstreamblock (swf_parser * context, const char * str)
     switch (block->stream_compression)
     {
         case 0:
-        {
             printf("%s  uncompressed samples\n", str);
             break;
-        }
+
         case 1:
-        {
             print_adpcm (block->adpcm, str);
             break;
-        }
-        case 2:
-        {
 
+        case 2:
             printf("%s  MP3: SamplesPerFrame:%d Delay:%d\n", str, block->samples_per_frame, block->delay);
             print_mp3header_list(block->mp3header_list, str);
-        }
     }
 
 
     swf_destroy_soundstreamblock (block);
-    return;
 }
 
 void
