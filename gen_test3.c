@@ -206,7 +206,7 @@ int main (int argc, char *argv[]) {
       swf_add_placeobject(movie, &error, m3, 14, 2);
 
       if (30 == i) {
-	swf_add_doaction(movie, &error, sactionGotoFrame);
+//	swf_add_doaction(movie, &error, sactionGotoFrame);
       }
       if (2 == i) {
 	swf_add_doaction(movie, &error, sactionPlay);
