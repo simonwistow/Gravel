@@ -86,8 +86,12 @@ sub make_timeline {
 sub bake_movie {
     my $self = shift;
 
-	$self->{_baked} = Gravel::Movie->_bake_movie();
-	
+#	$self->{_baked} = Gravel::Movie->_bake_movie();
+
+	my $b = Gravel::Movie->_create_baked();
+	$b->_bake_header($self);
+
+	return $b;
 }
 
 #
@@ -111,27 +115,37 @@ typedef struct {
 } SWF_Movie;
 
 
-void do_header(SV* obj, SV* self) {
-  SWF_Movie* s = (SWF_Movie*)SvIV(SvRV(obj));
+void _bake_header(SV* obj, SV* self) {
+	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
+	int error = SWF_ENoError;
+
+    swf_make_header(m->movie, &error, -4000, 4000, -4000, 4000);
+    m->movie->name = "ben1.swf\0";
+//    m->movie->name = self
+
 }
 
-/*
-SV* create(char* class, char* filename) {
-  SV* obj_ref = newSViv(0);
-  SV*     obj = newSVrv(obj_ref, class);
-  SWF_Movie *s = malloc(sizeof(SWF_Movie));
-  int error = SWF_ENoError;
-  s->movie = swf_parse_create(filename, &error);
 
-  if (error != SWF_ENoError) {
-    die("Error creating SWF parser (correct file name?)\n");
-  }
+SV* _create_baked(char* class) {
+	SV* obj_ref = newSViv(0);
+	SV*     obj = newSVrv(obj_ref, class);
+	SWF_Movie *m;
+	int error = SWF_ENoError;
 
-  sv_setiv(obj, (IV)s);
-  SvREADONLY_on(obj);
-  return obj_ref;
+	if ((m = (SWF_Movie *) calloc (1, sizeof(SWF_Movie))) == NULL) {
+		return NULL;
+	}
+
+	if ((m->movie = swf_make_movie(&error)) == NULL) {
+		return NULL;
+    }
+
+
+	sv_setiv(obj, (IV)m);
+	SvREADONLY_on(obj);
+	return obj_ref;
 }
-*/
+
 
 SV* _bake_movie (char* class) {
 	SV* obj_ref = newSViv(0);
@@ -150,16 +164,10 @@ SV* _bake_movie (char* class) {
 		return NULL;
     }
 
-	fprintf(stderr, "Foo 1\n");
-
     swf_make_header(m->movie, &error, -4000, 4000, -4000, 4000);
     m->movie->name = "ben1.swf\0";
 
-	fprintf(stderr, "Foo 2\n");
-
     temp = swf_make_triangle(m->movie, &error);
-
-	fprintf(stderr, "Foo 3\n");
 
     /* Need to calloc a (raw) buffer for temp... */
     if ((temp->buffer->raw = (SWF_U8 *) calloc (10240, sizeof (SWF_U8))) == NULL) {
@@ -173,6 +181,8 @@ SV* _bake_movie (char* class) {
     temp->serialised = 1;
 
 
+	fprintf(stderr, "Foo 5\n");
+
 //    swf_add_protect(movie, &error);
     swf_add_setbackgroundcolour(m->movie, &error, 0, 255, 0, 255);
     swf_dump_shape(m->movie, &error, temp);
@@ -185,8 +195,27 @@ SV* _bake_movie (char* class) {
     swf_destroy_movie(m->movie);
     swf_free(temp->buffer->raw);
 
+	fprintf(stderr, "Foo 6\n");
 
 	sv_setiv(obj, (IV)m);
 	SvREADONLY_on(obj);
 	return obj_ref;
+}
+
+
+void my_call_method(SV* self, char* method, SV* arg) {
+
+  dSP;
+  ENTER;
+  SAVETMPS;
+
+  PUSHMARK(SP);
+  XPUSHs(self);
+  XPUSHs(arg);
+  PUTBACK;
+
+  call_method(method, G_DISCARD);
+
+  FREETMPS;
+  LEAVE;
 }
