@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.18 2002/05/23 14:45:15 kitty_goth Exp $	
+ * 	$Id: swf_movie.c,v 1.19 2002/05/27 11:56:36 muttley Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -174,6 +174,20 @@ swf_make_tagrecord (int * error, SWF_U16 myid)
     return tag;
 }
 
+/* destroy a tag record */
+void
+swf_destroy_tagrecord (swf_tagrecord * tag)
+{
+	if (tag == NULL)
+	{
+		return;
+	}
+	free (tag->buffer->raw);
+	free (tag->buffer);
+	free (tag->next);
+	free (tag->tag);
+}
+
 
 /* Replace with an array of function pointers */
 
@@ -285,11 +299,28 @@ swf_make_shaperecords_for_triangle(int * error)
     return list;
 }
 
-void 
-swf_get_raw_shape (swf_parser * swf, int * error, swf_tagrecord * mytag) 
+swf_tagrecord *
+swf_get_raw_shape (swf_parser * swf, int * error) 
 {
     SWF_U32 startpos;
     int length;    
+    swf_tagrecord * mytag;
+     
+    
+    if (*error != SWF_ENoError)
+    {
+        fprintf(stderr,"error wasn't reset in get_raw_shape\n");
+     	return NULL;
+    }
+	
+
+    /* attempt to make a new tag record */
+    mytag  = swf_make_tagrecord(error, 0);
+    if (*error != SWF_ENoError)
+    {
+        fprintf(stderr,"couldn't get tag record in raw_shape\n");
+     	return NULL;
+    }
 
     startpos = length = 0;
 
@@ -300,17 +331,17 @@ swf_get_raw_shape (swf_parser * swf, int * error, swf_tagrecord * mytag)
 
     if (mytag->buffer->raw != NULL) {
         fprintf(stderr, "alloc fuckup 1\n");
-	return;
+	goto FAIL;
     }
 
     if ((mytag->buffer = (swf_buffer *) calloc (1, sizeof (swf_buffer))) == NULL) {
 	*error = SWF_EMallocFailure;
-	return;
+	goto FAIL;
     }
 
     if ((mytag->buffer->raw = (SWF_U8 *) calloc (length, sizeof (SWF_U8))) == NULL) {
 	*error = SWF_EMallocFailure;
-	return;
+	goto FAIL;
     }
 
 /* CHECKME: Do we need this ? */
@@ -318,17 +349,39 @@ swf_get_raw_shape (swf_parser * swf, int * error, swf_tagrecord * mytag)
     
     mytag->buffer->raw = swf_parse_get_bytes(swf, length);
     mytag->buffer->size = length;
+
+    return mytag;
+
+    FAIL:
+    swf_destroy_tagrecord(mytag);
+    return NULL;
+
 }
 
 
-void 
-swf_get_nth_shape (swf_parser * swf, int * error, int which_shape, swf_tagrecord * mytag) 
+swf_tagrecord *
+swf_get_nth_shape (swf_parser * swf, int * error, int which_shape) 
 {
 /*
  * Get a raw shape from the define shape frames.
  */
 
+
     int next_id, i, done;
+    swf_tagrecord * temp = NULL;
+	
+
+    /* attempt to make a new tag record */
+    //temp  = swf_make_tagrecord(error, 0);
+    if (*error != SWF_ENoError) 
+    {
+	fprintf(stderr,"error wasn't reset in get_nth_shape\n");
+	return NULL;
+    } 
+    *error = SWF_ENoError;            
+
+
+
 
     i = done = 0;
     
@@ -342,19 +395,25 @@ swf_get_nth_shape (swf_parser * swf, int * error, int which_shape, swf_tagrecord
 
         /* if there's been an error, bug out */
         if (*error != SWF_ENoError) {
-	    return;
+	    goto FAIL;
 	}
 
-/* Use default fall-through, just for perversity */
+        /* Use default fall-through, just for perversity */
 
         switch (next_id) {
 	    case tagDefineShape:
 	    case tagDefineShape2:
 	    case tagDefineShape3:
 		if (i  == which_shape ) {
-		    swf_get_raw_shape(swf, error, mytag);
-		    mytag->id = next_id;
-		    mytag->serialised = TRUE;
+		    temp = swf_get_raw_shape(swf, error);
+
+		    if (temp == NULL || *error != SWF_ENoError)
+		    {
+			goto FAIL;
+		    }
+
+		    temp->id = next_id;
+		    temp->serialised = TRUE;
 		    done = 1;
 		}
 		i++;
@@ -366,8 +425,15 @@ swf_get_nth_shape (swf_parser * swf, int * error, int which_shape, swf_tagrecord
     if (i<=which_shape)
     {
 	*error = SWF_ENoSuchShape;
+	goto FAIL;
     } 
-    return;
+
+    return temp;
+
+    FAIL:
+    swf_destroy_tagrecord(temp);
+    return NULL;
+
 }
 
 
@@ -433,7 +499,7 @@ swf_tagrecord * swf_make_triangle_as_tag(swf_movie * movie, int * error) {
     return triangle;
 
  FAIL:
-    //    swf_destroy_tagrecord(triangle);
+    swf_destroy_tagrecord(triangle);
     *error = SWF_EMallocFailure;
     return NULL;
 }

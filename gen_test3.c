@@ -34,7 +34,7 @@ void usage (char * name);
 void 
 usage (char * name) 
 {
-    fprintf (stderr, "%s <filename>\n", name);
+    fprintf (stderr, "Usage: %s <filename> <object number>\n", name);
 }
 
 
@@ -57,7 +57,7 @@ swf_get_object_id(swf_tagrecord * mytag, int * error)
 
 int main (int argc, char *argv[]) {
     swf_movie * movie;
-    int error = 0;
+    int error = SWF_ENoError;
     int shape_num;
     swf_parser * parser;
     swf_header * hdr;
@@ -68,6 +68,11 @@ int main (int argc, char *argv[]) {
     int i;
     char * myname;
     
+   if (argc<2)
+   {
+	usage(argv[0]);
+	exit (1);
+   }
 
 /* First, get a parser up */
 
@@ -105,18 +110,24 @@ int main (int argc, char *argv[]) {
 
 /* Right, now we need a tagrecord.. */
 
+/*
+    error = SWF_ENoError;
     temp = swf_make_tagrecord(&error, 0);
 
-    if (error) {
+    if (error != SWF_ENoError) {
+	fprintf(stderr,"Error making tag record : %s\n",  swf_error_code_to_string(error));
 	exit(1);
     }
 
     swf_get_nth_shape(parser, &error, shape_num, temp);
+*/
+    temp = swf_get_nth_shape(parser, &error, shape_num);
 
+ 
     if (error == SWF_ENoSuchShape) {
       fprintf(stderr,"No such shape : %d\n",shape_num);
       exit(1);
-    } else if (error != SWF_ENoError) {
+    } else if (error != SWF_ENoError || temp == NULL) {
       fprintf(stderr,"Error getting %dth shape : %s\n", shape_num, swf_error_code_to_string(error));
       exit(1);
     } 

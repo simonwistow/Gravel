@@ -64,8 +64,15 @@ swf_tagrecord * swf_make_tagrecord (int * error, SWF_U16 myid);
 swf_shaperecord_list * swf_make_shaperecords_for_triangle(int * error);
 swf_tagrecord * swf_make_triangle_as_tag(swf_movie * movie, int * error);
 
-void swf_get_nth_shape (swf_parser * swf, int * error, int which_shape, swf_tagrecord * mybuffer);
+
+/*
 void swf_get_raw_shape (swf_parser * swf, int * error, swf_tagrecord * mybuffer);
+void swf_get_nth_shape (swf_parser * swf, int * error, int which_shape, swf_tagrecord * mybuffer); 
+*/
+
+swf_tagrecord * swf_get_raw_shape (swf_parser * swf, int * error);
+swf_tagrecord * swf_get_nth_shape (swf_parser * swf, int * error, int which_shape);
+
 
 void swf_destroy_tagrecord (swf_tagrecord * tagrec);
 

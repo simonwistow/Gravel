@@ -105,6 +105,7 @@ int main (int argc, char *argv[]) {
     /* Right, now we need a tagrecord.. */
 
 
+/*
     temp = swf_make_tagrecord(&error, 0);
 
 
@@ -115,6 +116,8 @@ int main (int argc, char *argv[]) {
     }
 
     swf_get_nth_shape(parser, &error, shape_num, temp);
+*/
+    temp = swf_get_nth_shape(parser, &error, shape_num);
 
 
     if (error == SWF_ENoSuchShape) {
