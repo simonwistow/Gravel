@@ -19,7 +19,7 @@ DATE=$(shell perl -MPOSIX -e 'print POSIX::strftime("%Y-%m-%d", localtime);')
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-all: swf_parse
+all: swf_parse text_extract
 
 debug: swf_parse_debug
 
@@ -68,5 +68,7 @@ zip: $(SOURCES) $(HEADERS) $(MISC)
 	tar -cf - $(SOURCES) $(HEADERS) $(MISC) | gzip > libswfparse-$(DATE).tar.gz
 
 clean:
-	rm *.o *.tar.gz swf_parse text_extract swfparse *~
+	rm -f *.o *.tar.gz swf_parse text_extract swfparse
 
+reallyclean: clean
+	rm -f *~
