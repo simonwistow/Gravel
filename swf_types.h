@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.19  2001/07/12 13:16:28  muttley
+ * Whoops, needed to uncomment the definitions for SCOORD
+ *
  * Revision 1.18  2001/07/12 13:00:47  muttley
  * Use proper, configure generated architecture independant type sizes
  *
@@ -246,10 +249,12 @@ typedef unsigned short SWF_U16, *P_U16, **PP_U16;
 typedef signed short SWF_S16, *P_S16, **PP_S16;
 typedef unsigned char SWF_U8, *P_U8, **PP_U8;
 typedef signed char SWF_S8, *P_S8, **PP_S8;
+*/
+
+#include "swf_sizes.h"
 typedef signed long SFIXED, *P_SFIXED;
 typedef signed long SCOORD, *P_SCOORD;
-*/
-#include "swf_sizes.h"
+
 
 
 
