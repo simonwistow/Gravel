@@ -41,17 +41,15 @@ swf_parse_definesound (swf_parser * context, int * error)
     sound->mp3header_list = NULL;
 
 
-
     switch (sound->compression)
     {
         case 1:
             n_samples_adpcm = 0;
-            /*
-            if ((sound->adpcm = swf_parse_adpcm_decompress(context, error, sound->sample_count, sound->stereo_mono, sound->sample_size, n_samples_adpcm)) == NULL)
+			break;
+			if ((sound->adpcm = swf_parse_adpcm_decompress(context, error, sound->sample_count, sound->stereo_mono, sound->sample_size, n_samples_adpcm)) == NULL)
             {
-                goto FAIL;
+				goto FAIL;
             }
-            */
             break;
 
         case 2:
@@ -74,7 +72,6 @@ swf_parse_definesound (swf_parser * context, int * error)
 void
 swf_destroy_definesound (swf_definesound * sound)
 {
-
     if (sound==NULL) {
         return;
     }

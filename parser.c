@@ -16,6 +16,11 @@
  *
  *
  * $Log: parser.c,v $
+ * Revision 1.17  2001/07/15 16:20:48  clampr
+ * patch around bug in swf_parse_get_mp3headers to stop swf_parse segfaulting
+ *
+ * NOTE: this is not fixing the bug, it's just not failing due to it
+ *
  * Revision 1.16  2001/07/15 14:09:46  clampr
  * slice swf_parse.c and swf_destroy.c into tag/*.c files
  *
@@ -1090,23 +1095,25 @@ parse_definesound (swf_parser * context, const char * str)
 
     switch (sound->compression)
     {
-        case 0:
-        {
-            printf("%s  uncompressed samples\n", str);
-            break;
-        }
-        case 1:
-        {
-            print_adpcm (sound->adpcm, str);
-            break;
-        }
-        case 2:
-        {
+	case 0:
+		printf("%s  uncompressed samples\n", str);
+		break;
 
-            printf("%s  MP3: delay:%d\n", str, sound->delay);
+	case 1:
+		print_adpcm (sound->adpcm, str);
+		break;
+	
+	case 2:
+		printf("%s  MP3: delay:%d\n", str, sound->delay);
+		
+		if (sound->mp3header_list->header_count && !sound->mp3header_list->headers) {
+			printf("%s  BUG! Meant to have %d headers, have none...\n", str, sound->mp3header_list->header_count);
+			return;
+		}
+		else {
             print_mp3header_list (sound->mp3header_list, str);
-            break;
-        }
+		}
+		break;
     }
 
     printf ("\n");
@@ -1226,7 +1233,14 @@ parse_soundstreamblock (swf_parser * context, const char * str)
 
         case 2:
             printf("%s  MP3: SamplesPerFrame:%d Delay:%d\n", str, block->samples_per_frame, block->delay);
-            print_mp3header_list(block->mp3header_list, str);
+		
+			if (block->mp3header_list->header_count && !block->mp3header_list->headers) {
+				printf("%s  BUG! Meant to have %d headers, have none...\n", str, block->mp3header_list->header_count);
+				return;
+			}
+			else {
+				print_mp3header_list (block->mp3header_list, str);
+			}
     }
 
 

@@ -29,6 +29,7 @@ swf_parse_soundstreamblock (swf_parser * context, int * error)
 
     block->mp3header_list = NULL;
     block->adpcm          = NULL;
+	block->stream_compression = context->stream_compression;
 
     switch (context->stream_compression)
     {
@@ -37,16 +38,16 @@ swf_parse_soundstreamblock (swf_parser * context, int * error)
 		block->stream_sample_stereo_mono = context->stream_sample_stereo_mono;
 		block->stream_sample_size        = context->stream_sample_size;
 		block->n_samples_adpcm           = context->n_samples_adpcm = 0;
-		if ((block->adpcm                     = swf_parse_adpcm_decompress(context, error, block->n_stream_samples, block->stream_sample_stereo_mono, block->stream_sample_size, block->n_samples_adpcm)) == NULL)
+		if ((block->adpcm                = swf_parse_adpcm_decompress(context, error, block->n_stream_samples, block->stream_sample_stereo_mono, block->stream_sample_size, block->n_samples_adpcm)) == NULL)
 		{
 			goto FAIL;
 		}
 		break;
 
 	case 2:
-		block->samples_per_frame  = swf_parse_get_word (context);
-		block->delay              = swf_parse_get_word (context);
-		if ((block->mp3header_list     = swf_parse_get_mp3headers (context, error, block->samples_per_frame)) == NULL)
+		block->samples_per_frame   = swf_parse_get_word (context);
+		block->delay               = swf_parse_get_word (context);
+		if ((block->mp3header_list = swf_parse_get_mp3headers (context, error, block->samples_per_frame)) == NULL)
 		{
 			goto FAIL;
 		}
