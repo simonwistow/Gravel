@@ -356,15 +356,17 @@ void _bake_remove(swf_movie * movie, int * error, HV * h_place) {
 		return;
 	}
 
-	p_shape = hv_fetch(h_place, "_shape", 6, 0);	
-	if (NULL != p_shape) {  
-		obj_id = _shape_id(error, *p_shape);
+	p_shape = hv_fetch(h_place, "_contents", 9, 0);	
+	if (NULL == p_shape) {  
+		return;
 	}
+	obj_id = _shape_id(error, *p_shape);
 
 	p_depth = hv_fetch(h_place, "_depth", 6, 0);
-	if (NULL != p_depth) {  
-		depth = (SWF_U16)(SvIV(*p_depth));
+	if (NULL == p_depth) {  
+		return;
 	}
+	depth = (SWF_U16)(SvIV(*p_depth));
 
 	/* Paranoia */
 	*error = 0;

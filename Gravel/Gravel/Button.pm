@@ -123,6 +123,10 @@ void _bake (SV * shape, SV * mov)
 	swf_matrix * mx;
 	SWF_U32 char_id, depth, hit_test, down, over, up, button_id;
 	SV** p_num;
+	swf_tagrecord * temp;
+
+
+    temp = swf_make_tagrecord(error, tagDefineButton);
 
 /*
   The logic here is basically:
@@ -250,6 +254,23 @@ void _bake (SV * shape, SV * mov)
 
         swf_add_buttonrec(button, &error, char_id, mx, depth, hit_test, down, over, up);
     }
+
+	if ((temp->buffer->raw = (SWF_U8 *) calloc (10240, sizeof (SWF_U8))) == NULL) {
+		fprintf (stderr, "Calloc Fail\n");
+		return;
+	}
+
+// FIXME: Button serialisation
+
+	/* Now serialise and dump */
+/*	swf_serialise_definebutton(temp->buffer, &error, (swf_definebutton *) temp->tag);
+	temp->serialised = 1;
+	swf_dump_tag(m->movie, &error, temp);
+	if (SWF_ENoError != error) {
+		fprintf(stderr, "Non-zero error condition 10 detected\n");
+	}
+*/
+
 }
 
 

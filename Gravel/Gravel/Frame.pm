@@ -161,15 +161,17 @@ void _bake (SV * self, SV * mov)
 
 	matrix = _matrix_from_frame(&error, h_place);
 
-	p_shape = hv_fetch(h_place, "_shape", 6, 0);	
-	if (NULL != p_shape) {  
-		obj_id = _shape_id(&error, *p_shape);
+	p_shape = hv_fetch(h_place, "_contents", 9, 0);	
+	if (NULL == p_shape) {  
+		return;
 	}
+	obj_id = _shape_id(&error, *p_shape);
 
 	p_depth = hv_fetch(h_place, "_depth", 6, 0);
-	if (NULL != p_depth) {  
-		depth = (SWF_U16)(SvIV(*p_depth));
+	if (NULL == p_depth) {  
+		return;
 	}
+	depth = (SWF_U16)(SvIV(*p_depth));
 
 	swf_add_placeobject(m->movie, &error, matrix, obj_id, depth);
 
