@@ -90,7 +90,7 @@ init_parser (void) {
 	/* Set all the parse functions to dummy, then 
 	 * just add the ones we actually want...
 	 */
-	for (i=0; i <= 48; i++) {
+	for (i=0; i <= SWF_PARSER_MAX_TAG_ID; i++) {
 		masked[i] = dummy;
 	}
 
@@ -161,7 +161,6 @@ init_parser (void) {
 	masked[tagDefineShape3] = parse[tagDefineShape3];
 
 	return (void *) masked;
-//	return (void *) parse;
 }
 
 

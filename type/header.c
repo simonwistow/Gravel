@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: header.c,v 1.1 2002/05/29 16:40:47 kitty_goth Exp $	
+ * 	$Id: header.c,v 1.2 2002/06/26 20:37:33 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -111,4 +111,20 @@ swf_make_header (swf_movie * movie, int * error, SCOORD x1, SCOORD x2, SCOORD y1
     swf_make_header_raw(movie, error, rect);
 
     return;
+}
+
+void 
+swf_print_header (swf_header * hdr, int * error)
+{
+    printf("FWS\n");
+    printf("File version \t%"pSWF_U32"\n", hdr->version);
+    printf("File size \t%"pSWF_U32"\n", hdr->size);
+    printf("Movie width \t%lu\n", (hdr->bounds->xmax - hdr->bounds->xmin) / 20);
+    printf("Movie height \t%lu\n", (hdr->bounds->ymax - hdr->bounds->ymin) / 20);
+    printf("Xmin: \t%lu\n", (hdr->bounds->xmin / 20));
+    printf("Xmax: \t%lu\n", (hdr->bounds->xmax / 20));
+    printf("Ymin: \t%lu\n", (hdr->bounds->ymin / 20));
+    printf("Ymax: \t%lu\n", (hdr->bounds->ymax / 20));
+    printf("Frame rate \t%"pSWF_U32"\n", hdr->rate);
+    printf("Frame count \t%"pSWF_U32"\n", hdr->count);
 }

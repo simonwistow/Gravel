@@ -58,7 +58,8 @@ swf_destroy_parser (swf_parser * context)
 void
 swf_destroy_buffer (swf_buffer * buffy)
 {
-	if (buffy) { swf_free(buffy->raw); }
+	if (!buffy) { return; }
+	swf_free(buffy->raw); 
 	swf_free(buffy);
 }
 

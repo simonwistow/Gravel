@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.36  2002/06/26 20:37:33  kitty_goth
+ * Initial version of write_through works...
+ *
  * Revision 1.35  2002/06/20 17:02:16  kitty_goth
  * Coloured fills work properly. Got rid of the SWF_U32 nasty representation
  * of colours.
@@ -527,9 +530,9 @@ struct swf_cxform {
     SWF_S16 ab;
 };
 
-/* a transformation matrix */
+/* a transformation "matrix", in fact a general 2d transformation */
 struct swf_matrix {
-    SFIXED a;  /* scale  x */  /* todo simon : check these, possibly rename ? */
+    SFIXED a;  /* scale  x */  
     SFIXED b;  /* scale  y */
     SFIXED c;  /* rotate x */
     SFIXED d;  /* rotate y */

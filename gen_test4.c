@@ -110,9 +110,7 @@ int main (int argc, char *argv[]) {
         return 1;
     }
 
-    printf("foo 1\n");
     swf_serialise_defineshape(temp->buffer, &error, (swf_defineshape *) temp->tag);
-    printf("foo 2\n");
     temp->serialised = 1;
 
 
