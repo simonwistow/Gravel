@@ -16,8 +16,8 @@
  *
  *
  * $Log: parser.c,v $
- * Revision 1.8  2001/06/26 13:43:56  muttley
- * Store info from DefineFont, DefineFontInfo and DefineText to extract text properly
+ * Revision 1.9  2001/06/26 14:39:20  muttley
+ * Make it actually work (forgot to uncomment a line)
  *
  */
 
@@ -805,10 +805,10 @@ parse_definetext (swf_parser * context, const char * str)
 
     printf("%s\tnGlyphBits: nAdvanceBits:\n", str);
 
-    //print_textrecords (text->records, str);
+    print_textrecords (text->records, str);
     printf("\n");
 
-    //swf_destroy_definetext (text);
+    swf_destroy_definetext (text);
 
     return;
 
