@@ -146,7 +146,7 @@ sub bake_movie {
 
 	my $b = Gravel::Movie->_create_baked();
 	$b->_bake_header($self);
-	$b->_bake_preamble($self, $self->{_protect});
+	$b->_bake_preamble($self, 0);
 	$b->_bake_library($self);
 
 
@@ -233,10 +233,16 @@ void _bake_library(SV* obj, SV* self) {
 	AV* lib;
 	SV* shape;
 	HV* h_sh;
-	I32 lib_size, i;
-	swf_tagrecord * temp;
+	I32 lib_size, i, j, num_styles, width;
 	SCOORD x1, x2, y1, y2;
 	SV** p_num;
+	SV** p_sty;
+	SV** ph_sty;
+	SV** p_col;
+	AV* a_sty;
+	HV* h_sty;
+	swf_tagrecord * temp;
+	swf_defineshape * mytag;
 
 	p_lib = hv_fetch(h, "_library", 8, 0);
 	if (NULL != p_lib) {
@@ -249,35 +255,76 @@ void _bake_library(SV* obj, SV* self) {
 			shape = *p_shape;
 		}
 		
-// At this point, we have the shape to be turned 
-// into an unserialised defineShape 
+		/* At this point, we have the shape to be turned 
+		   into an unserialised defineShape */
 	    h_sh = (HV *) SvRV(shape); 
 
-		p_num = hv_fetch(h, "_xmin", 5, 0);
+		p_num = hv_fetch(h_sh, "_xmin", 5, 0);
 		if (NULL != p_num) {
 			x1 = (SCOORD)(SvIV(*p_num));
 		}
-		p_num = hv_fetch(h, "_xmax", 5, 0);
+		p_num = hv_fetch(h_sh, "_xmax", 5, 0);
 		if (NULL != p_num) {
 			x2 = (SCOORD)(SvIV(*p_num));
 		}
-		p_num = hv_fetch(h, "_ymin", 5, 0);
+		p_num = hv_fetch(h_sh, "_ymin", 5, 0);
 		if (NULL != p_num) {
 			y1 = (SCOORD)(SvIV(*p_num));
 		}
-		p_num = hv_fetch(h, "_ymax", 5, 0);
+		p_num = hv_fetch(h_sh, "_ymax", 5, 0);
 		if (NULL != p_num) {
 			y2 = (SCOORD)(SvIV(*p_num));
 		}
 
 	    temp = gravel_create_shape(m->movie, &error, x1, x2, y1, y2);
+		mytag = (swf_defineshape *) temp->tag;
+
+		/* Now populate the line styles */
+		p_sty = hv_fetch(h_sh, "_styles", 7, 0);
+		if (NULL == p_sty) {
+			a_sty = (AV *)SvRV(*p_sty); 
+		
+			num_styles = av_len(a_sty);
+			mytag->style->nlines = num_styles;
+			for (j=0; j<=num_styles; ++j) {
+				mytag->style->lines[j] = swf_make_linestyle(&error);
+			
+				ph_sty = av_fetch(a_sty, i, 0);
+				if (NULL != ph_sty) {
+					h_sty = (HV *)SvRV(*ph_sty); 
+					p_num = hv_fetch(h_sh, "width", 5, 0);
+					if (NULL != p_num) {
+						mytag->style->lines[j]->width = (U16)(SvIV(*p_num));
+					}
+					p_col = hv_fetch(h_sh, "colour", 6, 0);
+					if (NULL != p_col) {
+						mytag->style->lines[j]->col = gravel_parse_colour((char *)(SvPVX(*p_col)));
+					}
+				}
+			}
+		}
+
+
+		/* Now populate the fill styles */
+		p_sty = hv_fetch(h_sh, "_fills", 6, 0);
+		if (NULL != p_sty) {
+			a_sty = (AV *)SvRV(*p_sty); 
+
+			num_styles = av_len(a_sty);
+			mytag->style->nfills = num_styles;
+			for (j=0; j<=num_styles; ++j) {
+				mytag->style->fills[j] = swf_make_gradient_fillstyle(error, 2, fillLinearGradient);
+			}			
+		}
+
 
 		/* Need to calloc a (raw) buffer for temp... */
 		if ((temp->buffer->raw = (SWF_U8 *) calloc (10240, sizeof (SWF_U8))) == NULL) {
 			fprintf (stderr, "Calloc Fail\n");
-			return NULL;
+			return;
 		}
 
+		/* Now serialise and dump */
 		swf_serialise_defineshape(temp->buffer, &error, (swf_defineshape *) temp->tag);
 		temp->serialised = 1;
 		swf_dump_shape(m->movie, &error, temp);

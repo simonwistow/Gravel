@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.40  2003/03/12 17:11:11  kitty_goth
+ * Carry on at home
+ *
  * Revision 1.39  2002/07/06 08:45:29  kitty_goth
  * Fix fills stuff, move test code out of the lower level functions.
  *
@@ -1089,7 +1092,7 @@ struct swf_shaperecord {
 
 	/* For non-edges */
 	/* TODO: New Styles... */
-	/* TODO: MoveTo... */
+	/* TODO: MoveTo... - are these done now ? */
     swf_shapestyle * shapestyle; /* the stle of the shape */
 
 	/* As a UB[4] can be at most 15, this is safe, for now... */
@@ -1102,7 +1105,6 @@ struct swf_shaperecord {
     SWF_S32 x;                   /* dX value, relative to lastY */
     SWF_S32 y;                   /* dY value, relative to lastY */
 
-    /* todo simon : this is extremley b0rked at the moment I think */
 	/* For curved edges */
     SWF_S32 ax;                  /* the x anchor for a curve */
     SWF_S32 ay;                  /* the y anchor for a curve */

@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.37 2002/07/29 16:41:48 kitty_goth Exp $	
+ * 	$Id: swf_movie.c,v 1.38 2003/03/12 17:11:10 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -258,8 +258,8 @@ swf_make_gradient_fillstyle(int * error, SWF_U8 ncols, SWF_U8 type)
     swf_fillstyle * mystyle;
 
     if ((type != fillLinearGradient) && (type != fillRadialGradient) ) {
-	*error = SWF_EIncorrectFillType;
-	return NULL;
+	  *error = SWF_EIncorrectFillType;
+	  return NULL;
     }
     if (ncols > fillMaxGradientColours) {
 	*error = SWF_EIncorrectFillType;
@@ -334,28 +334,19 @@ FAIL:
 }
 
 
-/* FIXME: TESTCODE */
-
 swf_linestyle * 
 swf_make_linestyle(int * error) 
 {
     swf_linestyle * mystyle;
 
     if ((mystyle = (swf_linestyle *) calloc (1, sizeof (swf_linestyle))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
+		*error = SWF_EMallocFailure;
+		return NULL;
     }
     if ((mystyle->col = (swf_colour *) calloc (1, sizeof (swf_colour *))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
+		*error = SWF_EMallocFailure;
+		return NULL;
     }
-
-    mystyle->col->r = 0xff; 
-    mystyle->col->g = 0; 
-    mystyle->col->b = 0; 
-    mystyle->col->a = 0xff; 
-
-    mystyle->width = 6 * 20; /* Thin lines, 2 pixels wide */
 
     return mystyle;
 }
@@ -489,3 +480,12 @@ swf_make_finalise(swf_movie * movie, int * error)
   fclose(movie->file);
   free(file_buf);
 }
+
+
+/* 
+Local Variables:
+mode: C
+c-basic-offset: 4
+tab-width: 4
+End:
+*/

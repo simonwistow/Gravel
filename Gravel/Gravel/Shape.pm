@@ -33,14 +33,14 @@ sub new {
     my %conf;
     
     if ($cf eq 'HASH') {
-	%conf = %{$_[0]};
+		%conf = %{$_[0]};
     } else {
-	%conf = @_;
+		%conf = @_;
     }
 
     $self->{_edges} = [];
     $self->{_vertices} = [];
-    $self->{_styles} = $conf{styles} || {0 => {colour => BLACK, width => 20}};
+    $self->{_styles} = $conf{styles} || [{colour => BLACK, width => 20}];
     $self->{_fills} = $conf{fills} || [{colour => BLACK, type => 'solid'}];
 
     bless $self => $class;
@@ -166,9 +166,9 @@ sub poly {
     $self->vertex($x0, $y0);
     
     while (my $x = shift) {
-	my $y = shift;
+		my $y = shift;
 	
-	$self->line_to($x, $y);
+		$self->line_to($x, $y);
     }
     $self->line_to($x0, $y0);
 

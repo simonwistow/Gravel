@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002  Ben Evans <kitty@cpan.org>
+ * Copyright (C) 2003  Ben Evans <kitty@cpan.org>
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
@@ -26,9 +26,9 @@
 #include <stdio.h>
 
 void
-gravel_add_edge(swf_tagrecord* tag, int* error, SV* edge) 
+gravel_add_style_to_shape(swf_tagrecord* tag, int* error, SWF_U16 fill0, SWF_U16 fill1, SWF_U16 line, SWF_S32 x, SWF_S32 y)
 {
-	swf_defineshape * shape = (swf_defineshape *) tag;
+	swf_defineshape * shape = (swf_defineshape *) tag->tag;
     swf_shaperecord_list * list = shape->record;
     swf_shaperecord * record;
 
@@ -36,47 +36,49 @@ gravel_add_edge(swf_tagrecord* tag, int* error, SV* edge)
     record = swf_make_shaperecord(error, 0);
     record->flags = eflagsFill1 | eflagsMoveTo;
 
-    record->fillstyle0 = 0;
-    record->fillstyle1 = 1;
-    record->linestyle = 1;
+    record->fillstyle0 = fill0;
+    record->fillstyle1 = fill1;
+    record->linestyle = line;
 
-    record->x = 100*20;
-    record->y = 0*20;
+    record->x = x;
+    record->y = y;
 
 
     swf_add_shaperecord(list, error, record);
     list->record_count++;
 
-/* Then we need some edges */
+	return;
+}
 
-    /* */
+void
+gravel_add_line_to_shape(swf_tagrecord* tag, int* error, SWF_S32 x, SWF_S32 y)
+{
+	swf_defineshape * shape = (swf_defineshape *) tag->tag;
+    swf_shaperecord_list * list = shape->record;
+    swf_shaperecord * record;
+
     record = swf_make_shaperecord(error, 1);
-    record->x = 75 * 20;
-    record->y = 20 * 20;
+    record->x = x;
+    record->y = y;
     swf_add_shaperecord(list, error, record);
     list->record_count++;
 
-    /* */
-    record = swf_make_shaperecord(error, 1);
-    record->y = 50 * 20;
-    swf_add_shaperecord(list, error, record);
-    list->record_count++;
-
-    /* */
-    record = swf_make_shaperecord(error, 1);
-    record->x = -75 * 20;
-    record->y = -70 * 20;
-    swf_add_shaperecord(list, error, record);
-    list->record_count++;
+    return;
+}
 
 
+void
+gravel_end_shape(swf_tagrecord* tag, int* error)
+{
+	swf_defineshape * shape = (swf_defineshape *) tag->tag;
+    swf_shaperecord_list * list = shape->record;
+    swf_shaperecord * record;
 
-/* Finally we need an end-of-shape edge */
     record = swf_make_shaperecord(error, 0);
     swf_add_shaperecord(list, error, record);
     list->record_count++;
 
-    return list;
+    return;
 }
 
 
