@@ -16,6 +16,9 @@
  *
  *
  * $Log: print_utils.c,v $
+ * Revision 1.13  2001/07/15 15:50:37  clampr
+ * line deltas a gogo
+ *
  * Revision 1.12  2001/07/13 13:26:55  muttley
  * Added handling for button2actions.
  * We should be able to parse all URLs now
@@ -57,16 +60,12 @@ print_soundstreamhead (swf_soundstreamhead * head, const char * str, int is_head
     }
 
     printf("%stagSoundStreamHead%s: %s %skHz %s-bit %s AverageSamplesPerFrame:%d\n",
-        str, is_head2 ? "2" : "", compression[head->stream_compression], sample_rate[head->stream_sample_rate],
-        sample_size, stereo_mono, head->n_stream_samples);
-
-    return;
-
+		   str, is_head2 ? "2" : "", compression[head->stream_compression], sample_rate[head->stream_sample_rate],
+		   sample_size, stereo_mono, head->n_stream_samples);
 }
 
 void
 print_mp3header_list (swf_mp3header_list * header_list,const char * str) {
-
     int i;
 
     if (header_list==NULL) {
@@ -75,71 +74,51 @@ print_mp3header_list (swf_mp3header_list * header_list,const char * str) {
 
     for (i=0; i<header_list->header_count; i++)
     {
-
-            printf("%s  Frame%d: MPEG%s Layer%d %dHz %s %dbps size:Encoded:%d Decoded:%d\n",
-                str, i+1, swf_MPEG_Ver[header_list->headers[i]->ver], header_list->headers[i]->layer+1, header_list->headers[i]->freq,
-                (header_list->headers[i]->stereo) ? "stereo" : "mono", header_list->headers[i]->rate,
-                header_list->headers[i]->encoded_frame_size, header_list->headers[i]->decoded_frame_size);
+		printf("%s  Frame%d: MPEG%s Layer%d %dHz %s %dbps size:Encoded:%d Decoded:%d\n",
+			   str, i+1, swf_MPEG_Ver[header_list->headers[i]->ver], header_list->headers[i]->layer+1, header_list->headers[i]->freq,
+			   (header_list->headers[i]->stereo) ? "stereo" : "mono", header_list->headers[i]->rate,
+			   header_list->headers[i]->encoded_frame_size, header_list->headers[i]->decoded_frame_size);
     }
-    return;
-
 }
 
 void
 print_adpcm (swf_adpcm * adpcm,const char * str) {
     /* todo simon */
-    return;
-
 }
 
 void
 print_buttonrecords (swf_buttonrecord_list * list,const char * str)
 {
-
     swf_buttonrecord * node;
     int j;
-
 
     if (list==NULL){
         return;
     }
 
-
-
-
-
     node = list->first;
 
     while (node != NULL)
     {
+		printf("%s\tParseButtonRecord: char:%ld layer:%ld ", str, node->character, node->layer);
+
+		if (node->state_hit_test != 0)  printf("HIT ");
+		if (node->state_down != 0)      printf("DOWN ");
+		if (node->state_over != 0)      printf("OVER ");
+		if (node->state_up != 0)        printf("UP ");
+
+		printf("\n");
 
 
-            printf("%s\tParseButtonRecord: char:%ld layer:%ld ", str, node->character, node->layer);
+		print_matrix (node->matrix, str);
+		
+		for (j=0; j<node->ncharacters; j++)
+		{
+			print_cxform(node->characters[j], str);
+		}
 
-
-            if (node->state_hit_test != 0)  printf("HIT ");
-            if (node->state_down != 0)      printf("DOWN ");
-            if (node->state_over != 0)      printf("OVER ");
-            if (node->state_up != 0)        printf("UP ");
-
-
-            printf("\n");
-
-
-            print_matrix (node->matrix, str);
-
-            for (j=0; j<node->ncharacters; j++)
-            {
-
-                    print_cxform(node->characters[j], str);
-
-            }
-
-            node = node->next;
-
+		node = node->next;
     }
-
-    return;
 }
 
 void
@@ -159,388 +138,269 @@ print_doactions (swf_doaction_list * list, const char * str)
         print_doaction (node, str);
         node = node->next;
     }
-
-    return;
-
 }
 
 void
 print_doaction (swf_doaction * action, const char * str)
 {
-
-        INDENT;
-        printf("%saction code 0x%02x ", str, action->code);
-        if (action->code == 0)
-        {
-            /* Action code of zero indicates end of actions */
-            printf("\n");
-            return;
-        }
-
-        switch ( action->code )
-        {
-            case sactionNextFrame:
-            {
-                printf( "gotoNextFrame\n" );
-                break;
-            }
-
-            case sactionPrevFrame:
-            {
-                printf( "gotoPrevFrame\n" );
-                break;
-            }
-
-            case sactionPlay:
-            {
-                printf( "play\n" );
-                break;
-            }
-
-            case sactionStop:
-            {
-                printf( "stop\n" );
-                break;
-            }
-
-            case sactionToggleQuality:
-            {
-                printf( "toggleQuality\n" );
-                break;
-            }
-
-            case sactionStopSounds:
-            {
-                printf( "stopSounds\n" );
-                break;
-            }
-
-            case sactionAdd:
-            {
-                printf( "add\n" );
-                break;
-            }
-
-            case sactionSubtract:
-            {
-                printf( "subtract\n" );
-                break;
-            }
-
-            case sactionMultiply:
-            {
-                printf( "multiply\n" );
-                break;
-            }
-
-            case sactionDivide:
-            {
-                printf( "divide\n" );
-                break;
-            }
-
-            case sactionEqual:
-            {
-                printf( "equal\n" );
-                break;
-            }
-
-            case sactionLessThan:
-            {
-                printf( "lessThan\n" );
-                break;
-            }
-
-            case sactionLogicalAnd:
-            {
-                printf( "logicalAnd\n" );
-                break;
-            }
-
-            case sactionLogicalOr:
-            {
-                printf( "logicalOr\n" );
-                break;
-            }
-
-            case sactionLogicalNot:
-            {
-                printf( "logicalNot\n" );
-                break;
-            }
-
-            case sactionStringEqual:
-            {
-                printf( "stringEqual\n" );
-                break;
-            }
-
-            case sactionStringLength:
-            {
-                printf( "stringLength\n" );
-                break;
-            }
-
-            case sactionSubString:
-            {
-                printf( "subString\n" );
-                break;
-            }
-
-            case sactionInt:
-            {
-                printf( "int\n" );
-                break;
-            }
-
-            case sactionEval:
-            {
-                printf( "eval\n" );
-                break;
-            }
-
-            case sactionSetVariable:
-            {
-                printf( "setVariable\n" );
-                break;
-            }
-
-            case sactionSetTargetExpression:
-            {
-                printf( "setTargetExpression\n" );
-                break;
-            }
-
-            case sactionStringConcat:
-            {
-                printf( "stringConcat\n" );
-                break;
-            }
-
-            case sactionGetProperty:
-            {
-                printf( "getProperty\n" );
-                break;
-            }
-
-            case sactionSetProperty:
-            {
-                printf( "setProperty\n" );
-                break;
-            }
-
-            case sactionDuplicateClip:
-            {
-                printf( "duplicateClip\n" );
-                break;
-            }
-
-            case sactionRemoveClip:
-            {
-                printf( "removeClip\n" );
-                break;
-            }
-
-            case sactionTrace:
-            {
-                printf( "trace\n" );
-                break;
-            }
-
-            case sactionStartDragMovie:
-            {
-                printf( "startDragMovie\n" );
-                break;
-            }
-
-            case sactionStopDragMovie:
-            {
-                printf( "stopDragMovie\n" );
-                break;
-            }
-
-            case sactionStringLessThan:
-            {
-                printf( "stringLessThan\n" );
-                break;
-            }
-
-            case sactionRandom:
-            {
-                printf( "random\n" );
-                break;
-            }
-
-            case sactionMBLength:
-            {
-                printf( "mbLength\n" );
-                break;
-            }
-
-            case sactionOrd:
-            {
-                printf( "ord\n" );
-                break;
-            }
-
-            case sactionChr:
-            {
-                printf( "chr\n" );
-                break;
-            }
-
-            case sactionGetTimer:
-            {
-                printf( "getTimer\n" );
-                break;
-            }
-
-            case sactionMBSubString:
-            {
-                printf( "mbSubString\n" );
-                break;
-            }
-
-            case sactionMBOrd:
-            {
-                printf( "mbOrd\n" );
-                break;
-            }
-
-            case sactionMBChr:
-            {
-                printf( "mbChr\n" );
-                break;
-            }
-
-            case sactionGotoFrame:
-            {
-                printf("gotoFrame %5u\n",action->frame);
-                break;
-            }
-
-            case sactionGetURL:
-            {
-                printf("getUrl %s target %s\n", action->url, action->target);
-                break;
-            }
-
-            case sactionWaitForFrame:
-            {
-                printf("waitForFrame %-5u skipCount %-5u\n", action->frame, action->skip_count);
-                break;
-            }
-
-            case sactionSetTarget:
-            {
-
-                printf("setTarget %s\n", action->target);
-                break;
-            }
-
-            case sactionGotoLabel:
-            {
-                // swfparse used to crash here!
-                printf("gotoLabel %s\n", action->goto_label);
-                break;
-            }
-
-            case sactionWaitForFrameExpression:
-            {
-                printf( "waitForFrameExpression skipCount %-5u\n", action->skip_count );
-                break;
-            }
-
-            case sactionPushData:
-            {
-
-
-                /* property ids are pushed as floats for some reason */
-                if ( action->push_data_type == 1 )
-                {
-                    printf("pushData (float): %08lx %.1f\n", action->push_data_float.dw, action->push_data_float.f);
-                }
-                else
-                if ( action->push_data_type == 0 )
-                {
-                    printf("pushData (string): %s\n", action->push_data_string);
-                }
-                else
-                {
-                    printf( "pushData invalid dataType: %02lx\n", action->push_data_type);
-                }
-
-
-                break;
-            }
-
-            case sactionBranchAlways:
-            {
-
-                printf("branchAlways offset: %-5u\n",action->branch_offset);
-                break;
-            }
-
-            case sactionGetURL2:
-            {
-
-
-                if ( action->url2_flag == 1 )
-                {
-                    printf( "getUrl2 sendvars=GET\n" );
-                }
-                else
-                if ( action->url2_flag == 2 )
-                {
-                    printf( "getUrl2 sendvars=POST\n" );
-                }
-                else
-                {
-                    printf( "getUrl2 sendvars=Don't send\n" );
-                }
-                break;
-            }
-
-            case sactionBranchIfTrue:
-            {
-
-                printf("branchIfTrue offset: %-5u\n", action->branch_offset);
-                break;
-            }
-
-            case sactionCallFrame:
-            {
-                printf( "callFrame\n" );
-                break;
-            }
-
-            case sactionGotoExpression:
-            {
-
-                if ( action->stop_flag == 0 )
-                {
-                    printf("gotoExpression and Stop\n" );
-                }
-                else
-                if ( action->stop_flag == 1 )
-                {
-                    printf("gotoExpression and Play\n" );
-                }
-                else
-                {
-                    printf("gotoExpression invalid stopFlag: %d\n", action->stop_flag );
-                }
-
-                break;
-            }
-
-            default:
-            {
-                printf("UNKNOWN?\n");
-                break;
-            }
-
-       }
+	INDENT;
+	printf("%saction code 0x%02x ", str, action->code);
+	if (action->code == 0)
+	{
+		/* Action code of zero indicates end of actions */
+		printf("\n");
+		return;
+	}
+
+	switch ( action->code )
+	{
+	case sactionNextFrame:
+		printf( "gotoNextFrame\n" );
+		break;
+
+	case sactionPrevFrame:
+		printf( "gotoPrevFrame\n" );
+		break;
+
+	case sactionPlay:
+		printf( "play\n" );
+		break;
+
+	case sactionStop:
+		printf( "stop\n" );
+		break;
+
+	case sactionToggleQuality:
+		printf( "toggleQuality\n" );
+		break;
+
+	case sactionStopSounds:
+		printf( "stopSounds\n" );
+		break;
+
+	case sactionAdd:
+		printf( "add\n" );
+		break;
+
+	case sactionSubtract:
+		printf( "subtract\n" );
+		break;
+
+	case sactionMultiply:
+		printf( "multiply\n" );
+		break;
+		
+	case sactionDivide:
+		printf( "divide\n" );
+		break;
+
+	case sactionEqual:
+		printf( "equal\n" );
+		break;
+
+	case sactionLessThan:
+		printf( "lessThan\n" );
+		break;
+
+	case sactionLogicalAnd:
+		printf( "logicalAnd\n" );
+		break;
+
+	case sactionLogicalOr:
+		printf( "logicalOr\n" );
+		break;
+
+	case sactionLogicalNot:
+		printf( "logicalNot\n" );
+		break;
+
+	case sactionStringEqual:
+		printf( "stringEqual\n" );
+		break;
+
+	case sactionStringLength:
+		printf( "stringLength\n" );
+		break;
+
+	case sactionSubString:
+		printf( "subString\n" );
+		break;
+
+	case sactionInt:
+		printf( "int\n" );
+		break;
+
+	case sactionEval:
+		printf( "eval\n" );
+		break;
+
+	case sactionSetVariable:
+		printf( "setVariable\n" );
+		break;
+
+	case sactionSetTargetExpression:
+		printf( "setTargetExpression\n" );
+		break;
+
+	case sactionStringConcat:
+		printf( "stringConcat\n" );
+		break;
+
+	case sactionGetProperty:
+		printf( "getProperty\n" );
+		break;
+        
+	case sactionSetProperty:
+		printf( "setProperty\n" );
+		break;
+	
+	case sactionDuplicateClip:
+		printf( "duplicateClip\n" );
+		break;
+
+	case sactionRemoveClip:
+		printf( "removeClip\n" );
+		break;
+	
+	case sactionTrace:
+		printf( "trace\n" );
+		break;
+	
+	case sactionStartDragMovie:
+		printf( "startDragMovie\n" );
+		break;
+
+	case sactionStopDragMovie:
+		printf( "stopDragMovie\n" );
+		break;
+
+	case sactionStringLessThan:
+		printf( "stringLessThan\n" );
+		break;
+	
+	case sactionRandom:
+		printf( "random\n" );
+		break;
+	
+	case sactionMBLength:
+		printf( "mbLength\n" );
+		break;
+	
+	case sactionOrd:
+		printf( "ord\n" );
+		break;
+
+	case sactionChr:
+		printf( "chr\n" );
+		break;
+
+	case sactionGetTimer:
+		printf( "getTimer\n" );
+		break;
+
+	case sactionMBSubString:
+		printf( "mbSubString\n" );
+		break;
+
+	case sactionMBOrd:
+		printf( "mbOrd\n" );
+		break;
+
+	case sactionMBChr:
+		printf( "mbChr\n" );
+		break;
+
+	case sactionGotoFrame:
+		printf("gotoFrame %5u\n",action->frame);
+		break;
+
+	case sactionGetURL:
+		printf("getUrl %s target %s\n", action->url, action->target);
+		break;
+
+	case sactionWaitForFrame:
+		printf("waitForFrame %-5u skipCount %-5u\n", action->frame, action->skip_count);
+		break;
+
+	case sactionSetTarget:
+		printf("setTarget %s\n", action->target);
+		break;
+
+	case sactionGotoLabel:
+		// swfparse used to crash here!
+		printf("gotoLabel %s\n", action->goto_label);
+		break;
+
+	case sactionWaitForFrameExpression:
+		printf( "waitForFrameExpression skipCount %-5u\n", action->skip_count );
+		break;
+
+	case sactionPushData:
+		/* property ids are pushed as floats for some reason */
+		if ( action->push_data_type == 1 )
+		{
+			printf("pushData (float): %08lx %.1f\n", action->push_data_float.dw, action->push_data_float.f);
+		}
+		else
+			if ( action->push_data_type == 0 )
+			{
+				printf("pushData (string): %s\n", action->push_data_string);
+			}
+			else
+			{
+				printf( "pushData invalid dataType: %02lx\n", action->push_data_type);
+			}
+		break;
+
+	case sactionBranchAlways:
+		printf("branchAlways offset: %-5u\n",action->branch_offset);
+		break;
+
+	case sactionGetURL2:
+		if ( action->url2_flag == 1 )
+		{
+			printf( "getUrl2 sendvars=GET\n" );
+		}
+		else
+			if ( action->url2_flag == 2 )
+			{
+				printf( "getUrl2 sendvars=POST\n" );
+			}
+			else
+			{
+				printf( "getUrl2 sendvars=Don't send\n" );
+			}
+		break;
+
+	case sactionBranchIfTrue:
+		printf("branchIfTrue offset: %-5u\n", action->branch_offset);
+		break;
+
+	case sactionCallFrame:
+		printf( "callFrame\n" );
+		break;
+
+	case sactionGotoExpression:
+		if ( action->stop_flag == 0 )
+		{
+			printf("gotoExpression and Stop\n" );
+		}
+		else
+			if ( action->stop_flag == 1 )
+			{
+				printf("gotoExpression and Play\n" );
+			}
+			else
+			{
+				printf("gotoExpression invalid stopFlag: %d\n", action->stop_flag );
+			}
+		break;
+
+
+	default:
+		printf("UNKNOWN?\n");
+		break;
+	}
 
 }
 
@@ -561,8 +421,6 @@ print_button2actions (swf_button2action_list * list,const char * str)
         print_button2action (node, str);
         node = node->next;
     }
-
-	return;
 }
 
 void
@@ -570,7 +428,6 @@ print_button2action (swf_button2action * action, const char * str)
 {
      printf("%sCondition: %04lx\n", str, action->condition);
      print_doactions (action->doactions, str);
-
 }
 
 
@@ -578,7 +435,6 @@ print_button2action (swf_button2action * action, const char * str)
 void
 print_textrecord (swf_textrecord * node, const char * str)
 {
-
     int g;
 
     printf("\n%s\tflags: 0x%02x\n", str, node->flags);
@@ -613,9 +469,7 @@ print_textrecord (swf_textrecord * node, const char * str)
     }
     else
     {
-
         printf("%s\tnumber of glyphs: %d\n", str, node->glyph_count);
-
 
         printf("%s\t", str);
 
@@ -623,12 +477,7 @@ print_textrecord (swf_textrecord * node, const char * str)
         {
             printf("[%d,%d] ", node->glyphs[g][0], node->glyphs[g][1]);
         }
-
-
     }
-
-
-
 }
 
 
@@ -642,26 +491,21 @@ print_textrecords (swf_textrecord_list * list, const char * str, swf_parser * co
     int error = SWF_ENoError;
     char * text = NULL;
 
-
     text = swf_parse_textrecords_to_text(context, &error, list);
-
 
     node = list->first;
 
     while (node != NULL)
     {
-
         tmp = node;
         node = node->next;
         print_textrecord (tmp, str);
     }
 
-
     if (text!=NULL) {
         printf ("%s\ttext representation : %s\n", str, text);
     }
     free (text);
-    return;
 }
 
 void
@@ -675,20 +519,13 @@ print_rect (swf_rect * rect,const char * str)
           (double) rect->xmin / 20.0, (double)rect->ymin / 20.0,
           (double)(rect->xmax - rect->xmin) / 20.0,
           (double)(rect->ymax - rect->ymin) / 20.0);
-
-
-    return;
-
 }
 
 
 void
 print_imageguts (swf_imageguts * guts,const char * str)
 {
-
     SWF_U32 nbytes   = 0;
-
-
 
     INDENT;
     printf("%s----- dumping image details -----", str);
@@ -731,7 +568,6 @@ print_startsound (swf_startsound * sound,const char * str)
     }
 
 
-
     INDENT;
     printf("%scode %-3lu", str, sound->code);
 
@@ -756,10 +592,6 @@ print_startsound (swf_startsound * sound,const char * str)
             printf("\n");
         }
     }
-
-
-    return;
-
 }
 
 void
@@ -776,8 +608,6 @@ print_shapestyle (swf_shapestyle * style,const char * str)
     /* Get each of the fill style. */
     for (i = 0; i < style->nfills; i++)
     {
-
-
         if (style->fills[i]->fill_style & fillGradient)
         {
 
@@ -812,16 +642,12 @@ print_shapestyle (swf_shapestyle * style,const char * str)
     {
         printf("%s\tLine style %-5u width %g color RGB_HEX %06lx\n", str, i+1, (double)style->lines[i]->width/20.0, style->lines[i]->colour);
     }
-
-
-    return;
 }
 
 void
 print_shaperecords (swf_shaperecord_list * record,const char * str)
 {
     //todo
-    return;
 }
 
 
@@ -837,8 +663,6 @@ print_cxform (swf_cxform * cxform,const char * str)
     printf("%sRed:    mul:%04u  add:%04u\n", str, cxform->ra, cxform->rb);
     printf("%sGreen:  mul:%04u  add:%04u\n", str, cxform->ga, cxform->gb);
     printf("%sBlue:   mul:%04u  add:%04u\n", str, cxform->ba, cxform->bb);
-
-    return;
 }
 
 
@@ -851,11 +675,17 @@ print_matrix (swf_matrix * matrix,const char * str)
     printf("%s\t[%5.3f   %5.3f]\n", str,  (double)matrix->a/65536.0, (double)matrix->b/65536.0);
     printf("%s\t[%5.3f   %5.3f]\n", str,  (double)matrix->c/65536.0, (double)matrix->d/65536.0);
     printf("%s\t[%5.3f   %5.3f]\n", str,  (double)matrix->tx/20.0,   (double)matrix->ty/20.0);
-
-    return;
-
 }
 
+
+
+/* 
+Local Variables:
+mode: C
+c-basic-offset: 4
+tab-width: 4
+End:
+*/
 
 
 
