@@ -12,8 +12,9 @@ DEBUG = -DDEBUG -g
 
 #other stuff
 LIB_OBJECTS=swf_parse.lo swf_destroy.lo swf_error.lo swf_tags.lo
+ELIB_OBJECTS=lib_swfextract.lo
 OBJECTS=parser.o print_utils.o
-TEXT_OBJECTS=text_extract.o lib_swfextract.o
+TEXT_OBJECTS=text_extract.o
 D_LIB_OBJECTS=swf_parse.do swf_destroy.do swf_error.do swf_tags.do
 D_OBJECTS=parser.do print_utils.do
 D_TEXT_OBJECTS=text_extract.do lib_swfextract.do
@@ -44,11 +45,14 @@ debug: swf_parse_debug text_extract_debug
 libswfparse.la: $(LIB_OBJECTS)
 	$(LIBTOOL) $(CC) $(CFLAGS) -o libswfparse.la $(LIB_OBJECTS) -rpath $(LIB_PATH)
 
+libswfextract.la: $(ELIB_OBJECTS)
+	$(LIBTOOL) $(CC) $(CFLAGS) -o libswfextract.la $(ELIB_OBJECTS) -lswfparse -rpath $(LIB_PATH)
+
 swf_parse: libswfparse.la $(OBJECTS)
 	$(LIBTOOL) $(CC) $(CFLAGS) -o swf_parse $(OBJECTS) libswfparse.la
 
-text_extract: libswfparse.la $(TEXT_OBJECTS)
-	$(LIBTOOL) $(CC) $(CFLAGS) -o text_extract $(TEXT_OBJECTS) libswfparse.la
+text_extract: libswfextract.la $(TEXT_OBJECTS)
+	$(LIBTOOL) $(CC) $(CFLAGS) -o text_extract $(TEXT_OBJECTS) libswfextract.la
 
 swf_parse_debug: $(D_LIB_OBJECTS) $(D_OBJECTS)
 	$(CC) $(CFLAGS) -I . $(DEBUG) -o swf_parse_debug $(D_LIB_OBJECTS) $(D_OBJECTS)
@@ -79,7 +83,7 @@ install: all
 	$(INSTALL) -c swf_parse.h   $(INC_PATH)
 	$(INSTALL) -c swf_error.h   $(INC_PATH)
 	$(INSTALL) -c swf_destroy.h $(INC_PATH)
-
+	$(LIBTOOL) $(INSTALL) -c libswfextract.la $(LIB_PATH)
 	$(LIBTOOL) $(INSTALL) -c libswfparse.la $(LIB_PATH)
 	$(LIBTOOL) $(INSTALL) -c swf_parse $(BIN_PATH)
 	$(LIBTOOL) $(INSTALL) -c text_extract $(BIN_PATH)
