@@ -47,12 +47,23 @@ int main (int argc, char *argv[]) {
     swf_make_header(movie, &error, -4000, 4000, -4000, 4000);
     movie->name = "ben1.swf\0";
 
-
     temp = swf_make_triangle(movie, &error);
+
+    /* Need to calloc a (raw) buffer for temp... */
+    if ((temp->buffer->raw = (SWF_U8 *) calloc (10240, sizeof (SWF_U8))) == NULL) {
+	fprintf (stderr, "Calloc Fail\n");
+        return 1;
+    }
+
+
+    printf("foo 1\n");
+    swf_serialise_defineshape(temp->buffer, &error, (swf_defineshape *) temp->tag);
+    printf("foo 2\n");
+    temp->serialised = 1;
 
     swf_add_protect(movie, &error);
     swf_add_setbackgroundcolour(movie, &error, 0, 255, 0, 255);
-    //    swf_dump_shape(movie, &error, temp);
+    swf_dump_shape(movie, &error, temp);
 
     swf_add_showframe(movie, &error);
     swf_add_end(movie, &error);
@@ -60,6 +71,8 @@ int main (int argc, char *argv[]) {
     swf_make_finalise(movie, &error);
 
     swf_destroy_movie(movie);
+    swf_free(temp->buffer->raw);
+
 
     fprintf (stderr, "OK\n");
     return 0;

@@ -16,6 +16,10 @@
  *
  *
  * $Log: print_utils.c,v $
+ * Revision 1.16  2002/06/07 17:18:00  kitty_goth
+ * Well, it is *producing* a defineShape - it's just a bit mangled.
+ * We need to move away from icky SWF_U32 pretending to be colours
+ *
  * Revision 1.15  2002/05/09 15:26:55  clampr
  * More stealing from perl, now we have pSWF_* macros which are the printf
  * formats for out internal data types.
@@ -609,23 +613,21 @@ print_shapestyle (swf_shapestyle * style,const char * str)
     SWF_U16 i = 0, j = 0;
 
     if (style==NULL) {
+		printf("Bad style, man\n");
         return;
     }
 
     printf("%s\tNumber of fill styles \t%u\n", str, style->nfills);
 
     /* Get each of the fill style. */
-    for (i = 0; i < style->nfills; i++)
-    {
-        if (style->fills[i]->fill_style & fillGradient)
-        {
+    for (i = 0; i < style->nfills; i++) {
+        if (style->fills[i]->fill_style & fillGradient) {
 
             /* Get the number of colors. */
             printf("%s\tGradient Fill with %u colors\n", str, style->fills[i]->ncolours);
 
             /* Get each of the colors. */
-            for (j = 0; j < style->fills[i]->ncolours; j++)
-            {
+            for (j = 0; j < style->fills[i]->ncolours; j++) {
                 printf("%s\tcolor:%d: at:%d  RGBA:%08"pSWF_U32"x\n", str, j, style->fills[i]->colours[j]->pos, style->fills[i]->colours[j]->rgba);
             }
             printf("%s\tGradient Matrix:\n", str);
@@ -647,8 +649,7 @@ print_shapestyle (swf_shapestyle * style,const char * str)
     printf("%s\tNumber of line styles \t%u\n", str, style->nlines);
 
     /* Get each of the line styles. */
-    for (i = 0; i < style->nlines; i++)
-    {
+    for (i = 0; i < style->nlines && style->lines[i] != NULL; i++) {
         printf("%s\tLine style %-5u width %g color RGB_HEX %06"pSWF_U32"x\n", 
 			   str, i+1, (double)style->lines[i]->width/20.0, style->lines[i]->colour);
     }

@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: tagrecord.c,v 1.2 2002/06/03 22:28:35 kitty_goth Exp $	
+ * 	$Id: tagrecord.c,v 1.3 2002/06/07 17:18:01 kitty_goth Exp $	
  */
 
 #include <stdlib.h>
@@ -60,7 +60,7 @@ swf_destroy_tagrecord (swf_tagrecord * tag)
     return;
   }
   tag->next = NULL;
-  
+
   /* We don't want to free the next tag. It's probably still valid */
   /* Neither do we want to zap tag->tag - that should be taken care
      of by specialised cleanup, that knows what type it is */

@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.27 2002/06/07 13:53:45 kitty_goth Exp $	
+ * 	$Id: swf_movie.c,v 1.28 2002/06/07 17:18:01 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -84,6 +84,7 @@ swf_destroy_movie (swf_movie * movie)
     node = movie->first;
 
     while (node != NULL) {
+
         tmp = node;
         node = node->next;
 
@@ -93,7 +94,6 @@ swf_destroy_movie (swf_movie * movie)
 	if (shiva[tagid]) {
 	  shiva[tagid](tagrec);
 	}
-
 	swf_destroy_tagrecord(tmp);
     }
 
@@ -238,9 +238,13 @@ swf_make_fillstyle(int * error)
 	*error = SWF_EMallocFailure;
 	return NULL;
     }
+    if ((mystyle->colours = (swf_rgba_pos **) calloc (1, sizeof (swf_rgba_pos *))) == NULL) {
+	*error = SWF_EMallocFailure;
+	return NULL;
+    }
 
     mystyle->fill_style = 0; /* Just do solid fill for now */
-    mystyle->ncolours = 0; /* Just do solid fill for now */
+    mystyle->ncolours = 1; /* Just do solid fill for now */
     mystyle->bitmap_id = 0; /* Just do solid fill for now */
     mystyle->matrix = NULL; /* Just do solid fill for now */
     mystyle->colours = (swf_rgba_pos **) &(mystyle->matrix); /* Just do solid fill for now */
@@ -320,8 +324,10 @@ swf_make_shaperecords_for_triangle(int * error)
 
 /* First, we need a non-edge, change of style record */ 
     record = swf_make_shaperecord(error, 0);
-
-
+    record->flags = eflagsFill0 | eflagsFill1 | eflagsLine;
+    record->fillstyle0 = 0;
+    record->fillstyle1 = 0;
+    record->linestyle = 0;
 
 
     swf_add_shaperecord(list, error, record);
@@ -394,6 +400,16 @@ swf_make_triangle(swf_movie * movie, int * error)
 	*error = SWF_EMallocFailure;
 	goto FAIL;
     }
+    if ((mystyle->fills = (swf_fillstyle **) calloc (1, sizeof (swf_fillstyle *))) == NULL) {
+	*error = SWF_EMallocFailure;
+	goto FAIL;
+    }
+    if ((mystyle->lines = (swf_linestyle **) calloc (1, sizeof (swf_linestyle *))) == NULL) {
+	*error = SWF_EMallocFailure;
+	goto FAIL;
+    }
+
+
 
     shape->tagid = ++(movie->max_obj_id);
 

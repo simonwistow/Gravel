@@ -159,7 +159,11 @@ swf_buffer_shapestyle(swf_buffer * buffer, int * error, swf_shapestyle * s)
 			fprintf(stderr, "Warning! Unsupported fill type...\n");
 		} else {
 			/* Solid Fill */
-			swf_serialise_cxform(buffer, error, s->fills[i]->colour);
+			/* Test code */
+			swf_buffer_put_dword(buffer, error, 0);
+
+			/* FIXME: The code uses SWF_U32 instead of a colour type for fillstyle->colour atm */
+			//			swf_serialise_cxform(buffer, error, s->fills[i]->colour);
 		}
 	}
 
@@ -172,27 +176,17 @@ swf_buffer_shapestyle(swf_buffer * buffer, int * error, swf_shapestyle * s)
 	/* FIXME: Alpha channels... */
 	for (i=0; i < s->nlines; i++) {
 		swf_buffer_put_word (buffer, error, s->lines[i]->width);
-		swf_serialise_cxform(buffer, error, s->lines[i]->colour);
+			/* Test code */
+			swf_buffer_put_dword(buffer, error, 0);
+
+			/* FIXME: The code uses SWF_U32 instead of a colour type for fillstyle->colour atm */
+			//		swf_serialise_cxform(buffer, error, s->lines[i]->colour);
 	}
 
+	swf_buffer_put_bits(buffer, 4, s->fillbits);
+	swf_buffer_put_bits(buffer, 4, s->linebits);
 
-	i = 1; /* The nbits is a UB value, so i = 1 here*/
-	max = s->nfills;
-	while (1 < max) {
-		i++;
-		max = max >> 1;
-	}
-	swf_buffer_put_bits(buffer, 4, i);
-
-	i = 1; /* The nbits is a UB value, so i = 1 here*/
-	max = s->nlines;
-	while (1 < max) {
-		i++;
-		max = max >> 1;
-	}
-	swf_buffer_put_bits(buffer, 4, i);
 	swf_buffer_flush_bits(buffer);
-
 }
 
 /*
@@ -220,7 +214,7 @@ swf_destroy_shapestyle (swf_shapestyle * style)
        swf_free (style->lines[i]);
     }
 
-    swf_free (style->lines);
+	swf_free (style->lines);
 
     for (i=0; i<style->nfills && style->fills[i] != NULL; i++) {
         swf_destroy_fillstyle (style->fills[i]);

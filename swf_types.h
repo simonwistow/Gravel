@@ -16,6 +16,10 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.33  2002/06/07 17:18:01  kitty_goth
+ * Well, it is *producing* a defineShape - it's just a bit mangled.
+ * We need to move away from icky SWF_U32 pretending to be colours
+ *
  * Revision 1.32  2002/06/07 13:53:45  kitty_goth
  * More progress towards defineShape type stuff
  *
@@ -578,10 +582,12 @@ struct swf_defineshape {
 
 struct swf_shapestyle {
     SWF_U16 nfills;                  /* the number of fills it has */
-    swf_fillstyle ** fills;          /* the styles of thos fills */
+    swf_fillstyle ** fills;          /* the styles of those fills */
+    SWF_U8 fillbits;                 /* the number of fills it has */
 
     SWF_U16 nlines;                  /* the number of lines it has */
     swf_linestyle ** lines;          /* the style of those lines */
+    SWF_U8 linebits;                 /* the number of fills it has */
 };
 
 struct swf_fillstyle {
@@ -595,6 +601,7 @@ struct swf_fillstyle {
     SWF_U16 bitmap_id;                /* the id of bitmap used in a bitmap fill */
     swf_matrix * matrix;              /* the transformation matrix for the bitmap */
     swf_rgba_pos ** colours;          /* the colours used in the gradient fill and the positions they're in*/
+
 	/* FIXME: This is supposed to be a proper colour */
     SWF_U32 colour;                   /* the colour used in the solid fill */
 };

@@ -481,6 +481,8 @@ parse_defineshape_aux (swf_parser * context, int with_alpha, const char * str)
     printf("%stagDefineShape \ttagid %-5"pSWF_U32"\n", str, shape->tagid);
 
     print_shapestyle (shape->style, str);
+	/* TODO */
+    print_shaperecords (shape->record, str);
 
     swf_destroy_defineshape (shape);
 }
