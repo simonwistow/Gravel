@@ -16,6 +16,9 @@
  *
  *
  * $Log: lib_swfextract.c,v $
+ * Revision 1.14  2001/07/16 00:02:37  clampr
+ * pointer big
+ *
  * Revision 1.13  2001/07/15 23:07:20  clampr
  * gargh, make a null pointer?
  *
@@ -256,10 +259,7 @@ get_text (swf_extractor * swf, int * error)
         /* get the next id */
         next_id = swf_parse_nextid(swf->parser, error);
         /* if there's been an error, bug out */
-        if (error != SWF_ENoError)
-        {
-	        return;
-        }
+        if (*error != SWF_ENoError) return;
 
         #ifdef DEBUG
         fprintf (stderr, "[get_text : next_id is %s]\n", swf_tag_to_string(next_id));
@@ -304,14 +304,7 @@ get_text (swf_extractor * swf, int * error)
 			parse_definefontinfo (swf, error);
 			break;
         }
-
-        /* if there's been an error, bug out */
-        if (error != SWF_ENoError)
-        {
-	        return;
-        }
-
-    } while (next_id != 0);
+    } while ((!*error) && next_id);
 
     #ifdef DEBUG
     fprintf (stderr, "[get_text: finished parsing ]\n");
@@ -566,7 +559,7 @@ parse_definebutton2 (swf_extractor * swf, int * error)
 void
 parse_definefont  (swf_extractor * swf, int * error)
 {
-	swf_definefont * font = swf_parse_definefont (swf->parser, error);
+	swf_definefont * font = swf_parse_definefont(swf->parser, error);
 
 	if (font == NULL || error != SWF_ENoError)
 	{
@@ -581,7 +574,7 @@ parse_definefont  (swf_extractor * swf, int * error)
 void
 parse_definefont2 (swf_extractor * swf, int * error)
 {
-    swf_definefont2 * font = swf_parse_definefont2 (swf->parser, error);
+    swf_definefont2 * font = swf_parse_definefont2(swf->parser, error);
 
     if (font == NULL || error != SWF_ENoError)
     {
@@ -595,8 +588,7 @@ void
 parse_definefontinfo (swf_extractor * swf, int * error)
 {
 
-	swf_definefontinfo * info = swf_parse_definefontinfo (swf->parser, error);
-
+	swf_definefontinfo * info = swf_parse_definefontinfo(swf->parser, error);
 
 	if (info == NULL || error != SWF_ENoError)
 	{
@@ -605,8 +597,6 @@ parse_definefontinfo (swf_extractor * swf, int * error)
 
 
     swf_destroy_definefontinfo (info);
-
-
 }
 
 
@@ -618,7 +608,6 @@ add_string (swf_extractor * swf, int * error, char * string)
     #endif
 
     add_text (error, &swf->strings, &swf->num_strings, &current_max_strings, string);
-
 }
 
 
