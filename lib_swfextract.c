@@ -16,6 +16,9 @@
  *
  *
  * $Log: lib_swfextract.c,v $
+ * Revision 1.22  2002/05/09 01:12:02  clampr
+ * valgrind found a leak
+ *
  * Revision 1.21  2001/07/20 01:50:03  clampr
  * handy.h - bringing dprintf to reduce the amount of code
  *
@@ -102,6 +105,7 @@ int current_max_urls    = 0;
 swf_extractor *
 load_swf (char * file, int * error)
 {
+    swf_header *header;	
     swf_extractor * swf;
     #ifdef DEBUG
     int i;
@@ -136,11 +140,12 @@ load_swf (char * file, int * error)
     dprintf("[load_swf : parsing headers]\n");
 
     /* check the headers */
-    (void) swf_parse_header(swf->parser, error);
+    header = swf_parse_header(swf->parser, error);
     if (*error!=0)
     {
         goto FAIL;
     }
+    swf_destroy_header(header);
 
     dprintf("[load_swf : getting text]\n");
 
