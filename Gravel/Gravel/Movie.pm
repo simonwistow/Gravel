@@ -273,57 +273,29 @@ void _bake_preamble(SV* obj, SV* self, U32 protect) {
 	swf_free(col);
 }
 
-void _bake_button(int * error, swf_definebutton * tag, HV * h_sh)
-{
-	
-
-}
-
 void _bake_library(SV* obj, SV* self) 
 {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
 	int error = SWF_ENoError;
 	HV* h = (HV *)SvRV(self); 
+
 	SV** p_lib;
 	SV** p_shape;
 	AV* lib;
-	HV* h_sh;
 	I32 lib_size, i;
-	SV** p_num;
-
-	SV** p_butt;
-	SWF_U8 button;
-    swf_tagrecord * tmp;
-	swf_definebutton * tmp_tag;
 
 	p_lib = hv_fetch(h, "_library", 8, 0);
-	if (NULL != p_lib) {
-		lib = (AV *)SvRV(*p_lib);
+	if (NULL == p_lib) {
+		return;
 	}
+	lib = (AV *)SvRV(*p_lib);
 	lib_size = av_len(lib);
 	for (i=0; i<=lib_size; ++i) {
 		p_shape = av_fetch(lib, i, 0);
-		if (NULL != p_shape) {
-			_call_bake_method(*p_shape, "_bake", obj);
+		if (NULL == p_shape) {
+			return;
 		}
-
-/*		p_butt = hv_fetch(h_sh, "_is_button", 10, 0);
-		if (NULL != p_butt) {
-			button = (SWF_U8)(SvIV(*p_butt));
-			if (button) {
-				tmp = swf_make_tagrecord(&error, tagDefineButton);
-				tmp_tag = (swf_definebutton *) tmp->tag;
-				_bake_button(&error, tmp_tag, h_sh);
-				swf_serialise_definebutton(tmp->buffer, &error, tmp_tag);
-				tmp->serialised = 1;
-				swf_dump_shape(m->movie, &error, tmp);
-				if (SWF_ENoError != error) {
-					fprintf(stderr, "Non-zero error condition 10a detected\n");
-				}
-			}
-		}
-*/
-		
+		_call_foreign_method(*p_shape, "_bake", obj);
 	}
 }
 
@@ -462,6 +434,8 @@ void _bake_place(swf_movie * movie, int * error, HV * h_place) {
 	return;
 }
 
+/* FIXME: Do this properly... */
+
 void _bake_contents(SV * shape, int * error, SV * obj) {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
 
@@ -571,30 +545,6 @@ void _bake_frames(SV* obj, SV* self) {
 	return;
 }
 
-void _bake_test(SV* obj, SV* self) {
-	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
-	int error = SWF_ENoError;
-	swf_matrix * matrix;
-
-//    error = 0;
-
-    if ((matrix = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
-		error = SWF_EMallocFailure;
-		return;
-    }
-
-/* FIXME: Do object IDs properly */
-
-/* FIXME: Test matrix */
-    matrix->a  = matrix->d  = 512 * 1000;
-	matrix->tx = matrix->ty = 100 * 20;
-
-	swf_add_placeobject(m->movie, &error, matrix, 1, 1);
-    swf_add_showframe(m->movie, &error);
-}
-
-
-
 void _bake_end(SV* obj, SV* self) {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
 	int error = SWF_ENoError;
@@ -618,38 +568,19 @@ void _finalise(SV* obj, SV* self) {
     swf_destroy_movie(m->movie);
 }
 
-void _call_bake_method(SV* shape, char* method, SV * mov) {
-  dSP;
-  ENTER;
-  SAVETMPS;
+void _call_foreign_method(SV* shape, char* method, SV * mov) {
+	dSP;
+	ENTER;
+	SAVETMPS;
 
-  PUSHMARK(SP);
-  XPUSHs(shape);
-  XPUSHs(mov);
-//  XPUSHi(SvIV(SvRV(obj)));
+	PUSHMARK(SP);
+	XPUSHs(shape);
+	XPUSHs(mov);
+	PUTBACK;
 
-  PUTBACK;
+	call_method(method, G_DISCARD);
 
-  call_method(method, G_DISCARD);
-
-  FREETMPS;
-  LEAVE;
+	FREETMPS;
+	LEAVE;
 }
 
-
-void my_call_method(SV* self, char* method, SV* arg) {
-
-  dSP;
-  ENTER;
-  SAVETMPS;
-
-  PUSHMARK(SP);
-  XPUSHs(self);
-  XPUSHs(arg);
-  PUTBACK;
-
-  call_method(method, G_DISCARD);
-
-  FREETMPS;
-  LEAVE;
-}
