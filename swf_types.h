@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.34  2002/06/10 16:44:02  kitty_goth
+ * Refactor and a bit of a cleanup.
+ *
  * Revision 1.33  2002/06/07 17:18:01  kitty_goth
  * Well, it is *producing* a defineShape - it's just a bit mangled.
  * We need to move away from icky SWF_U32 pretending to be colours
@@ -603,7 +606,8 @@ struct swf_fillstyle {
     swf_rgba_pos ** colours;          /* the colours used in the gradient fill and the positions they're in*/
 
 	/* FIXME: This is supposed to be a proper colour */
-    SWF_U32 colour;                   /* the colour used in the solid fill */
+	    SWF_U32 colour;                  
+    swf_colour col;                   /* the colour used in the solid fill */
 };
 
 struct swf_linestyle {

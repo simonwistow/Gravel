@@ -583,52 +583,6 @@ swf_parse_get_textrecords (swf_parser * context, int * error, int has_alpha, int
 }
 
 
-swf_shaperecord_list *
-swf_parse_get_shaperecords (swf_parser * context, int * error)
-{
-    /* TODO */
-
-    int xlast = 0;
-    int ylast = 0;
-    int at_end = FALSE;
-
-    swf_shaperecord_list * list;
-    swf_shaperecord * temp;
-
-
-    if ((list = (swf_shaperecord_list *) calloc (1, sizeof (swf_shaperecord_list))) == NULL) {
-        *error = SWF_EMallocFailure;
-        return NULL;
-    }
-
-    list->first = NULL;
-    list->lastp = &(list->first);
-
-    while (!at_end)
-    {
-		if ((temp = swf_parse_get_shaperecord(context, error, &at_end, xlast, ylast, FALSE) ) == NULL)
-		{
-			if (*error != SWF_ENoError)
-			{
-				goto FAIL;
-			}
-			break;
-		}
-		
-		*(list->lastp) = temp;
-		list->lastp = &(temp->next);
-
-		list->record_count++;
-    }
-
-    return list;
-
- FAIL:
-    swf_destroy_shaperecord_list (list);
-    return NULL;
-}
-
-
 swf_buttonrecord_list *
 swf_parse_get_buttonrecords (swf_parser * context, int * error, int with_alpha)
 {
@@ -723,132 +677,6 @@ swf_parse_get_buttonrecord (swf_parser * context, int * error, int byte, int wit
  FAIL:
     swf_destroy_buttonrecord (button);
     return NULL;
-}
-
-/*
- * CHECKME
- */
-
-swf_shaperecord *
-swf_parse_get_shaperecord (swf_parser * context, int * error, int * at_end, int xlast, int ylast, int with_alpha)
-{
-    /* Determine if this is an edge. */
-    swf_shaperecord * record;
-    SWF_S16 nbits;
-
-    if ((record = (swf_shaperecord *) calloc (1, sizeof (swf_shaperecord))) == NULL) {
-        *error = SWF_EMallocFailure;
-        *at_end = FALSE;
-        return NULL;
-    }
-
-    record->is_edge = swf_parse_get_bits (context, 1);
-
-
-    if (!record->is_edge) {
-        /* Handle a state change */
-        record->flags = swf_parse_get_bits(context, 5);
-
-        /* Are we at the end? */
-        if (record->flags == 0) {
-            dprintf("\tEnd of shape.\n\n");
-            *at_end = TRUE;
-            return record;
-        }
-
-        /* Process a move to. */
-        if (record->flags & eflagsMoveTo) {
-            nbits = (SWF_U16) swf_parse_get_bits(context, 5);
-            record->x = swf_parse_get_sbits(context, nbits);
-            record->y = swf_parse_get_sbits(context, nbits);
-            xlast = record->x;
-            ylast = record->y;
-        }
-
-        /* Get new fill info. */
-        if (record->flags & eflagsFill0) {
-            record->fillstyle0 = swf_parse_get_bits(context, context->fill_bits);
-        }
-
-        if (record->flags & eflagsFill1) {
-            record->fillstyle1 = swf_parse_get_bits(context, context->fill_bits);
-        }
-        /* Get new line info */
-        if (record->flags & eflagsLine) {
-            record->linestyle = swf_parse_get_bits(context, context->line_bits);
-        }
-
-        /* Check to get a new set of styles for a new shape layer. */
-        if (record->flags & eflagsNewStyles) {
-
-            /* Parse the style. */
-            record->shapestyle = swf_parse_get_shapestyle(context, error, with_alpha);
-
-            /* Reset. */
-            context->fill_bits = (SWF_U16) swf_parse_get_bits (context, 4);
-            context->line_bits = (SWF_U16) swf_parse_get_bits (context, 4);
-        }
-
-        *at_end = record->flags & eflagsEnd ? TRUE : FALSE;
-
-		return record;
-    } 
-	else { /* not strictly needed - the if branch returned! */
-        if (swf_parse_get_bits(context, 1)) {
-            /* Handle a line */
-            nbits = (SWF_U16) swf_parse_get_bits(context, 4) + 2;   /* nbits is biased by 2 */
-
-            /* Save the deltas */
-            if (swf_parse_get_bits(context, 1)) {
-                /* Handle a general line. */
-                record->x = swf_parse_get_sbits(context, nbits);
-                record->y = swf_parse_get_sbits(context, nbits);
-                xlast += record->x;
-                ylast += record->y;
-
-            } else {
-                /* Handle a vert or horiz line. */
-                if (swf_parse_get_bits(context, 1)) {
-                    /* Vertical line */
-                    record->y = swf_parse_get_sbits(context, nbits);
-                    // record->x = NULL;
-                    ylast += record->y;
-
-                } else {
-                    /* Horizontal line */
-                    record->x = swf_parse_get_sbits(context, nbits);
-                    // record->y = NULL;
-                    xlast += record->x;
-                }
-            }
-        } else {
-            /* Handle a curve */
-            nbits = (SWF_U16) swf_parse_get_bits(context, 4) + 2;   /* nBits is biased by 2 */
-
-            /* Get the control */
-            record->cx = swf_parse_get_sbits(context, nbits);
-            record->cy = swf_parse_get_sbits(context, nbits);
-            xlast += record->cx;
-            ylast += record->cy;
-
-
-
-            /* Get the anchor */
-            record->ax = swf_parse_get_sbits(context, nbits);
-            record->ay = swf_parse_get_sbits(context, nbits);
-            xlast += record->ax;
-            ylast += record->ay;
-        }
-
-        *at_end = FALSE;
-        return record;
-    }
-
-/* TODO - not necessary ?
- FAIL:
-    swf_destroy_shaperecord (record);
-    return NULL;
-*/
 }
 
 
@@ -954,6 +782,9 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
 
 /*
  * $Log: swf_parse.c,v $
+ * Revision 1.51  2002/06/10 16:44:02  kitty_goth
+ * Refactor and a bit of a cleanup.
+ *
  * Revision 1.50  2002/06/03 22:28:34  kitty_goth
  * Fix memory leask and a couple of minor nits
  *

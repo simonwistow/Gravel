@@ -31,3 +31,5 @@ extern void swf_serialise_cxform_force_alpha (swf_buffer * buffer, int * error, 
 extern void swf_serialise_defineshape (swf_buffer * buffer, int * error, swf_defineshape * shape);
 
 extern void swf_buffer_shapestyle(swf_buffer * buffer, int * error, swf_shapestyle * s);
+
+extern void swf_buffer_shaperecord(swf_buffer * buffer, int * error, swf_shaperecord * s, swf_shapestyle * st);

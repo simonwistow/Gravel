@@ -129,8 +129,8 @@ int main (int argc, char *argv[]) {
 
     m3->a  = m3->d  = 1 * 256 * 256;
     m3->b  = m3->c  = 0;
-    m3->tx = 100 * 20;
-    m3->ty = 100 * 20;
+    m3->tx = 0 * 20;
+    m3->ty = 0 * 20;
 
 
     swf_add_placeobject(movie, &error, m3, 1, 2);

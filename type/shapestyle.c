@@ -136,7 +136,6 @@ swf_parse_get_shapestyle (swf_parser * context, int * error, int with_alpha)
 void
 swf_buffer_shapestyle(swf_buffer * buffer, int * error, swf_shapestyle * s)
 {
-	SWF_U16 max;
 	SWF_U8 i, type;
 
 	swf_buffer_initbits(buffer);
