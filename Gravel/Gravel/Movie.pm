@@ -158,7 +158,7 @@ sub bake_movie {
 	$b->_bake_frames($self);
 
 #	print STDERR DumperX $self->{_library};
-	print STDERR DumperX $self;
+#	print STDERR DumperX $self;
 
 	$b->_bake_end($self);
 	$b->_finalise($self);

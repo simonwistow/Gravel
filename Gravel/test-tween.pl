@@ -12,7 +12,7 @@ use Gravel::Effect::Tween;
 use Data::Dumper qw/DumperX/;
 
 my $m = Gravel::Movie->new();
-#my $m = Gravel::Movie->new({bgcol => '#ff0000'});
+#my $m = Gravel::Movie->new({bgcol => '#00ffff'});
 
 $m->name('foo.swf');
 $m->size(0, 0, 10000, 10000);
@@ -20,9 +20,9 @@ $m->size(0, 0, 10000, 10000);
 my $g = Gravel::Shape->new({fills => [{colour => HAZY_RED, type => 'solid'}]});
 $g->poly(0, 0, 0, 500, 500, 500, 500, 0, );
 
-my $s = {start => 0, end => 10, depth => 1,
+my $s = {start => 0, end => 10, depth => 2,
 		 startx => 0, starty => 0, 
-		 endx => 1000, endy => 1000};
+		 endx => 1000, endy => 800};
 my $e = Gravel::Effect::Tween->new($s);
 my $a = $g->action($e);
 
@@ -33,7 +33,7 @@ $m->event($a);
 my $g2 = Gravel::Shape->new({fills => [{colour => BLUE, type => 'solid'}]});
 $g2->poly(0, 0, 0, 1000, 1000, 1000,);
 
-my $s2 = {start => 0, end => 10, depth => 5,
+my $s2 = {start => 5, end => 25, depth => 1,
 		  startx => 0, starty => 0, 
 		  endx => 500, endy => 1000};
 my $e2 = Gravel::Effect::Tween->new($s2);
@@ -41,15 +41,6 @@ my $a2 = $g2->action($e2);
 
 $m->event($a2);
 
-#my $g3 = Gravel::Shape->new({fills => [{colour => GREEN, type => 'solid'}]});
-#$g3->vertex(0,0);
-#$g3->line_to(0,250);
-#$g3->arc_to(500,800, 600, 200);
-#$g3->line_to(500,0);
-#$g3->line_to(0,0);
-#my $e3 = Gravel::Effect::Tween->new($g3, $s);
-
-#$m->event($e3);
 
 $m->make_timeline();
 

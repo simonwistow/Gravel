@@ -34,6 +34,7 @@ sub new {
 
     $self->{_start} = $conf{start};
     $self->{_end} = $conf{end};
+    $self->{_depth} = $conf{depth} || 1;
 
     $self->{_stang} = $conf{start_ang};
     $self->{_endang} = $conf{end_ang};
@@ -43,35 +44,32 @@ sub new {
 
 #
 
-
-sub frames {
+sub matrices {
 	my $self = shift;
+
+	unless (defined $self->{_start} and defined $self->{_end}) {
+		return undef;
+	}
 	
-	my $ra_f = [];
+	my $ra_m = [];
 
 	my $numf = $self->{_end} - $self->{_start};
-	my ($theta0, $theta1) = ($self->{_stang}, $self->{_endang});
-
 	my $dth = ( $self->{_endang} - $self->{_stang} ) / $numf;
 
+	my $theta = $self->{_stang};
 	for (my $i = $self->{_start}; $i < $self->{_end}; ++$i) {
-		my $f = Gravel::Frame->new();
 
-		# This needs much fixing....
-		$f->shape($self->shape);
-#		$f->place($x, $y);
+		my $m = Gravel::Matrix->new();
 
-		$ra_f->[$i] = $f;
-
+		$theta += $dth;
+		$ra_m->[$i] = $m;
 	}
 
-	return $ra_f;
+	return $ra_m;
 }
 
 
 #
-
-
 
 #
 

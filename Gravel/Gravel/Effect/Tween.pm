@@ -73,12 +73,6 @@ sub matrices {
 
 #
 
-sub start { return (shift)->{_start}; }
-sub end { return (shift)->{_end}; }
-sub depth { return (shift)->{_depth}; }
-
-#
-
 1;
 
 __DATA__

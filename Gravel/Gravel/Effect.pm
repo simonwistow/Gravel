@@ -36,9 +36,22 @@ sub new {
 
 # start and end refer to start and end frames
 
-#sub shape {return (shift)->{_shape};}
-sub start {return (shift)->{_start};}
-sub end   {return (shift)->{_end};}
+sub start {
+	my $self = shift;
+	my $v = shift;
+	return $self->{_start} unless defined $v;
+	return $self->{_start} = $v;
+}
+
+sub end {
+	my $self = shift;
+	my $v = shift;
+	return $self->{_end} unless defined $v;
+	return $self->{_end} = $v;
+}
+
+
+sub depth { return (shift)->{_depth}; }
 
 #
 

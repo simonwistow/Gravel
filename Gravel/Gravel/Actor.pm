@@ -48,8 +48,19 @@ sub new {
 sub add {
 	my $self = shift;
 	my $e = shift;
-	$self->{_start} = undef;
-	$self->{_end} = undef;
+
+	if (defined $e->start) { 
+		$self->{_start} = undef;		
+	} else {
+		$e->start($self->{_start});
+	}
+
+	if (defined $e->end) {
+		$self->{_end} = undef;
+	} else {
+		$e->end($self->{_end});
+	}
+
 	push @{$self->{_effects}}, $e;
 }
 
@@ -91,7 +102,6 @@ sub end {
 # FIXME: Multiple effects
 sub frames {
 	my $self = shift;
-#	return $self->{_effects}->[0]->frames($self->{_shape});
 
 	my $m = [];
 
