@@ -16,6 +16,9 @@
  *
  *
  * $Log: print_utils.c,v $
+ * Revision 1.14  2001/07/16 14:14:40  clampr
+ * free of null
+ *
  * Revision 1.13  2001/07/15 15:50:37  clampr
  * line deltas a gogo
  *
@@ -505,7 +508,7 @@ print_textrecords (swf_textrecord_list * list, const char * str, swf_parser * co
     if (text!=NULL) {
         printf ("%s\ttext representation : %s\n", str, text);
     }
-    free (text);
+    swf_free (text);
 }
 
 void
