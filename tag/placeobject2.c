@@ -139,6 +139,7 @@ swf_add_placeobject2 (swf_movie * movie, int * error, SWF_U16 char_id, swf_matri
 	}
 	if (hasColour) {
 		swf_serialise_cxform_force_alpha(temp->buffer, error, mycx);
+//		swf_serialise_cxform(temp->buffer, error, mycx);
 	}
 	if (hasRatio) {
 		/* Not yet */

@@ -26,7 +26,8 @@
 
 #include <stdio.h>
 
-#define NUMFRAMES 20
+#define NUMFRAMES 60
+#define FRAMERATE 15
 
 void usage (char * name);
 
@@ -126,11 +127,11 @@ int main (int argc, char *argv[]) {
       return 1;
     }
 
-    mycx->ra = 256;
+    mycx->ra = 0;
     mycx->ga = 0;
-    mycx->ba = 256;
+    mycx->ba = 0;
 
-    mycx->aa = 256;
+    mycx->aa = 0;
     mycx->ab = 0;
 
 
@@ -146,14 +147,14 @@ int main (int argc, char *argv[]) {
     movie->header = hdr;
     movie->name = (char *) "ben3.swf";
 
-    movie->header->rate = 20 * 256;
+    movie->header->rate = FRAMERATE * 256;
 
     swf_add_setbackgroundcolour(movie, &error, 0, 255, 0, 255);
     swf_dump_shape(movie, &error, temp);
 
     /* Do the frames */
 
-    matrix->a  = matrix->c  = 256 * 100;
+    matrix->a  = matrix->c  = 256 * 256;
     matrix->b  = matrix->d  = 0;
     matrix->tx = 0 * 20;
     matrix->ty = 0 * 20;
@@ -169,8 +170,10 @@ int main (int argc, char *argv[]) {
       if (i < NUMFRAMES) {
 	swf_add_removeobject(movie, &error, obj_id);
       }
-      matrix->tx += 20 * 20;
-      mycx->bb += 256;
+      matrix->tx += 4 * 20;
+      matrix->a += 4 * 256;
+      matrix->a += 4 * 256;
+      mycx->bb += 4;
     }
 
     swf_add_end(movie, &error);
