@@ -53,9 +53,9 @@ case 2 in
 esac
 
 case 4 in
+        $ac_cv_sizeof_long)  SWF_U32="unsigned long";   SWF_S32="signed long";;
         $ac_cv_sizeof_short) SWF_U32="unsigned short";  SWF_S32="signed short";;
         $ac_cv_sizeof_int)   SWF_U32="unsigned int";    SWF_S32="signed int";;
-        $ac_cv_sizeof_long)  SWF_U32="unsigned long";   SWF_S32="signed long";;
 esac
 
 if test -z "$SWF_U8"; then
