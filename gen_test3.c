@@ -112,6 +112,15 @@ int main (int argc, char *argv[]) {
     }
 
     swf_get_nth_shape(parser, &error, shape_num, temp);
+
+    if (error == SWF_ENoSuchShape) {
+      fprintf(stderr,"No such shape : %d\n",shape_num);
+      exit(1);
+    } else if (error != SWF_ENoError) {
+      fprintf(stderr,"Error getting %dth shape : %s\n", shape_num, swf_error_code_to_string(error));
+      exit(1);
+    } 
+
     obj_id = swf_get_object_id(temp, &error);
 
     if ((matrix = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {

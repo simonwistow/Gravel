@@ -23,6 +23,7 @@
 #include "swf_movie.h"
 #include "swf_serialise.h"
 #include "swf_destroy.h"
+#include "swf_error.h"
 
 #include <stdio.h>
 
@@ -31,7 +32,7 @@ void usage (char * name);
 void 
 usage (char * name) 
 {
-    fprintf (stderr, "%s <filename>\n", name);
+    fprintf (stderr, "Usage: %s <filename> <object number>\n", name);
 }
 
 
@@ -54,7 +55,7 @@ swf_get_object_id(swf_tagrecord * mytag, int * error)
 
 int main (int argc, char *argv[]) {
     swf_movie * movie;
-    int error = 0;
+    int error = SWF_ENoError;
     int shape_num;
     swf_parser * parser;
     swf_header * hdr;
@@ -64,7 +65,12 @@ int main (int argc, char *argv[]) {
     swf_cxform * mycx;
     int i;
 
-/* First, get a parser up */
+   /* First, get a parser up */
+    if (argc<3)
+    {
+	usage(argv[0]);
+	exit (1);
+    }
 
     parser = swf_parse_create(argv[1], &error);
     shape_num = atoi(argv[2]);
@@ -92,17 +98,33 @@ int main (int argc, char *argv[]) {
     printf("Frame rate \t%"pSWF_U32"\n", hdr->rate);
     printf("Frame count \t%"pSWF_U32"\n", hdr->count);
 
+
     printf("\n----- Reading movie details -----\n");
 
-/* Right, now we need a tagrecord.. */
+
+    /* Right, now we need a tagrecord.. */
+
 
     temp = swf_make_tagrecord(&error, 0);
 
-    if (error) {
+
+    if (error != SWF_ENoError) 
+    {
+	fprintf(stderr,"Error making tag record : %s\n",  swf_error_code_to_string(error));
 	exit(1);
     }
 
     swf_get_nth_shape(parser, &error, shape_num, temp);
+
+
+    if (error == SWF_ENoSuchShape) {
+      fprintf(stderr,"No such shape : %d\n",shape_num);
+      exit(1);
+    } else if (error != SWF_ENoError) {
+      fprintf(stderr,"Error getting %dth shape : %s\n", shape_num, swf_error_code_to_string(error));
+      exit(1);
+    } 
+
     obj_id = swf_get_object_id(temp, &error);
 
     if ((matrix = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {

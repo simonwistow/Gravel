@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.17 2002/05/22 11:49:31 kitty_goth Exp $	
+ * 	$Id: swf_movie.c,v 1.18 2002/05/23 14:45:15 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -363,6 +363,10 @@ swf_get_nth_shape (swf_parser * swf, int * error, int which_shape, swf_tagrecord
         }
     } while ((!*error) && next_id && !done);
 
+    if (i<=which_shape)
+    {
+	*error = SWF_ENoSuchShape;
+    } 
     return;
 }
 

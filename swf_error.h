@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_error.h,v $
+ * Revision 1.9  2002/05/23 14:45:15  kitty_goth
+ * Simon's change
+ *
  * Revision 1.8  2001/07/14 00:17:55  clampr
  * added emacs file variables to avoid clashing with existing style (now I know what it is)
  *
@@ -49,7 +52,7 @@
 #define SWF_ETooManyFriends                 (13)
 #define SWF_EByGum                          (14)
 #define SWF_EFontNotSet                     (15)
-
+#define SWF_ENoSuchShape                    (16)
 
 
 extern const char * swf_error_code_to_string (int);
