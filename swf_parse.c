@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.39  2001/07/14 23:45:48  clampr
+ * one bigass layout delta
+ *
  * Revision 1.38  2001/07/14 23:28:01  clampr
  * spurious line deltas 'o the day
  *
@@ -108,16 +111,16 @@ const int swf_MPEG_VerTab[4]={2,3,1,0};
 const int swf_MPEG_FreqTab[4]={44100,48000,32000};
 const int swf_MPEG_RateTab[2][3][16]=
 {
-  {
-    {  0, 32, 64, 96,128,160,192,224,256,288,320,352,384,416,448,  0},
-    {  0, 32, 48, 56, 64, 80, 96,112,128,160,192,224,256,320,384,  0},
-   {  0, 32, 40, 48, 56, 64, 80, 96,112,128,160,192,224,256,320,  0},
-  },
-  {
-    {  0, 32, 48, 56, 64, 80, 96,112,128,144,160,176,192,224,256,  0},
-    {  0,  8, 16, 24, 32, 40, 48, 56, 64, 80, 96,112,128,144,160,  0},
-    {  0,  8, 16, 24, 32, 40, 48, 56, 64, 80, 96,112,128,144,160,  0},
-  },
+	{
+		{  0, 32, 64, 96,128,160,192,224,256,288,320,352,384,416,448,  0},
+		{  0, 32, 48, 56, 64, 80, 96,112,128,160,192,224,256,320,384,  0},
+		{  0, 32, 40, 48, 56, 64, 80, 96,112,128,160,192,224,256,320,  0},
+	},
+	{
+		{  0, 32, 48, 56, 64, 80, 96,112,128,144,160,176,192,224,256,  0},
+		{  0,  8, 16, 24, 32, 40, 48, 56, 64, 80, 96,112,128,144,160,  0},
+		{  0,  8, 16, 24, 32, 40, 48, 56, 64, 80, 96,112,128,144,160,  0},
+	},
 };
 //todo : since these are exported do they need to be declared final?
 const char * swf_MPEG_Ver[4] = {"1","2","2.5","3?"};
@@ -132,42 +135,42 @@ const char * swf_MPEG_Ver[4] = {"1","2","2.5","3?"};
 swf_parser *
 swf_parse_create (char * name, int * error)
 {
+	
+	swf_parser * context;
+	FILE * file;
 
-      swf_parser * context;
-      FILE * file;
+	/* Open the file for reading. */
+	file = fopen(name, "rb");
 
-      /* Open the file for reading. */
-      file = fopen(name, "rb");
+	/* Did we open the file? */
+	if (file == NULL) {
+		*error = SWF_EFileOpenFailure;
+		return NULL;
+		
+	}
 
-      /* Did we open the file? */
-      if (file == NULL) {
-	  *error = SWF_EFileOpenFailure;
-	  return NULL;
+	if ((context = (swf_parser *) calloc (1, sizeof (swf_parser))) == NULL) {
+		*error = SWF_EMallocFailure;
+		return NULL;
+	}
+	
+	context->file = file;
+	context->name =  (char *) strdup (name);
+	context->bitpos = 0;
+	context->bitbuf = 0;
+	context->headers_parsed = 0;
+	context->frame  = 0;
 
-      }
-
-      if ((context = (swf_parser *) calloc (1, sizeof (swf_parser))) == NULL) {
-	  *error = SWF_EMallocFailure;
-	  return NULL;
-      }
-
-      context->file = file;
-      context->name =  (char *) strdup (name);
-      context->bitpos = 0;
-      context->bitbuf = 0;
-      context->headers_parsed = 0;
-      context->frame  = 0;
-
-      /* todo: fix this magic number */
-      if ((context->font_chars = (char **) calloc (256, sizeof (char *))) == NULL)
-      {
+	/* todo: fix this magic number */
+	if ((context->font_chars = (char **) calloc (256, sizeof (char *))) == NULL)
+	{
 	    *error = SWF_EMallocFailure;
 	    return NULL;
-      }
-      context->number_of_fonts = 0;
+	}
+	context->number_of_fonts = 0;
 
 
-      return context;
+	return context;
 }
 
 
@@ -185,19 +188,19 @@ swf_parse_header (swf_parser * context, int * error)
     SWF_U8 file_hdr[8];
 
     if ((header = (swf_header *) calloc (1, sizeof (swf_header))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
+		*error = SWF_EMallocFailure;
+		return NULL;
     }
 
     if (fread(file_hdr, 1, 8, context->file) != 8) {
-	*error = SWF_EFileReadError;
-	goto FAIL;
+		*error = SWF_EFileReadError;
+		goto FAIL;
     }
 
     /* Verify the header and get the file size. */
     if (file_hdr[0] != 'F' || file_hdr[1] != 'W' || file_hdr[2] != 'S' ) {
-	*error = SWF_ENotValidSWF;
-	goto FAIL;
+		*error = SWF_ENotValidSWF;
+		goto FAIL;
     }
 
 
@@ -206,8 +209,8 @@ swf_parse_header (swf_parser * context, int * error)
     header->size    = (SWF_U32) file_hdr[4] | ((SWF_U32) file_hdr[5] << 8) | ((SWF_U32) file_hdr[6] << 16) | ((SWF_U32) file_hdr[7] << 24);
 
     if (header->size < 21) {
-	*error = SWF_EFileTooSmall;
-	goto FAIL;
+		*error = SWF_EFileTooSmall;
+		goto FAIL;
     }
 
     /* Reposition to the 8th byte in the stream */
@@ -294,14 +297,14 @@ SWF_U32
 swf_parse_get_bits (swf_parser * context, SWF_S32 n)
 {
     SWF_U32 v = 0;
-
+	
     while (1) {
         SWF_S32 s = n - context->bitpos;
         if (s > 0) {
             /* Consume the entire buffer */
             v |= context->bitbuf << s;
             n -= context->bitpos;
-
+			
             /* Get the next buffer */
             context->bitbuf = swf_parse_get_byte(context);
             context->bitpos = 8;
@@ -348,10 +351,10 @@ swf_parse_get_rect (swf_parser * context, int * error)
 {
     swf_rect * rect;
     int nbits;
-
+	
     if ((rect = (swf_rect *) calloc (1, sizeof (swf_rect))) == NULL) {
-                *error = SWF_EMallocFailure;
-                return NULL;
+		*error = SWF_EMallocFailure;
+		return NULL;
     }
 
     swf_parse_initbits(context);
@@ -372,7 +375,6 @@ swf_parse_get_rect (swf_parser * context, int * error)
 SWF_U16
 swf_parse_get_word(swf_parser * context)
 {
-
     swf_parse_initbits(context);
 
     return (SWF_U16) swf_parse_get_byte(context) | ((SWF_U16) swf_parse_get_byte(context) << 8);
@@ -386,7 +388,6 @@ swf_parse_get_word(swf_parser * context)
 SWF_U32
 swf_parse_get_dword(swf_parser * context)
 {
-
     swf_parse_initbits(context);
 
     return (SWF_U32) swf_parse_get_byte(context) | ((SWF_U32) swf_parse_get_byte(context) << 8) | ((SWF_U32) swf_parse_get_byte(context) << 16) | ((SWF_U32) swf_parse_get_byte(context) << 24);
@@ -485,8 +486,8 @@ swf_parse_definefontinfo (swf_parser * context, int * error)
     swf_definefontinfo * info;
 
     if ((info = (swf_definefontinfo *) calloc (1, sizeof (swf_definefontinfo))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
+		*error = SWF_EMallocFailure;
+		return NULL;
     }
 
     info->fontid = (SWF_U32) swf_parse_get_word (context);
@@ -494,8 +495,8 @@ swf_parse_definefontinfo (swf_parser * context, int * error)
 
     /* Allocate enough space to hold the name of the font */
     if ( ( info->fontname = (char *) calloc ((1 + info->namelen), sizeof(char))) == NULL ){
-	*error = SWF_EMallocFailure;
-	goto FAIL;
+		*error = SWF_EMallocFailure;
+		goto FAIL;
     }
 
     /* Read the fontname from the stream*/
@@ -552,8 +553,8 @@ swf_parse_placeobject2 (swf_parser * context, int * error)
     swf_placeobject2 * place;
 
     if ((place = (swf_placeobject2 *) calloc (1, sizeof (swf_placeobject2))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
+		*error = SWF_EMallocFailure;
+		return NULL;
     }
 
     place->flags = swf_parse_get_byte (context);
@@ -571,7 +572,7 @@ swf_parse_placeobject2 (swf_parser * context, int * error)
     if (place->flags & splaceMatrix) {
         if ((place->matrix  = (swf_matrix *) swf_parse_get_matrix (context, error)) == NULL) {
             goto FAIL;
-	}
+		}
     }
 
     /* Get the color transform if specified. */
@@ -596,7 +597,7 @@ swf_parse_placeobject2 (swf_parser * context, int * error)
     if (place->flags & splaceName){
         if ((place->name = (char *) swf_parse_get_string(context, error)) == NULL) {
             goto FAIL;
-	}
+		}
     }
 
 
@@ -623,28 +624,28 @@ swf_parse_get_matrix (swf_parser * context, int * error)
     int n_bits;
 
     if ((matrix = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
+		*error = SWF_EMallocFailure;
+		return NULL;
     }
 
     swf_parse_initbits (context);
 
     /* Scale terms */
     if (swf_parse_get_bits (context, 1)) {
-	n_bits = (int) swf_parse_get_bits (context, 5);
-	matrix->a = swf_parse_get_sbits(context, n_bits);
-	matrix->d = swf_parse_get_sbits(context, n_bits);
+		n_bits = (int) swf_parse_get_bits (context, 5);
+		matrix->a = swf_parse_get_sbits(context, n_bits);
+		matrix->d = swf_parse_get_sbits(context, n_bits);
     } else {
-	matrix->a = matrix->d = 0x00010000L;
+		matrix->a = matrix->d = 0x00010000L;
     }
 
     /* Rotate/skew terms */
     if (swf_parse_get_bits (context, 1)) {
-	n_bits = swf_parse_get_bits (context, 5);
-	matrix->b = swf_parse_get_sbits(context, n_bits);
-	matrix->c = swf_parse_get_sbits(context, n_bits);
+		n_bits = swf_parse_get_bits (context, 5);
+		matrix->b = swf_parse_get_sbits(context, n_bits);
+		matrix->c = swf_parse_get_sbits(context, n_bits);
     } else {
-	matrix->b = matrix->c = 0;
+		matrix->b = matrix->c = 0;
     }
 
     /* Translate terms */
@@ -668,8 +669,8 @@ swf_parse_get_cxform (swf_parser * context, int * error, int has_alpha)
     int need_add, need_mul, n_bits;
 
     if ((cxform = (swf_cxform *) calloc (1, sizeof (swf_cxform))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
+		*error = SWF_EMallocFailure;
+		return NULL;
     }
 
     swf_parse_initbits (context);
@@ -686,25 +687,25 @@ swf_parse_get_cxform (swf_parser * context, int * error, int has_alpha)
     cxform->ab = 0;
 
     if (need_mul) {
-	cxform->ra = (SWF_S16) swf_parse_get_sbits (context, n_bits);
-	cxform->ga = (SWF_S16) swf_parse_get_sbits (context, n_bits);
-	cxform->ba = (SWF_S16) swf_parse_get_sbits (context, n_bits);
-	if (has_alpha) {
-	    cxform->aa = (SWF_S16) swf_parse_get_sbits (context, n_bits);
-	}
+		cxform->ra = (SWF_S16) swf_parse_get_sbits (context, n_bits);
+		cxform->ga = (SWF_S16) swf_parse_get_sbits (context, n_bits);
+		cxform->ba = (SWF_S16) swf_parse_get_sbits (context, n_bits);
+		if (has_alpha) {
+			cxform->aa = (SWF_S16) swf_parse_get_sbits (context, n_bits);
+		}
     } else {
-	cxform->ra = cxform->ga = cxform->ba = 256;
+		cxform->ra = cxform->ga = cxform->ba = 256;
     }
 
     if (need_add) {
-	cxform->rb = (SWF_S16) swf_parse_get_sbits (context, n_bits);
-	cxform->gb = (SWF_S16) swf_parse_get_sbits (context, n_bits);
-	cxform->bb = (SWF_S16) swf_parse_get_sbits (context, n_bits);
-	if (has_alpha) {
-	    cxform->ab = (SWF_S16)swf_parse_get_sbits (context, n_bits);
-	}
+		cxform->rb = (SWF_S16) swf_parse_get_sbits (context, n_bits);
+		cxform->gb = (SWF_S16) swf_parse_get_sbits (context, n_bits);
+		cxform->bb = (SWF_S16) swf_parse_get_sbits (context, n_bits);
+		if (has_alpha) {
+			cxform->ab = (SWF_S16)swf_parse_get_sbits (context, n_bits);
+		}
     } else {
-	cxform->rb = cxform->gb = cxform->bb = 0;
+		cxform->rb = cxform->gb = cxform->bb = 0;
     }
 
     return cxform;
@@ -852,12 +853,12 @@ swf_parse_setbackgroundcolour (swf_parser * context, int * error)
     swf_setbackgroundcolour * back;
 
     if ((back = (swf_setbackgroundcolour *) calloc (1, sizeof (swf_setbackgroundcolour))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
+		*error = SWF_EMallocFailure;
+		return NULL;
     }
 
     if ((back->colour = (swf_colour *) calloc (1, sizeof (swf_colour))) == NULL) {
-	*error = SWF_EMallocFailure;
+		*error = SWF_EMallocFailure;
 	    goto FAIL;
     }
 
@@ -898,8 +899,8 @@ swf_parse_get_shapestyle (swf_parser * context, int * error, int with_alpha)
     swf_shapestyle * styles;
 
     if ((styles = (swf_shapestyle *) calloc (1, sizeof (swf_shapestyle))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
+		*error = SWF_EMallocFailure;
+		return NULL;
     }
 
     styles->nfills = 0;
@@ -918,15 +919,15 @@ swf_parse_get_shapestyle (swf_parser * context, int * error, int with_alpha)
     }
 
     if ((styles->fills = (swf_fillstyle **) calloc (styles->nfills, sizeof (swf_fillstyle *))) == NULL) {
-	*error = SWF_EMallocFailure;
-	goto FAIL;
+		*error = SWF_EMallocFailure;
+		goto FAIL;
     }
 
     /* Get each of the fill style. */
     for (i = 0; i <styles->nfills; i++) {
         if ((styles->fills[i] = (swf_fillstyle *) calloc (1, sizeof (swf_fillstyle))) == NULL) {
-	    *error = SWF_EMallocFailure;
-	    goto FAIL;
+			*error = SWF_EMallocFailure;
+			goto FAIL;
         }
 
         styles->fills[i]->ncolours = 0;
@@ -978,15 +979,15 @@ swf_parse_get_shapestyle (swf_parser * context, int * error, int with_alpha)
     }
 
     if ((styles->lines = (swf_linestyle **) calloc (styles->nlines, sizeof (swf_linestyle *))) == NULL) {
-	*error = SWF_EMallocFailure;
-	goto FAIL;
+		*error = SWF_EMallocFailure;
+		goto FAIL;
     }
 
     /* Get each of the line styles. */
     for (i = 0; i < styles->nlines; i++) {
         if ((styles->lines[i] = (swf_linestyle *) calloc (1, sizeof (swf_linestyle))) == NULL) {
-	    *error = SWF_EMallocFailure;
-	    goto FAIL;
+			*error = SWF_EMallocFailure;
+			goto FAIL;
         }
 
         styles->lines[i]->width  = swf_parse_get_word   (context);
@@ -1005,10 +1006,10 @@ swf_parse_defineshape_aux (swf_parser * context, int * error, int with_alpha)
 {
 
     swf_defineshape * shape;
-
+	
     if ((shape = (swf_defineshape *) calloc (1, sizeof (swf_defineshape))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
+		*error = SWF_EMallocFailure;
+		return NULL;
     }
 
     shape->tagid  = (SWF_U32) swf_parse_get_word (context);
@@ -1059,8 +1060,8 @@ swf_parse_placeobject (swf_parser * context, int * error)
     swf_placeobject * place;
 
     if ((place = (swf_placeobject *) calloc (1, sizeof (swf_placeobject))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
+		*error = SWF_EMallocFailure;
+		return NULL;
     }
 
     place->tagid = (SWF_U32) swf_parse_get_word(context);
@@ -1074,9 +1075,9 @@ swf_parse_placeobject (swf_parser * context, int * error)
     }
 
     if (swf_parse_tell(context) < context->tagend) {
-	if ((place->cxform = swf_parse_get_cxform (context, error, 0)) == NULL) {
+		if ((place->cxform = swf_parse_get_cxform (context, error, 0)) == NULL) {
             goto FAIL;
-	}
+		}
     }
 
     return place;
@@ -1093,8 +1094,8 @@ swf_parse_freecharacter (swf_parser * context, int * error)
     swf_freecharacter * character;
 
     if ((character = (swf_freecharacter *) calloc (1, sizeof (swf_freecharacter))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
+		*error = SWF_EMallocFailure;
+		return NULL;
     }
 
     character->tagid = swf_parse_get_word (context);
@@ -1109,8 +1110,8 @@ swf_parse_removeobject(swf_parser * context, int * error)
     swf_removeobject * object;
 
     if ((object = (swf_removeobject *) calloc (1, sizeof (swf_removeobject))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
+		*error = SWF_EMallocFailure;
+		return NULL;
     }
 
     object->tagid = (SWF_U32) swf_parse_get_word (context);
@@ -1127,8 +1128,8 @@ swf_parse_removeobject2(swf_parser * context, int * error)
     swf_removeobject2 * object;
 
     if ((object = (swf_removeobject2 *) calloc (1, sizeof (swf_removeobject2))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
+		*error = SWF_EMallocFailure;
+		return NULL;
     }
 
     object->depth = (SWF_U32) swf_parse_get_word (context);
@@ -1143,15 +1144,15 @@ swf_parse_startsound (swf_parser * context, int * error)
     swf_startsound * sound;
 
     if ((sound = (swf_startsound *) calloc (1, sizeof (swf_startsound))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
+		*error = SWF_EMallocFailure;
+		return NULL;
     }
 
     sound->tagid = swf_parse_get_word (context);
 
     if (sound->tagid) {
         sound->code =  swf_parse_get_byte (context);
-
+		
         if ( sound->code & soundHasInPoint ) {
             sound->inpoint = swf_parse_get_dword (context);
         }
@@ -1168,17 +1169,17 @@ swf_parse_startsound (swf_parser * context, int * error)
 
         if (  sound->code & soundHasEnvelope ) {
             sound->npoints = swf_parse_get_byte (context);
-
+			
 			if (sound->npoints) {
 				if ((sound->points = (swf_soundpoint **) calloc (sound->npoints, sizeof (swf_soundpoint *))) == NULL) {
 					*error = SWF_EMallocFailure;
 					goto FAIL;
 				}
 			}
-
+			
             for (i = 0; i < sound->npoints; i++ ) {
-		sound->points[i] = NULL;
-		if ((sound->points[i] = (swf_soundpoint *) calloc (1, sizeof (swf_soundpoint))) == NULL) {
+				sound->points[i] = NULL;
+				if ((sound->points[i] = (swf_soundpoint *) calloc (1, sizeof (swf_soundpoint))) == NULL) {
                     *error = SWF_EMallocFailure;
                     goto FAIL;
                 }
@@ -1355,7 +1356,7 @@ swf_parse_definetext (swf_parser * context, int * error)
 
 
     if ((text->records  =  swf_parse_get_textrecords (context, error, FALSE, n_glyph_bits, n_advance_bits)) == NULL) {
-            goto FAIL;
+		goto FAIL;
     }
 
 
@@ -1365,9 +1366,6 @@ swf_parse_definetext (swf_parser * context, int * error)
     FAIL:
     swf_destroy_definetext (text);
     return NULL;
-
-
-
 }
 
 /*
@@ -1498,8 +1496,8 @@ swf_parse_definebutton2 (swf_parser *  context, int * error)
 
 
  FAIL:
- swf_destroy_definebutton2 (button);
- return NULL;
+	swf_destroy_definebutton2 (button);
+	return NULL;
 }
 
 
@@ -1530,26 +1528,26 @@ swf_parse_get_button2actions (swf_parser * context, int * error)
 
     while (TRUE)
     {
-         action_offset = swf_parse_get_word (context);
-         next_action   = swf_parse_tell (context) + action_offset - 2;
+		action_offset = swf_parse_get_word (context);
+		next_action   = swf_parse_tell (context) + action_offset - 2;
+		
+        #ifdef DEBUG
+        fprintf (stderr, "[get_button2action_list : action_offset  = %lx %lx (%d)]\n", action_offset, next_action, test);
+        #endif
 
-         #ifdef DEBUG
-         fprintf (stderr, "[get_button2action_list : action_offset  = %lx %lx (%d)]\n", action_offset, next_action, test);
-         #endif
-
-         if ((temp  = (swf_button2action *) calloc (1, sizeof(swf_button2action))) == NULL)
-         {
+		if ((temp  = (swf_button2action *) calloc (1, sizeof(swf_button2action))) == NULL)
+		{
             *error = SWF_EMallocFailure;
             goto FAIL;
-         }
+		}
 
 
-         temp->condition = swf_parse_get_word (context);
-         if ((temp->doactions = (swf_doaction_list *) swf_parse_get_doactions (context, error)) == NULL)
-         {
+		temp->condition = swf_parse_get_word (context);
+		if ((temp->doactions = (swf_doaction_list *) swf_parse_get_doactions (context, error)) == NULL)
+		{
             swf_free (temp);
             goto FAIL;
-         }
+		}
 
          *(list->lastp) = temp;
 	     list->lastp = &(temp->next);
@@ -1557,7 +1555,7 @@ swf_parse_get_button2actions (swf_parser * context, int * error)
 
          if (action_offset == 0)
          {
-            break;
+			 break;
          }
 
          swf_parse_seek (context, next_action);
@@ -1570,9 +1568,6 @@ swf_parse_get_button2actions (swf_parser * context, int * error)
     FAIL:
     swf_destroy_button2action_list (list);
     return NULL;
-
-
-
 }
 
 
@@ -1582,7 +1577,6 @@ swf_parse_get_button2actions (swf_parser * context, int * error)
 swf_doaction_list *
 swf_parse_get_doactions (swf_parser * context, int * error)
 {
-
     swf_doaction_list * list;
     swf_doaction      * temp;
 
@@ -1596,31 +1590,22 @@ swf_parse_get_doactions (swf_parser * context, int * error)
     list->lastp = &(list->first);
 
 
-
     do
     {
-
-
         if ((temp = swf_parse_get_doaction(context, error)) == NULL)
         {
             goto FAIL;
-
         }
-
 
          *(list->lastp) = temp;
 	     list->lastp = &(temp->next);
-
-
     } while (temp->code != 0x00);
-
 
     return list;
 
     FAIL:
     swf_destroy_doaction_list (list);
     return NULL;
-
 }
 
 
@@ -1771,7 +1756,7 @@ swf_parse_defineedittext (swf_parser * context, int * error)
 
     if (text->flags & seditTextFlagsHasText ) {
         if ((text->initial_text = swf_parse_get_string (context, error)) == NULL) {
-	    goto FAIL;
+			goto FAIL;
         }
     }
 
@@ -1832,12 +1817,10 @@ swf_parse_definefont2 (swf_parser * context, int * error)
 
     if (font->glyph_count > 0)
     {
-
 	    if ((context->font_chars [font->fontid] = (char *) calloc (font->glyph_count, sizeof (char))) == NULL)
 	    {
 		    *error = SWF_EMallocFailure;
 		    goto FAIL;
-		    
 	    }
 
 		data_pos = swf_parse_tell(context);
@@ -1971,8 +1954,6 @@ swf_parse_definefont2 (swf_parser * context, int * error)
             font->kerning_pairs[i]->adjust = swf_parse_get_word(context);
 
         }
-
-
     }
 
 
@@ -2035,7 +2016,6 @@ swf_parse_definemorphshape (swf_parser * context, int * error)
     for (i = 0; i < shape->nfills; i++ )
     {
         if ((shape->fills[i] = (swf_fillstyle2 *) calloc (1, sizeof (swf_fillstyle2))) == NULL) {
-
     	    *error = SWF_EMallocFailure;
 	        goto FAIL;
 	    }
@@ -2182,7 +2162,6 @@ swf_parse_definesound (swf_parser * context, int * error)
 
     sound->tagid = swf_parse_get_word (context);
 
-
     sound->compression    = swf_parse_get_bits (context, 4);      /* uncompressed, ADPCM or MP3 */
     sound->sample_rate    = swf_parse_get_bits (context, 2);
     sound->sample_size    = swf_parse_get_bits (context, 1);
@@ -2196,7 +2175,6 @@ swf_parse_definesound (swf_parser * context, int * error)
     switch (sound->compression)
     {
         case 1:
-        {
             n_samples_adpcm = 0;
             /*
             if ((sound->adpcm = swf_parse_adpcm_decompress(context, error, sound->sample_count, sound->stereo_mono, sound->sample_size, n_samples_adpcm)) == NULL)
@@ -2205,21 +2183,19 @@ swf_parse_definesound (swf_parser * context, int * error)
             }
             */
             break;
-        }
+
         case 2:
-        {
             sound->delay = swf_parse_get_word(context);
             if ((sound->mp3header_list = swf_parse_get_mp3headers (context, error, sound->sample_count)) == NULL)
             {
                 goto FAIL;
             }
             break;
-        }
     }
 
     return sound;
 
-    FAIL:
+ FAIL:
     swf_destroy_definesound (sound);
     return NULL;
 }
@@ -2249,26 +2225,23 @@ swf_parse_get_mp3headers (swf_parser * context, int * error, int samples_per_fra
             {
                 header_store_size += 10;
                 if (header_list->headers) {
-			header_list->headers = (swf_mp3header **) realloc (header_list->headers, sizeof(swf_mp3header *) * header_store_size);
-		}
-		else {
-			header_list->headers = (swf_mp3header **) calloc (header_store_size, sizeof(swf_mp3header *));
-		}
+					header_list->headers = (swf_mp3header **) realloc (header_list->headers, sizeof(swf_mp3header *) * header_store_size);
+				}
+				else {
+					header_list->headers = (swf_mp3header **) calloc (header_store_size, sizeof(swf_mp3header *));
+				}
                 if (!header_list->headers) {
                     *error = SWF_EMallocFailure;
                     goto FAIL;
-
                 }
             }
-
+			
             header_list->headers[frame_count] = NULL;
             if ((header_list->headers[frame_count] = (swf_mp3header *) calloc (1, sizeof(swf_mp3header))) == NULL)
             {
                 *error = SWF_EMallocFailure;
                 goto FAIL;
-
             }
-
 
             /* Get the MP3 frame header */
             for (i=0; i<4; i++) {
@@ -2324,7 +2297,7 @@ swf_parse_get_mp3headers (swf_parser * context, int * error, int samples_per_fra
     header_list->header_count = ++frame_count;
     return header_list;
 
-    FAIL:
+ FAIL:
     swf_destroy_mp3header_list (header_list);
     return NULL;
 
@@ -2367,15 +2340,12 @@ swf_parse_namecharacter (swf_parser * context, int * error)
     name->label = swf_parse_get_string (context, error);
 
     return name;
-
 }
 
 
 swf_definebuttoncxform *
 swf_parse_definebuttoncxform (swf_parser * context, int * error)
 {
-
-
     int size=0;
     swf_definebuttoncxform * button;
 
@@ -2389,7 +2359,6 @@ swf_parse_definebuttoncxform (swf_parser * context, int * error)
 
     while (swf_parse_tell (context) < context->tagend)
     {
-
         button->ncxforms = size++;
         if ((button->cxforms = (swf_cxform **) realloc (button->cxforms, sizeof (swf_cxform) * size)) == NULL)
         {
@@ -2406,7 +2375,7 @@ swf_parse_definebuttoncxform (swf_parser * context, int * error)
 
     return button;
 
-    FAIL:
+ FAIL:
     swf_destroy_definebuttoncxform (button);
     return NULL;
 
@@ -2416,7 +2385,7 @@ swf_soundstreamblock *
 swf_parse_soundstreamblock (swf_parser * context, int * error)
 {
     swf_soundstreamblock * block;
-
+	
     if ((block = (swf_soundstreamblock *) calloc (1, sizeof (swf_soundstreamblock))) == NULL) {
         *error = SWF_EMallocFailure;
         return NULL;
@@ -2427,42 +2396,34 @@ swf_parse_soundstreamblock (swf_parser * context, int * error)
 
     switch (context->stream_compression)
     {
+	case 1:
+		block->n_stream_samples          = context->n_stream_samples;
+		block->stream_sample_stereo_mono = context->stream_sample_stereo_mono;
+		block->stream_sample_size        = context->stream_sample_size;
+		block->n_samples_adpcm           = context->n_samples_adpcm = 0;
+		if ((block->adpcm                     = swf_parse_adpcm_decompress(context, error, block->n_stream_samples, block->stream_sample_stereo_mono, block->stream_sample_size, block->n_samples_adpcm)) == NULL)
+		{
+			goto FAIL;
+		}
+		break;
 
-        case 1:
-        {
-            block->n_stream_samples          = context->n_stream_samples;
-            block->stream_sample_stereo_mono = context->stream_sample_stereo_mono;
-            block->stream_sample_size        = context->stream_sample_size;
-            block->n_samples_adpcm           = context->n_samples_adpcm = 0;
-            if ((block->adpcm                     = swf_parse_adpcm_decompress(context, error, block->n_stream_samples, block->stream_sample_stereo_mono, block->stream_sample_size, block->n_samples_adpcm)) == NULL)
-            {
-                goto FAIL;
-            }
-            break;
-        }
-        case 2:
-        {
-            block->samples_per_frame  = swf_parse_get_word (context);
-            block->delay              = swf_parse_get_word (context);
-            if ((block->mp3header_list     = swf_parse_get_mp3headers (context, error, block->samples_per_frame)) == NULL)
-            {
-                goto FAIL;
-            }
-            break;
-        }
-        default:
-        {
-
-            // todo simon?
-            goto FAIL;
-        }
-
-
+	case 2:
+		block->samples_per_frame  = swf_parse_get_word (context);
+		block->delay              = swf_parse_get_word (context);
+		if ((block->mp3header_list     = swf_parse_get_mp3headers (context, error, block->samples_per_frame)) == NULL)
+		{
+			goto FAIL;
+		}
+		break;
+	
+	default:
+		// todo simon?
+		goto FAIL;
     }
 
     return block;
 
-    FAIL:
+ FAIL:
     swf_destroy_soundstreamblock (block);
     return NULL;
 
@@ -2488,7 +2449,6 @@ swf_parse_definebuttonsound (swf_parser * context, int * error)
 
     for (i=0; i<3; i++)
     {
-
         if ((state = swf_parse_startsound (context, error)) == NULL)
         {
             goto FAIL;
@@ -2497,25 +2457,24 @@ swf_parse_definebuttonsound (swf_parser * context, int * error)
 
         switch (i)
         {
-            case 0:
-                button->up_state = state;
-                break;
-            case 1:
-                button->over_state = state;
-                break;
-            case 2:
-                button->down_state = state;
-                break;
+		case 0:
+			button->up_state = state;
+			break;
+
+		case 1:
+			button->over_state = state;
+			break;
+			
+		case 2:
+			button->down_state = state;
+			break;
         }
-
-
-
 
     }
 
     return button;
 
-    FAIL:
+ FAIL:
     swf_destroy_definebuttonsound (button);
     return NULL;
 }
@@ -2533,7 +2492,6 @@ swf_parse_soundstreamhead (swf_parser * context, int * error)
     head->mix_format = swf_parse_get_byte (context);
 
     /* The stream settings */
-
     head->stream_compression         = context->stream_compression = swf_parse_get_bits (context, 4);
     head->stream_sample_rate         = context->stream_sample_rate = swf_parse_get_bits (context, 2);
     head->stream_sample_size         = context->stream_sample_size = swf_parse_get_bits (context, 1);
@@ -2541,7 +2499,6 @@ swf_parse_soundstreamhead (swf_parser * context, int * error)
     head->n_stream_samples           = context->n_stream_samples = swf_parse_get_word (context);
 
     return head;
-
 }
 
 swf_soundstreamhead *
@@ -2577,10 +2534,6 @@ swf_parse_definebitslossless (swf_parser * context, int * error)
 
 
     return bits;
-
-
-
-
 }
 
 swf_definebitslossless *
@@ -2597,8 +2550,6 @@ swf_parse_get_textrecord (swf_parser * context, int * error, int has_alpha, int 
     int g;
     swf_textrecord * record;
     SWF_U8 flags = swf_parse_get_byte(context);
-
-
 
     if (flags == 0) { return NULL; }
 
@@ -2644,7 +2595,6 @@ swf_parse_get_textrecord (swf_parser * context, int * error, int has_alpha, int 
         if (flags & textHasFont)
         {
             record->font_height = swf_parse_get_word(context);
-
         }
         #ifdef SWF_PARSE_DEBUG
         fprintf(stderr,"]\n");
@@ -2676,7 +2626,6 @@ swf_parse_get_textrecord (swf_parser * context, int * error, int has_alpha, int 
             {
                *error = SWF_EMallocFailure;
                 goto FAIL;
-
             }
 
             record->glyphs[g][0] = swf_parse_get_bits (context, glyph_bits);    // index
@@ -2718,35 +2667,35 @@ swf_parse_get_textrecords (swf_parser * context, int * error, int has_alpha, int
 
     while (1)
     {
-            #ifdef SWF_PARSE_DEBUG
-            fprintf (stderr, "[get_textrecords : attempting to get  a record]\n");
-            #endif
+        #ifdef DEBUG
+		fprintf (stderr, "[get_textrecords : attempting to get  a record]\n");
+        #endif
 
-	        if ((temp = swf_parse_get_textrecord(context, error, has_alpha, glyph_bits, advance_bits)) == NULL)
-            {
-                //if (error != SWF_ENoError)
-                //{
-                //    goto FAIL;
-                //}
-               break;
-	        }
+		if ((temp = swf_parse_get_textrecord(context, error, has_alpha, glyph_bits, advance_bits)) == NULL)
+		{
+			//if (error != SWF_ENoError)
+			//{
+			//    goto FAIL;
+			//}
+			break;
+		}
 
-            #ifdef SWF_PARSE_DEBUG
-            fprintf (stderr, "[get_textrecords : got a record]\n");
-            #endif
+        #ifdef DEBUG
+        fprintf (stderr, "[get_textrecords : got a record]\n");
+        #endif
 
-            *(list->lastp) = temp;
-	        list->lastp = &(temp->next);
+		*(list->lastp) = temp;
+		list->lastp = &(temp->next);
     }
 
-    #ifdef SWF_PARSE_DEBUG
+    #ifdef DEBUG
     fprintf (stderr, "[get_textrecords : returning]\n");
     #endif
 
     return list;
 
-    FAIL:
-    #ifdef SWF_PARSE_DEBUG
+ FAIL:
+    #ifdef DEBUG
     fprintf (stderr, "[get_text_records : FAILED!]\n");
     #endif
     swf_destroy_textrecord_list (list);
@@ -2777,24 +2726,24 @@ swf_parse_get_shaperecords (swf_parser * context, int * error)
 
     while (!at_end)
     {
-	        if ((temp = swf_parse_get_shaperecord(context, error, &at_end, xlast, ylast, FALSE) ) == NULL)
-            {
-                if (*error != SWF_ENoError)
-                {
-                    goto FAIL;
-                }
-                break;
-	        }
+		if ((temp = swf_parse_get_shaperecord(context, error, &at_end, xlast, ylast, FALSE) ) == NULL)
+		{
+			if (*error != SWF_ENoError)
+			{
+				goto FAIL;
+			}
+			break;
+		}
+		
+		*(list->lastp) = temp;
+		list->lastp = &(temp->next);
 
-	        *(list->lastp) = temp;
-	        list->lastp = &(temp->next);
-
-	        list->record_count++;
+		list->record_count++;
     }
 
     return list;
 
-    FAIL:
+ FAIL:
     swf_destroy_shaperecord_list (list);
     return NULL;
 }
@@ -2818,32 +2767,24 @@ swf_parse_get_buttonrecords (swf_parser * context, int * error, int with_alpha)
 
     button_end = swf_parse_get_byte (context);
 
-
-
     do
     {
-
-
         if ((temp = swf_parse_get_buttonrecord(context, error, button_end, with_alpha)) == NULL)
         {
             goto FAIL;
-
+			
         }
 
-
-         *(list->lastp) = temp;
-	     list->lastp = &(temp->next);
-
+		*(list->lastp) = temp;
+		list->lastp = &(temp->next);
     }
     while ((button_end = (SWF_U32) swf_parse_get_byte(context)) != 0);
 
     return list;
 
-    FAIL:
+ FAIL:
     swf_destroy_buttonrecord_list (list);
     return NULL;
-
-
 }
 
 
@@ -2886,8 +2827,6 @@ swf_parse_get_buttonrecord (swf_parser * context, int * error, int byte, int wit
             goto FAIL;
         }
 
-
-
         for (i=0; i<button->ncharacters; i++)
         {
             button->characters[i] = NULL;
@@ -2927,7 +2866,6 @@ swf_parse_get_shaperecord (swf_parser * context, int * error, int * at_end, int 
 
 
     if (!record->is_edge) {
-
         /* Handle a state change */
         record->flags = swf_parse_get_bits(context, 5);
 
@@ -2975,10 +2913,9 @@ swf_parse_get_shaperecord (swf_parser * context, int * error, int * at_end, int 
 
         *at_end = record->flags & eflagsEnd ? TRUE : FALSE;
 
-	return record;
-
-    } else {
-
+		return record;
+    } 
+	else { /* not strictly needed - the if branch returned! */
         if (swf_parse_get_bits(context, 1)) {
             /* Handle a line */
             nbits = (SWF_U16) swf_parse_get_bits(context, 4) + 2;   /* nbits is biased by 2 */
