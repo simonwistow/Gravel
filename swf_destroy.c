@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_destroy.c,v $
+ * Revision 1.15  2001/07/12 20:08:22  clampr
+ * in swf_destroy_textrecord check there are glyphs to destroy first, else you free(NULL) and badness occurs
+ *
  * Revision 1.14  2001/07/09 12:47:59  muttley
  * Changes for lib_swfextract and text_extract
  *
@@ -155,8 +158,7 @@ swf_destroy_textrecord (swf_textrecord * record)
     for (i=0; i<record->glyph_count; i++) {
         free (record->glyphs[i]);
     }
-    free (record->glyphs);
-
+    if (record->glyphs) free (record->glyphs);
     free (record);
 
     return;
@@ -166,7 +168,6 @@ void
 swf_destroy_textrecord_list (swf_textrecord_list * list)
 {
     swf_textrecord *tmp, *node;
-
     if (list==NULL){
 	return;
     }
@@ -855,10 +856,10 @@ swf_destroy_definetext (swf_definetext * text)
         return;
     }
 
-
     swf_destroy_rect (text->rect);
     swf_destroy_matrix (text->matrix);
     swf_destroy_textrecord_list (text->records);
+
     free (text);
 
     return;
