@@ -34,9 +34,17 @@ sub new {
 
     my $self = {};
 
+	$self->{_is_button} = $conf{is_button};
+
+	if ($self->{_is_button}) {
+
+	} else {
+		$self->{_effects} = [$conf{effect}];
+	}
+
+
 	$self->{_current} = 0;
 	$self->{_shape} = $conf{shape};
-	$self->{_effects} = [$conf{effect}];
 
 	$self->{_start} = $conf{start};
 	$self->{_end} = $conf{end};
@@ -121,6 +129,8 @@ sub merge_matrix {
 # FIXME: Multiple effects
 sub frames {
 	my $self = shift;
+
+#	return $self->
 
 	my $m = [];
 	my $ra_m = [];
