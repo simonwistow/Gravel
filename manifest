@@ -31,3 +31,6 @@ swfs/lossless.swf
 swfs/sound2.swf   
 swfs/test2.swf   
 swfs/textbox.swf
+lib_swfextract.c
+lib_swfextract.h
+text_extract.c

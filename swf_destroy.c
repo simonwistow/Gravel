@@ -16,10 +16,8 @@
  *
  *
  * $Log: swf_destroy.c,v $
- * Revision 1.13  2001/07/05 12:02:51  muttley
- * Fixed parsing of ButtonRecords and DoActions
- * Updated the types, destroy and print functions to cope with this
- * Updated the todo, readme and manifest files to reflect this
+ * Revision 1.14  2001/07/09 12:47:59  muttley
+ * Changes for lib_swfextract and text_extract
  *
  * Revision 1.12  2001/06/30 12:33:18  kitty_goth
  * Move to a linked list representation of shaperecords - I was getting

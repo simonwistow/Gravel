@@ -16,10 +16,8 @@
  *
  *
  * $Log: parser.h,v $
- * Revision 1.8  2001/07/05 12:02:51  muttley
- * Fixed parsing of ButtonRecords and DoActions
- * Updated the types, destroy and print functions to cope with this
- * Updated the todo, readme and manifest files to reflect this
+ * Revision 1.9  2001/07/09 12:47:59  muttley
+ * Changes for lib_swfextract and text_extract
  *
  * Revision 1.7  2001/06/26 13:43:56  muttley
  * Store info from DefineFont, DefineFontInfo and DefineText to extract text properly
