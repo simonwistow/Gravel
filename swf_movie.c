@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.8 2002/05/09 15:26:55 clampr Exp $	
+ * 	$Id: swf_movie.c,v 1.9 2002/05/09 16:56:07 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -265,7 +265,7 @@ swf_shaperecord_list * swf_make_shaperecords_for_triangle(int * error) {
 }
 
 
-void swf_get_raw_shape (swf_parser * swf, int * error, swf_tagrecord * mybuffer) {
+void swf_get_raw_shape (swf_parser * swf, int * error, swf_tagrecord * mytag) {
     SWF_U32 startpos;
     int length;    
 
@@ -274,11 +274,22 @@ void swf_get_raw_shape (swf_parser * swf, int * error, swf_tagrecord * mybuffer)
     startpos = swf->filepos;
     length = swf->cur_tag_len;
 
+    /* mytag should not have a calloc'd buffer */
+
+    if (mytag->buffer != NULL) {
+	return;
+    }
+
+    if ((mytag->buffer = (SWF_U8 *) calloc (length, sizeof (SWF_U8))) == NULL) {
+	*error = SWF_EMallocFailure;
+	return;
+    }
+
 /* CHECKME: Do we need this ? */
-    swf_parse_seek(swf, startpos);
+//    swf_parse_seek(swf, startpos);
     
-    mybuffer->buffer = swf_parse_get_bytes(swf, length);
-    mybuffer->size = length;
+    mytag->buffer = swf_parse_get_bytes(swf, length);
+    mytag->size = length;
 }
 
 
