@@ -37,8 +37,6 @@ $m->make_timeline();
 #print STDERR DumperX $m;
 #print STDERR DumperX $e;
 
-print STDERR DumperX $m;
-
 my $r = $m->bake_movie();
 
 #print STDERR DumperX $m;

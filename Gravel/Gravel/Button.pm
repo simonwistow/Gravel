@@ -54,6 +54,8 @@ sub vertices {
 	foreach my $state (@{$self->{_states}}) {
 		push @$vert, $state->shape->vertices;
 	}
+
+	return $vert;
 }
 
 #

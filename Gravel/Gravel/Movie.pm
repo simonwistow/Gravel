@@ -154,9 +154,9 @@ sub bake_movie {
 	$b->_bake_header($self);
 	$b->_bake_preamble($self, 0);
 
-	print STDERR DumperX $self->{_library};
-
 	$b->_bake_library($self);
+
+	print STDERR DumperX $self;
 
 	$b->_bake_frames($self);
 
@@ -858,6 +858,7 @@ void _bake_frames(SV* obj, SV* self) {
 				for (j=0; j<=av_len(a_frame); ++j) {
 					ph_shape = av_fetch(a_frame, j, 0);
 					if (NULL != ph_shape) {
+						/* FIXME: Need to delegate this to the perl object in question via _perl_ dispatch and split up this monolithic XS code... */
 						_bake_place(m->movie, &error, (HV *)SvRV(*ph_shape));
 					}
 				}
