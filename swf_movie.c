@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.36 2002/07/11 16:16:47 kitty_goth Exp $	
+ * 	$Id: swf_movie.c,v 1.37 2002/07/29 16:41:48 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -90,6 +90,8 @@ swf_destroy_movie (swf_movie * movie)
 
 	tagid  = tmp->id;
 	tagrec = tmp->tag;
+
+	//	fprintf(stderr, "Destroying a tag of id: %i\n", tagid);
 
 	if (shiva[tagid]) {
 	  shiva[tagid](tagrec);

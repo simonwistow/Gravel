@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: tagrecord.c,v 1.4 2002/07/01 08:23:53 muttley Exp $	
+ * 	$Id: tagrecord.c,v 1.5 2002/07/29 16:41:48 kitty_goth Exp $	
  */
 
 #include <stdlib.h>
@@ -67,7 +67,8 @@ swf_destroy_tagrecord (swf_tagrecord * tag)
      of by specialised cleanup, that knows what type it is */
   
   swf_destroy_buffer(tag->buffer);
-  swf_free (tag);
+  tag->buffer = NULL;
+  swf_free(tag);
 }
 
 

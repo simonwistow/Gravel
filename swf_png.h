@@ -22,6 +22,12 @@ void swf_png_get_IHDR(swf_png_data * png, int * error, png_structp png_ptr, png_
 
 void swf_png_get_PLTE(swf_png_data * png, int * error, png_structp png_ptr, png_infop info_ptr);
 
+swf_tagrecord * swf_read_png(const char * filename, int * error);
+swf_buffer * swf_write_dbl(int * error, swf_png_data * png, SWF_U16 bitmap_id);
+void writeDBL(FILE *f, swf_png_data * png, int * error);
+swf_shaperecord_list * swf_make_shaperecords_for_box(int * error);
+swf_tagrecord * swf_make_box(swf_movie * movie, int * error);
+
 #endif 
 
 /* 

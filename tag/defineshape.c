@@ -132,10 +132,7 @@ swf_destroy_defineshape (swf_defineshape * shape)
         return;
     }
     swf_destroy_rect (shape->rect);
-	/* FIXME: URGENT : There's a bug in destroy_shapestyle which 
-	 * causes swf_parse to bug out if the next line is uncommented...
-	 */
-    //swf_destroy_shapestyle (shape->style);
+    swf_destroy_shapestyle (shape->style);
     swf_destroy_shaperecord_list (shape->record);
     swf_free(shape);
     return;
