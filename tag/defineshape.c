@@ -98,6 +98,7 @@ swf_buffer_shaperecord(swf_buffer * buffer, int * error, swf_shaperecord * s, sw
 	if (!s->is_edge) {
 		/* State change */
 		
+		printf("Putting non-edge.. flags : %u\n", s->flags);
 		swf_buffer_put_bits(buffer, 5, s->flags);
 
         /* Are we at the end? */
@@ -136,14 +137,19 @@ swf_buffer_shaperecord(swf_buffer * buffer, int * error, swf_shaperecord * s, sw
 
 		return;
 	} else {
+		printf("Putting edge..\n");
 
 		if (s->x | s->y) {
 			if (s->ax | s->ay | s->cx | s->cy) {
+				printf("Putting weirdness..\n");
 				/* We're trying to be a line and a curve all at once */
 				*error = SWF_ENotValidSWF;
 				return;
 			}
+
 			/* we're a straight line */
+			printf("Putting line..\n");
+
 			swf_buffer_put_bits(buffer, 1, 1);
 			
 			max = 0;
@@ -154,13 +160,13 @@ swf_buffer_shaperecord(swf_buffer * buffer, int * error, swf_shaperecord * s, sw
 				max = abs(s->x);
 			}
 			
-			i = 0; /* 2 for sbits, -2 from spec */
+			i = 2; /* 2 for sbits, -2 from spec */
 			while (1 < max) {
 				i++;
 				max = max >> 1;
 			}
 			swf_buffer_put_bits(buffer, 4, i);
-			i += 4;
+			i += 2;
 
 			if ((0 == s->x) || (0 == s->y)) {
 				/* Vertical / Horizontal line */
@@ -181,6 +187,7 @@ swf_buffer_shaperecord(swf_buffer * buffer, int * error, swf_shaperecord * s, sw
 			/* TODO: Curves... */
 			/* we're a curve */
 			swf_buffer_put_bits(buffer, 1, 0);
+			printf("Putting curve..\n");
 
 		}
 		

@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.29 2002/06/08 12:25:42 kitty_goth Exp $	
+ * 	$Id: swf_movie.c,v 1.30 2002/06/08 13:47:30 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -324,10 +324,12 @@ swf_make_shaperecords_for_triangle(int * error)
 
 /* First, we need a non-edge, change of style record */ 
     record = swf_make_shaperecord(error, 0);
-    record->flags = eflagsFill0 | eflagsFill1 | eflagsLine;
+//    record->flags = eflagsFill0 | eflagsFill1 | eflagsLine;
+    record->flags = eflagsFill1 | eflagsLine;
+//    record->flags = eflagsFill1;
     record->fillstyle0 = 0;
-    record->fillstyle1 = 0;
-    record->linestyle = 0;
+    record->fillstyle1 = 1;
+    record->linestyle = 1;
 
 
     swf_add_shaperecord(list, error, record);
@@ -430,6 +432,7 @@ swf_make_triangle(swf_movie * movie, int * error)
 
     *(mystyle->fills) = swf_make_fillstyle(error);
     *(mystyle->lines) = swf_make_linestyle(error);
+//    *(mystyle->lines) = NULL;
 
     shape->style = mystyle;
 

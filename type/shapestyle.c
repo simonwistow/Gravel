@@ -139,6 +139,7 @@ swf_buffer_shapestyle(swf_buffer * buffer, int * error, swf_shapestyle * s)
 	SWF_U16 max;
 	SWF_U8 i, type;
 
+	swf_buffer_initbits(buffer);
 	if (s->nfills < 255) {
 		swf_buffer_put_byte (buffer, error, (SWF_U8)s->nfills);
 	} else {
@@ -147,6 +148,8 @@ swf_buffer_shapestyle(swf_buffer * buffer, int * error, swf_shapestyle * s)
 
 	/* FIXME: Alpha channels... */
 	for (i=0; i < s->nfills; i++) {
+		printf("putting fill %i\n", i);
+
 		type = s->fills[i]->fill_style;
 		swf_buffer_put_byte (buffer, error, type);
 
@@ -160,7 +163,9 @@ swf_buffer_shapestyle(swf_buffer * buffer, int * error, swf_shapestyle * s)
 		} else {
 			/* Solid Fill */
 			/* Test code */
-			swf_buffer_put_dword(buffer, error, 0);
+			swf_buffer_put_byte(buffer, error, 0);
+			swf_buffer_put_byte(buffer, error, 0);
+			swf_buffer_put_byte(buffer, error, 0);
 
 			/* FIXME: The code uses SWF_U32 instead of a colour type for fillstyle->colour atm */
 			//			swf_serialise_cxform(buffer, error, s->fills[i]->colour);
@@ -175,9 +180,12 @@ swf_buffer_shapestyle(swf_buffer * buffer, int * error, swf_shapestyle * s)
 
 	/* FIXME: Alpha channels... */
 	for (i=0; i < s->nlines; i++) {
+		printf("putting line %i\n", i);
 		swf_buffer_put_word (buffer, error, s->lines[i]->width);
 			/* Test code */
-			swf_buffer_put_dword(buffer, error, 0);
+			swf_buffer_put_byte(buffer, error, 0);
+			swf_buffer_put_byte(buffer, error, 0);
+			swf_buffer_put_byte(buffer, error, 0);
 
 			/* FIXME: The code uses SWF_U32 instead of a colour type for fillstyle->colour atm */
 			//		swf_serialise_cxform(buffer, error, s->lines[i]->colour);

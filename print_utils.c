@@ -16,6 +16,10 @@
  *
  *
  * $Log: print_utils.c,v $
+ * Revision 1.18  2002/06/08 13:47:30  kitty_goth
+ * This is still a bit broken but defineshape generation is actually starting to
+ * produce stuff
+ *
  * Revision 1.17  2002/06/08 12:25:42  kitty_goth
  * Modify swf_parse to pick out the define shapes only. Have a read of these
  * changes when you get a minute, Simon.
@@ -672,6 +676,22 @@ print_shaperecords (swf_shaperecord_list * record,const char * str)
 		node = node->next;
     
 		printf("%s\tShape isEdge: %i ; Flags : %u\n", str, temp->is_edge, temp->flags);
+		if (temp->flags & eflagsMoveTo) {
+			printf("%s\t\tMove To\n", str);
+		}
+		if (temp->flags & eflagsFill0) {
+			printf("%s\t\tFill 0 Changes to %i\n", str, temp->fillstyle0);
+		}
+		if (temp->flags & eflagsFill1) {
+			printf("%s\t\tFill 1 Changes to %i\n", str, temp->fillstyle1);
+		}
+		if (temp->flags & eflagsLine) {
+			printf("%s\t\tLine Changes\n", str);
+		}
+		if (temp->flags & eflagsNewStyles) {
+			printf("%s\t\tStyles Change\n", str);
+		}
+
 		if (temp->x | temp->y) {
 			printf("%s\tLine Found : x : %li ; y : %li\n", str, temp->x, temp->y);
 		}
