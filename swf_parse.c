@@ -13,111 +13,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- *
- *
- * $Log: swf_parse.c,v $
- * Revision 1.43  2001/07/16 15:05:15  clampr
- * get rid of glib due to randomness (I suspect it may have been a dynamic linking issue)
- *
- * add in a homebrew linked list type for font_extras (ick)
- *
- * Revision 1.42  2001/07/16 01:41:25  clampr
- * glib version of font management
- *
- * Revision 1.41  2001/07/15 15:12:53  clampr
- * move the mp3 stuff to definesound
- *
- * Revision 1.40  2001/07/15 14:09:46  clampr
- * slice swf_parse.c and swf_destroy.c into tag/*.c files
- *
- * Revision 1.39  2001/07/14 23:45:48  clampr
- * one bigass layout delta
- *
- * Revision 1.38  2001/07/14 23:28:01  clampr
- * spurious line deltas 'o the day
- *
- * Revision 1.37  2001/07/14 23:17:11  clampr
- * tweak up some layout
- *
- * Revision 1.36  2001/07/14 23:03:18  clampr
- * avoid a calloc(0)
- *
- * Revision 1.35  2001/07/14 22:14:09  clampr
- * avoid calloc(0)
- *
- * Revision 1.34  2001/07/14 21:35:02  clampr
- * swf_parse_definebuttonsound don't free something being returned
- *
- * Revision 1.33  2001/07/14 00:17:55  clampr
- * added emacs file variables to avoid clashing with existing style (now I know what it is)
- *
- * Revision 1.32  2001/07/13 15:58:08  muttley
- * Bad Simon! Don't turn on DEBUG in a file, use make
- *
- * Revision 1.31  2001/07/13 15:22:07  clampr
- * another realloc of NULL
- *
- * Revision 1.30  2001/07/13 14:58:44  clampr
- * avoid a calloc(0)
- *
- * Revision 1.29  2001/07/13 14:51:41  clampr
- * paper over some cracks fond in 3deng_01.swf
- *
- * Revision 1.28  2001/07/13 14:47:34  clampr
- * malloc the right type
- *
- * Revision 1.27  2001/07/13 14:35:18  muttley
- * Fix bug in parsing button2actions
- *
- * Revision 1.26  2001/07/13 14:02:51  clampr
- * s/free/swf_free/
- *
- * Revision 1.25  2001/07/13 13:26:55  muttley
- * Added handling for button2actions.
- * We should be able to parse all URLs now
- *
- * Revision 1.23  2001/07/13 00:57:48  clampr
- * fixed a memory leak in swf_parser->font_chars deallocation
- * documented a magic number that needs slaying
- *
- * Revision 1.22  2001/07/13 00:32:31  clampr
- * juggle to avoid calloc(0, sizeof(SWF_U8))
- *
- * Revision 1.21  2001/07/09 15:48:54  acme
- * Renamed U32 to SWF_U32 and so on
- *
- * Revision 1.20  2001/07/09 12:38:57  muttley
- * A few bug fixes
- *
- * Revision 1.15  2001/06/30 12:33:18  kitty_goth
- * Move to a linked list representation of shaperecords - I was getting
- * SEGFAULT due to not large enough free chunk's. Seems much faster now.
- * --Kitty
- *
- * Revision 1.14  2001/06/30 09:55:35  kitty_goth
- * Synch with Simons mods
- *
- * Revision 1.13  2001/06/29 15:10:11  muttley
- * The printing of the actual text of a DefineText (and DefineText2 now)
- * is no longer such a big hack. Font information is kept in the swf_parser
- * context and the function that will take a text_record_list and print out
- * the text (textrecord_list_to_text) has been moved to swf_parse.c ...
- *
- * A couple of potential bugs have also been fixed and some more 'todo's added
- *
- * Revision 1.12  2001/06/27 12:42:15  kitty_goth
- * Debug shaperecord handling --Kitty
- *
- * Revision 1.11  2001/06/26 17:40:30  kitty_goth
- * Bug fix for swf_parse_get_bytes to fix sound stream stuff. --Kitty
- *
- * Revision 1.10  2001/06/26 13:43:02  muttley
- * Fix text_record and text_record_list parsing
- *
  */
 
 #include "swf_parse.h"
 #include "swf_destroy.h"
+#include "handy.h"
 
 
 /*
@@ -547,9 +447,7 @@ swf_parse_get_button2actions (swf_parser * context, int * error)
 		action_offset = swf_parse_get_word (context);
 		next_action   = swf_parse_tell (context) + action_offset - 2;
 		
-        #ifdef DEBUG
-        fprintf (stderr, "[get_button2action_list : action_offset  = %lx %lx (%d)]\n", action_offset, next_action, test);
-        #endif
+        dprintf ("[get_button2action_list : action_offset  = %lx %lx (%d)]\n", action_offset, next_action, test);
 
 		if ((temp  = (swf_button2action *) calloc (1, sizeof(swf_button2action))) == NULL)
 		{
@@ -634,9 +532,7 @@ swf_parse_get_textrecords (swf_parser * context, int * error, int has_alpha, int
     swf_textrecord_list * list;
     swf_textrecord * temp;
 
-    #ifdef SWF_PARSE_DEBUG
-    fprintf (stderr, "[get_textrecords : mallocing]\n");
-    #endif
+    dprintf ("[get_textrecords : mallocing]\n");
 
     if ((list = (swf_textrecord_list *) calloc (1, sizeof (swf_textrecord_list))) == NULL)
     {
@@ -648,9 +544,7 @@ swf_parse_get_textrecords (swf_parser * context, int * error, int has_alpha, int
 
     while (1)
     {
-        #ifdef DEBUG
-		fprintf (stderr, "[get_textrecords : attempting to get  a record]\n");
-        #endif
+		dprintf ("[get_textrecords : attempting to get  a record]\n");
 
 		if ((temp = swf_parse_get_textrecord(context, error, has_alpha, glyph_bits, advance_bits)) == NULL)
 		{
@@ -661,24 +555,18 @@ swf_parse_get_textrecords (swf_parser * context, int * error, int has_alpha, int
 			break;
 		}
 
-        #ifdef DEBUG
-        fprintf (stderr, "[get_textrecords : got a record]\n");
-        #endif
+        dprintf ("[get_textrecords : got a record]\n");
 
 		*(list->lastp) = temp;
 		list->lastp = &(temp->next);
     }
 
-    #ifdef DEBUG
-    fprintf (stderr, "[get_textrecords : returning]\n");
-    #endif
+    dprintf ("[get_textrecords : returning]\n");
 
     return list;
 
  FAIL:
-    #ifdef DEBUG
-    fprintf (stderr, "[get_text_records : FAILED!]\n");
-    #endif
+    dprintf ("[get_text_records : FAILED!]\n");
     swf_destroy_textrecord_list (list);
     return NULL;
 }
@@ -852,9 +740,7 @@ swf_parse_get_shaperecord (swf_parser * context, int * error, int * at_end, int 
 
         /* Are we at the end? */
         if (record->flags == 0) {
-            #ifdef SWF_PARSE_DEBUG
-            fprintf(stderr, "\tEnd of shape.\n\n");
-            #endif
+            dprintf("\tEnd of shape.\n\n");
             *at_end = TRUE;
             return record;
         }
@@ -971,41 +857,29 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
         return NULL;
     }
 
-    #ifdef SWF_PARSE_DEBUG
-    fprintf (stderr, "[textrecords_to_text : list is not null]\n");
-    #endif
+    dprintf ("[textrecords_to_text : list is not null]\n");
     node = list->first;
 
-    #ifdef SWF_PARSE_DEBUG
-    fprintf (stderr, "[textrecords_to_text : node is %s]\n", (node==NULL)?"NULL":"Ok");
-    #endif
+    dprintf ("[textrecords_to_text : node is %s]\n", (node==NULL)?"NULL":"Ok");
 
     /* todo simon : if node == NULL need to cope */
 
     while (node != NULL)
     {
-        #ifdef SWF_PARSE_DEBUG
-        fprintf (stderr, "[textrecords_to_text : node is not NULL]\n");
-        #endif
+        dprintf ("[textrecords_to_text : node is not NULL]\n");
 
         if (node->flags & isTextControl)
         {
-            #ifdef SWF_PARSE_DEBUG
-            fprintf (stderr, "[textrecords_to_text : it's a text control]\n");
-            #endif
+            dprintf ("[textrecords_to_text : it's a text control]\n");
 
             if ( node->flags & textHasFont)
             {
                 font_id = node->font_id;
-                #ifdef DEBUG
-                fprintf (stderr, "[textrecords_to_text : font_id is %d]\n", font_id);
-                #endif
+                dprintf ("[textrecords_to_text : font_id is %d]\n", font_id);
             }
         }
 		else {
-            #ifdef DEBUG
-            fprintf (stderr, "[textrecords_to_text : mallocing string %d : fontid now %d]\n", node->glyph_count, font_id);
-            #endif
+            dprintf ("[textrecords_to_text : mallocing string %d : fontid now %d]\n", node->glyph_count, font_id);
 
             /* malloc to the size of the string */
             if ((str = (char *) calloc (node->glyph_count+1, sizeof (char))) == NULL)
@@ -1014,9 +888,7 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
                 return NULL;
             }
 
-            #ifdef DEBUG
-            fprintf (stderr, "[textrecords_to_text : malloced string]\n");
-            #endif
+            dprintf ("[textrecords_to_text : malloced string]\n");
 
             if (!(font = swf_fetch_font_extra(context, font_id, 0)))
             {
@@ -1024,10 +896,8 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
                 return NULL;
             }
 
-            #ifdef DEBUG
-            fprintf (stderr, "[textrecords_to_text : number of glyphs is  %d]\n", node->glyph_count);
-            #endif
-
+            dprintf ("[textrecords_to_text : number of glyphs is  %d]\n", node->glyph_count);
+			
             /* ... and then set it */
             for (g=0; g< node->glyph_count; g++)
             {
@@ -1035,11 +905,9 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
             }
             str[g]='\0';
 
-            /* todo :sometimes there's more than one peice of text ... we shoudl probably cope with that as well */
-            #ifdef SWF_PARSE_DEBUG
-            fprintf (stderr, "[textrecords_to_text : string is  '%s']\n", str);
-            #endif
+            dprintf ("[textrecords_to_text : string is  '%s']\n", str);
 
+            /* todo :sometimes there's more than one peice of text ... we shoudl probably cope with that as well */
             return str;
         }
 
@@ -1049,36 +917,136 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
     }
 
 
-
-    #ifdef SWF_PARSE_DEBUG
-    fprintf (stderr, "[textrecords_to_text : attempting to return]\n");
-    #endif
+    dprintf ("[textrecords_to_text : attempting to return]\n");
 
     if (font_id == -1) {
         /* somethings gone wrong */
-        #ifdef SWF_PARSE_DEBUG
-        fprintf (stderr, "[textrecords_to_text : EFontNotSet]\n");
-        #endif
+        dprintf (stderr, "[textrecords_to_text : EFontNotSet]\n");
         //todo simon : why is this not working *error = SWF_EFontNotSet;
         return NULL;
     }
 
     if (str == NULL) {
         /* somethings gone wrong */
-        #ifdef SWF_PARSE_DEBUG
-        fprintf (stderr, "[textrecords_to_text : EStringNotSet]\n");
-        #endif
+        dprintf ("[textrecords_to_text : EStringNotSet]\n");
         *error = SWF_EFontNotSet; /*todo :  need to change error message */
         return NULL;
     }
     /* et voila */
-    #ifdef SWF_PARSE_DEBUG
-    fprintf (stderr, "[textrecords_to_text : returning]\n");
-    #endif
+
+    dprintf ("[textrecords_to_text : returning]\n");
 
     return str;
 }
 
+
+
+/*
+ * $Log: swf_parse.c,v $
+ * Revision 1.44  2001/07/20 01:59:18  clampr
+ * move cvs log to the end of the file
+ *
+ * switch to handy.h, dprintf tidy
+ *
+ * Revision 1.43  2001/07/16 15:05:15  clampr
+ * get rid of glib due to randomness (I suspect it may have been a dynamic linking issue)
+ *
+ * add in a homebrew linked list type for font_extras (ick)
+ *
+ * Revision 1.42  2001/07/16 01:41:25  clampr
+ * glib version of font management
+ *
+ * Revision 1.41  2001/07/15 15:12:53  clampr
+ * move the mp3 stuff to definesound
+ *
+ * Revision 1.40  2001/07/15 14:09:46  clampr
+ * slice swf_parse.c and swf_destroy.c into tag/*.c files
+ *
+ * Revision 1.39  2001/07/14 23:45:48  clampr
+ * one bigass layout delta
+ *
+ * Revision 1.38  2001/07/14 23:28:01  clampr
+ * spurious line deltas 'o the day
+ *
+ * Revision 1.37  2001/07/14 23:17:11  clampr
+ * tweak up some layout
+ *
+ * Revision 1.36  2001/07/14 23:03:18  clampr
+ * avoid a calloc(0)
+ *
+ * Revision 1.35  2001/07/14 22:14:09  clampr
+ * avoid calloc(0)
+ *
+ * Revision 1.34  2001/07/14 21:35:02  clampr
+ * swf_parse_definebuttonsound don't free something being returned
+ *
+ * Revision 1.33  2001/07/14 00:17:55  clampr
+ * added emacs file variables to avoid clashing with existing style (now I know what it is)
+ *
+ * Revision 1.32  2001/07/13 15:58:08  muttley
+ * Bad Simon! Don't turn on DEBUG in a file, use make
+ *
+ * Revision 1.31  2001/07/13 15:22:07  clampr
+ * another realloc of NULL
+ *
+ * Revision 1.30  2001/07/13 14:58:44  clampr
+ * avoid a calloc(0)
+ *
+ * Revision 1.29  2001/07/13 14:51:41  clampr
+ * paper over some cracks fond in 3deng_01.swf
+ *
+ * Revision 1.28  2001/07/13 14:47:34  clampr
+ * malloc the right type
+ *
+ * Revision 1.27  2001/07/13 14:35:18  muttley
+ * Fix bug in parsing button2actions
+ *
+ * Revision 1.26  2001/07/13 14:02:51  clampr
+ * s/free/swf_free/
+ *
+ * Revision 1.25  2001/07/13 13:26:55  muttley
+ * Added handling for button2actions.
+ * We should be able to parse all URLs now
+ *
+ * Revision 1.23  2001/07/13 00:57:48  clampr
+ * fixed a memory leak in swf_parser->font_chars deallocation
+ * documented a magic number that needs slaying
+ *
+ * Revision 1.22  2001/07/13 00:32:31  clampr
+ * juggle to avoid calloc(0, sizeof(SWF_U8))
+ *
+ * Revision 1.21  2001/07/09 15:48:54  acme
+ * Renamed U32 to SWF_U32 and so on
+ *
+ * Revision 1.20  2001/07/09 12:38:57  muttley
+ * A few bug fixes
+ *
+ * Revision 1.15  2001/06/30 12:33:18  kitty_goth
+ * Move to a linked list representation of shaperecords - I was getting
+ * SEGFAULT due to not large enough free chunk's. Seems much faster now.
+ * --Kitty
+ *
+ * Revision 1.14  2001/06/30 09:55:35  kitty_goth
+ * Synch with Simons mods
+ *
+ * Revision 1.13  2001/06/29 15:10:11  muttley
+ * The printing of the actual text of a DefineText (and DefineText2 now)
+ * is no longer such a big hack. Font information is kept in the swf_parser
+ * context and the function that will take a text_record_list and print out
+ * the text (textrecord_list_to_text) has been moved to swf_parse.c ...
+ *
+ * A couple of potential bugs have also been fixed and some more 'todo's added
+ *
+ * Revision 1.12  2001/06/27 12:42:15  kitty_goth
+ * Debug shaperecord handling --Kitty
+ *
+ * Revision 1.11  2001/06/26 17:40:30  kitty_goth
+ * Bug fix for swf_parse_get_bytes to fix sound stream stuff. --Kitty
+ *
+ * Revision 1.10  2001/06/26 13:43:02  muttley
+ * Fix text_record and text_record_list parsing
+ *
+ */
 
 
 
