@@ -21,14 +21,29 @@ sub new {
     my %conf;
     
     if ($cf eq 'HASH') {
-	%conf = %{$_[0]};
+		%conf = %{$_[0]};
     } else {
-	%conf = @_;
+		%conf = @_;
     }
+
+	$self->{_contents} = {};
 
     bless $self => $class;
 
     return $self;
+}
+
+sub contents { return (shift)->{_contents}; }
+
+sub shape {
+	my $self = shift;
+	$self->{_contents}->{shape} = shift;
+}
+
+sub place {
+	my $self = shift;
+	$self->{_contents}->{x} = shift;
+	$self->{_contents}->{y} = shift;
 }
 
 #

@@ -38,6 +38,8 @@ sub new {
 #
 
 sub shape {return (shift)->{_shape};}
+sub startpos {return (shift)->{_startpos};}
+sub endpos   {return (shift)->{_endpos};}
 
 #
 

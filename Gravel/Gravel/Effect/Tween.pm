@@ -7,6 +7,7 @@ use lib '../../';
 
 use Gravel::Shape;
 use Gravel::Effect;
+use Gravel::Frame;
 
 use base qw(Gravel::Effect);
 
@@ -26,22 +27,50 @@ sub new {
     my %conf;
     
     if ($cf eq 'HASH') {
-	%conf = %{$_[0]};
+		%conf = %{$_[0]};
     } else {
-	%conf = @_;
+		%conf = @_;
     }
 
     $self->{_start} = $conf{start};
     $self->{_end} = $conf{end};
 
-    $self->{_startpos} = $conf{startpos};
-    $self->{_endpos} = $conf{endpos};
+    $self->{_startx} = $conf{startx};
+    $self->{_endx} = $conf{endx};
+
+    $self->{_starty} = $conf{starty};
+    $self->{_endy} = $conf{endy};
 
     return $self;
 }
 
 #
 
+
+sub frames {
+	my $self = shift;
+	
+	my $ra_f = [];
+
+	my $numf = $self->{_end} - $self->{_start};
+	my ($x, $y) = ($self->{_startx}, $self->{_starty});
+
+	my $dx = ( $self->{_endx} - $self->{_startx} ) / $numf;
+	my $dy = ( $self->{_endy} - $self->{_starty} ) / $numf;
+
+	for (my $i = $self->{_start}; $i < $self->{_end}; ++$i) {
+		my $f = Gravel::Frame->new();
+
+		$f->shape($self->shape);
+		$f->place($x, $y);
+
+		$ra_f->[$i] = $f;
+		$x += $dx;
+		$y += $dy;
+	}
+
+	return $ra_f;
+}
 
 
 #

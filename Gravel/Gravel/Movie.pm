@@ -32,9 +32,9 @@ sub new {
     my %conf;
     
     if ($cf eq 'HASH') {
-	%conf = %{$_[0]};
+		%conf = %{$_[0]};
     } else {
-	%conf = @_;
+		%conf = @_;
     }
 
     $self->{_library} = [];
@@ -54,7 +54,7 @@ sub event {
     push @{$self->{_events}}, $e;
     my $g = $e->shape();
     foreach (@{$self->{_library}}) {
-	return if $_ == $g;
+		return if $_ == $g;
     }
     push @{$self->{_library}}, $g;
 }
@@ -74,10 +74,10 @@ sub make_timeline {
     my $self = shift;
 
     foreach my $e (@{$self->{_events}}) {
-	my $ra_f = $e->frames();
-	foreach (@$ra_f) {
-	    
-	}
+		my $ra_f = $e->frames();
+		for(my $i = 0; $i < scalar(@$ra_f); ++$i) {
+			$self->{_timeline}->[$i] = $ra_f->[$i] if $ra_f->[$i];
+		}
     }
 }
 
