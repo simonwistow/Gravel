@@ -3,7 +3,7 @@ INSTRUCTIONS:
 compile using :
 
 % ./configure
-% make
+% make  (or gmake if you're on a BSD-based system)
 
 run using :
 % ./swf_parse [filename here] 
@@ -18,20 +18,21 @@ and can also be made on its own by using '% make text_extract'
 
 MANIFEST:
 ----------------------
-readme              : this file
-Makefile	    : the makefile for the project
+README              : this file
+Makefile.in	    : the makefile for the project
 parser.[ch]         : the test harness, prints out contents of an SWF
 		    : file in a close a manner to the official Macromedia parser.
-swf_parse.[ch]      : the parsing/constructors routines
-swf_destroy.[ch]    : the destructor routines
+tag/*.c             : specific tag parsing/destroying routines
+swf_parse.[ch]      : miscellaneous parsing/constructors routines
+swf_destroy.[ch]    : miscellaneous destructor routines
 swf_error.[ch]      : error codes and code->string routine
 swf_types.h         : the types
 print_utils.[ch]    : utilities for printing our various types
-configure.in        : configure macros
-sizes.h.in          : cope with architecture independant U32 etc
+configure.ac        : configure macros
+swf_memory.h.in     : cope with architecture independant U32 etc
 oldswfparse.cpp     : the official Macromedia code
 gpl.txt             : the Gnu General Public licence
-todo                : stuff left todo
+TODO                : stuff left todo
 dos.pl		    : a Perl script which turns DOS into Unix style line
 		    : endings
 text_extract.c      : an app that will extract all the text and urls from an SWF
