@@ -77,6 +77,6 @@ AC_SUBST(S32)
 
 dnl What to do with all this information
 
-AC_CONFIG_FILES([sizes.h ])
+AC_CONFIG_FILES([sizes.h])
 AC_OUTPUT
 
