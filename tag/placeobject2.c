@@ -85,12 +85,11 @@ swf_parse_placeobject2 (swf_parser * context, int * error)
 }
 
 
-/* We also need 'name' and 'ratio' attributes */
+/* We also need 'ratio' (and ' move') attributes */
 void
-swf_add_placeobject2 (swf_movie * movie, int * error, SWF_U16 char_id, swf_matrix * mym, swf_cxform * mycx, char * myname)
+swf_add_placeobject2 (swf_movie * movie, int * error, swf_matrix * mym, SWF_U16 char_id, SWF_U16 depth, swf_cxform * mycx, char * myname)
 {
 	swf_tagrecord * temp;
-	SWF_U16 depth;
 	SWF_U8 hasName, hasRatio, hasColour, hasMatrix, hasChar;
 
 	hasName = hasRatio = hasColour = hasMatrix = hasChar = 0;
@@ -118,8 +117,6 @@ swf_add_placeobject2 (swf_movie * movie, int * error, SWF_U16 char_id, swf_matri
 	hasChar   = (char_id != 0);
 
 	//	printf("hasName = %i hasRatio = %i hasColour = %i hasMatrix = %i hasChar = %i\n", hasName, hasRatio, hasColour, hasMatrix, hasChar);
-
-	depth = 1;
 
     swf_buffer_initbits(temp->buffer);
 	swf_buffer_put_bits(temp->buffer, 2, 0); /* Undocument bits, assume 0 */

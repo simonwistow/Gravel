@@ -34,6 +34,39 @@ swf_parse_removeobject2(swf_parser * context, int * error)
 }
 
 
+void
+swf_add_removeobject2 (swf_movie * movie, int * error, SWF_U16 depth)
+{
+	swf_tagrecord * temp;
+
+    temp = swf_make_tagrecord(error);
+
+    if (*error) {
+		return;
+    }
+   
+    temp->next = NULL;
+    temp->id = tagRemoveObject2;
+    temp->tag = NULL;
+    temp->serialised = 1;
+
+/* Remove Object specifics */
+    if ((temp->buffer->raw = (SWF_U8 *) calloc (2, sizeof (SWF_U8))) == NULL) {
+		*error = SWF_EMallocFailure;
+		return;
+    }
+
+	swf_buffer_put_word(temp->buffer, error, depth);
+    temp->buffer->size = 2;
+
+/* Footer ... */
+
+    *(movie->lastp) = temp;
+    movie->lastp = &(temp->next);
+
+    return;
+}
+
 
 void
 swf_destroy_removeobject2 (swf_removeobject2 * object)

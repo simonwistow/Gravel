@@ -34,10 +34,9 @@ swf_parse_removeobject(swf_parser * context, int * error)
 }
 
 void
-swf_add_removeobject (swf_movie * movie, int * error, SWF_U16 char_id)
+swf_add_removeobject (swf_movie * movie, int * error, SWF_U16 char_id, SWF_U16 depth)
 {
 	swf_tagrecord * temp;
-	SWF_U16 depth;
 
     temp = swf_make_tagrecord(error);
 
@@ -56,8 +55,6 @@ swf_add_removeobject (swf_movie * movie, int * error, SWF_U16 char_id)
 		return;
     }
 
-	depth = 1;
-	
 	swf_buffer_put_word(temp->buffer, error, char_id);
 	swf_buffer_put_word(temp->buffer, error, depth);
     temp->buffer->size = 4;

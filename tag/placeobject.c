@@ -57,10 +57,9 @@ swf_parse_placeobject (swf_parser * context, int * error)
 
 
 void
-swf_add_placeobject (swf_movie * movie, int * error, SWF_U16 char_id, swf_matrix * mym)
+swf_add_placeobject (swf_movie * movie, int * error, swf_matrix * mym, SWF_U16 char_id, SWF_U16 depth)
 {
 	swf_tagrecord * temp;
-	SWF_U16 depth;
 
     temp = swf_make_tagrecord(error);
 
@@ -79,8 +78,6 @@ swf_add_placeobject (swf_movie * movie, int * error, SWF_U16 char_id, swf_matrix
 		return;
     }
 
-	depth = 1;
-	
 	swf_buffer_put_word(temp->buffer, error, char_id);
 	swf_buffer_put_word(temp->buffer, error, depth);
     temp->buffer->size = 4;

@@ -63,8 +63,8 @@ int main (int argc, char *argv[]) {
     swf_header * hdr;
     swf_tagrecord * temp;
     SWF_U16 obj_id;
-    swf_matrix * matrix;
-    swf_cxform * mycx;
+    swf_matrix *matrix, *m2;
+    swf_cxform *mycx, *cx2;
     int i;
 
 /* First, get a parser up */
@@ -126,6 +126,14 @@ int main (int argc, char *argv[]) {
       error = SWF_EMallocFailure;
       return 1;
     }
+    if ((m2 = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
+      error = SWF_EMallocFailure;
+      return 1;
+    }
+    if ((cx2 = (swf_cxform *) calloc (1, sizeof (swf_cxform))) == NULL) {
+      error = SWF_EMallocFailure;
+      return 1;
+    }
 
     mycx->ra = 0;
     mycx->ga = 0;
@@ -133,6 +141,13 @@ int main (int argc, char *argv[]) {
 
     mycx->aa = 0;
     mycx->ab = 0;
+
+    cx2->ra = 0;
+    cx2->ga = 0;
+    cx2->ba = 0;
+
+    cx2->aa = 0;
+    cx2->ab = 0;
 
 
 /* Now generate the output movie */
@@ -163,23 +178,38 @@ int main (int argc, char *argv[]) {
     mycx->gb = 0;
     mycx->bb = 0;
 
+    m2->a  = m2->c  = 2 * 256 * 256;
+    m2->b  = m2->d  = 0;
+    m2->tx = 100 * 20;
+    m2->ty = 0 * 20;
+
+    mycx->rb = 0;
+    mycx->gb = 0;
+    mycx->bb = 0;
+
     for (i=1; i<=NUMFRAMES; i++) {
-      swf_add_placeobject2(movie, &error, obj_id, matrix, mycx, NULL);
+      swf_add_placeobject2(movie, &error, matrix, obj_id, i, mycx, NULL);
+      swf_add_placeobject2(movie, &error, m2, obj_id, 1, cx2, NULL);
       swf_add_showframe(movie, &error);
 
       if (i < NUMFRAMES) {
-	swf_add_removeobject(movie, &error, obj_id);
+	swf_add_removeobject2(movie, &error, i);
+	swf_add_removeobject2(movie, &error, 1);
       }
-      matrix->tx += 4 * 20;
+      matrix->tx += 5 * 20;
       matrix->a += 4 * 256;
-      matrix->a += 4 * 256;
-      mycx->bb += 4;
+      mycx->bb += 5;
+
+      m2->ty += 2 * 20;
+      cx2->gb += 4;
     }
 
     swf_add_end(movie, &error);
 
     swf_make_finalise(movie, &error);
 
+    swf_free(cx2);
+    swf_free(m2);
     swf_free(mycx);
     swf_free(matrix);
     swf_destroy_movie(movie);

@@ -62,6 +62,7 @@ int main (int argc, char *argv[]) {
     SWF_U16 obj_id;
     swf_matrix * matrix;
     swf_cxform * mycx;
+    int i;
 
 /* First, get a parser up */
 
@@ -147,99 +148,20 @@ int main (int argc, char *argv[]) {
     matrix->tx = 300 * 20;
     matrix->ty = 150 * 20;
 
-    swf_add_placeobject(movie, &error, obj_id, matrix);
-    swf_add_showframe(movie, &error);
-
-    swf_add_removeobject(movie, &error, obj_id);
-    matrix->a  = matrix->c  = 512 * 100;
-    matrix->b  = matrix->d  = 0;
-    matrix->tx = 270 * 20;
-    matrix->ty = 150 * 20;
-
     mycx->rb = 0;
     mycx->gb = 0;
     mycx->bb = 1;
 
-    swf_add_placeobject(movie, &error, obj_id, matrix);
-    swf_add_showframe(movie, &error);
+    for (i=1; i<=8; i++) {
+      swf_add_placeobject(movie, &error, matrix, obj_id, 1);
+      swf_add_showframe(movie, &error);
 
-    swf_add_removeobject(movie, &error, obj_id);
-    matrix->a  = matrix->c  = 512 * 100;
-    matrix->b  = matrix->d  = 0;
-    matrix->tx = 240 * 20;
-    matrix->ty = 150 * 20;
+      if (i < 8) {
+	swf_add_removeobject(movie, &error, obj_id, 1);
+      }
 
-    mycx->rb = 0;
-    mycx->gb = 0;
-    mycx->bb = 1;
-
-    swf_add_placeobject(movie, &error, obj_id, matrix);
-    swf_add_showframe(movie, &error);
-
-    swf_add_removeobject(movie, &error, obj_id);
-    matrix->a  = matrix->c  = 512 * 100;
-    matrix->b  = matrix->d  = 0;
-    matrix->tx = 210 * 20;
-    matrix->ty = 150 * 20;
-
-    mycx->rb = 0;
-    mycx->gb = 0;
-    mycx->bb = 1;
-
-    swf_add_placeobject(movie, &error, obj_id, matrix);
-    swf_add_showframe(movie, &error);
-
-    swf_add_removeobject(movie, &error, obj_id);
-    matrix->a  = matrix->c  = 512 * 100;
-    matrix->b  = matrix->d  = 0;
-    matrix->tx = 180 * 20;
-    matrix->ty = 150 * 20;
-
-    mycx->rb = 0;
-    mycx->gb = 0;
-    mycx->bb = 1;
-
-    swf_add_placeobject(movie, &error, obj_id, matrix);
-    swf_add_showframe(movie, &error);
-
-    swf_add_removeobject(movie, &error, obj_id);
-    matrix->a  = matrix->c  = 512 * 100;
-    matrix->b  = matrix->d  = 0;
-    matrix->tx = 150 * 20;
-    matrix->ty = 150 * 20;
-
-    mycx->rb = 0;
-    mycx->gb = 0;
-    mycx->bb = 1;
-
-    swf_add_placeobject(movie, &error, obj_id, matrix);
-    swf_add_showframe(movie, &error);
-
-    swf_add_removeobject(movie, &error, obj_id);
-    matrix->a  = matrix->c  = 512 * 100;
-    matrix->b  = matrix->d  = 0;
-    matrix->tx = 120 * 20;
-    matrix->ty = 150 * 20;
-
-    mycx->rb = 0;
-    mycx->gb = 0;
-    mycx->bb = 1;
-
-    swf_add_placeobject(movie, &error, obj_id, matrix);
-    swf_add_showframe(movie, &error);
-
-    swf_add_removeobject(movie, &error, obj_id);
-    matrix->a  = matrix->c  = 512 * 100;
-    matrix->b  = matrix->d  = 0;
-    matrix->tx =  90 * 20;
-    matrix->ty = 150 * 20;
-
-    mycx->rb = 0;
-    mycx->gb = 0;
-    mycx->bb = 1;
-
-    swf_add_placeobject(movie, &error, obj_id, matrix);
-    swf_add_showframe(movie, &error);
+      matrix->tx -= 30 * 20;
+    }
 
     swf_add_end(movie, &error);
 
