@@ -16,7 +16,7 @@ my $m = Gravel::Movie->new();
 #my $m = Gravel::Movie->new({bgcol => '#00ffff'});
 
 $m->name('foo.swf');
-$m->size(-20000, -20000, 20000, 20000);
+$m->size(0, 0, 20000, 20000);
 
 my $g = Gravel::Shape->new({fills => [{colour => HAZY_RED, type => 'solid'}]});
 $g->poly(0, 0, 0, 500, 500, 500, 500, 0, );
