@@ -57,11 +57,10 @@ swf_parse_placeobject (swf_parser * context, int * error)
 
 
 void
-swf_add_placeobject (swf_movie * movie, int * error, SWF_U16 char_id) 
+swf_add_placeobject (swf_movie * movie, int * error, SWF_U16 char_id, swf_matrix * mym)
 {
 	swf_tagrecord * temp;
 	SWF_U16 depth;
-	swf_matrix * mym;
 
     temp = swf_make_tagrecord(error);
 
@@ -80,23 +79,9 @@ swf_add_placeobject (swf_movie * movie, int * error, SWF_U16 char_id)
 		return;
     }
 
-    if ((mym = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
-		*error = SWF_EMallocFailure;
-		return;
-    }
-
-    printf("foo A\n");
-
-	mym->a  = mym->c  = 512 * 100;
-	mym->b  = mym->d  = 0;
-	mym->tx = 300 * 20;
-	mym->ty = 150 * 20;
-
 	depth = 1;
 	
-    printf("foo B\n");
 	swf_buffer_put_word(temp->buffer, error, char_id);
-    printf("foo C\n");
 	swf_buffer_put_word(temp->buffer, error, depth);
     temp->buffer->size = 4;
 

@@ -60,6 +60,7 @@ int main (int argc, char *argv[]) {
     swf_header * hdr;
     swf_tagrecord * temp;
     SWF_U16 obj_id;
+    swf_matrix * matrix;
 
 /* First, get a parser up */
 
@@ -108,6 +109,11 @@ int main (int argc, char *argv[]) {
     swf_get_nth_shape(parser, &error, shape_num, temp);
     obj_id = swf_get_object_id(temp, &error);
 
+    if ((matrix = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
+      error = SWF_EMallocFailure;
+      return;
+    }
+
 /* Now generate the output movie */
 
     if ((movie = swf_make_movie(&error)) == NULL) {
@@ -118,20 +124,35 @@ int main (int argc, char *argv[]) {
 /* Ensure we steal a good header... */
 
     movie->header = hdr;
-    movie->name = "ben2.swf\0";
+    movie->name = "ben3.swf\0";
 
     swf_add_setbackgroundcolour(movie, &error, 0, 255, 0, 255);
     swf_dump_shape(movie, &error, temp);
     printf("foo 5\n");
-    swf_add_placeobject(movie, &error, obj_id);
+
+    printf("foo A\n");
+
+    matrix->a  = matrix->c  = 512 * 100;
+    matrix->b  = matrix->d  = 0;
+    matrix->tx = 300 * 20;
+    matrix->ty = 150 * 20;
+
+    swf_add_placeobject(movie, &error, obj_id, matrix);
     printf("foo 6\n");
     swf_add_showframe(movie, &error);
-    swf_add_end(movie, &error);
+    matrix->a  = matrix->c  = 512 * 100;
+    matrix->b  = matrix->d  = 0;
+    matrix->tx = 0;
+    matrix->ty = 150 * 20;
 
+    swf_add_placeobject(movie, &error, obj_id, matrix);
+    swf_add_showframe(movie, &error);
+    swf_add_end(movie, &error);
 
     swf_make_finalise(movie, &error);
     printf("foo 7\n");
 
+    swf_free(matrix);
     swf_destroy_movie(movie);
 
     fprintf (stderr, "OK\n");
