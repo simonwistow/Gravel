@@ -85,6 +85,22 @@ swf_add_buttonrecord (swf_definebutton * button, int * error, swf_buttonrecord *
 }
 
 
+swf_definebutton *
+swf_make_definebutton(int * error, SWF_U32 button_id)
+{
+	swf_definebutton* button;
+
+    if ((button = (swf_definebutton *) calloc (1, sizeof (swf_definebutton))) == NULL) {
+		*error = SWF_EMallocFailure;
+		return NULL;
+    }
+
+	button->tagid = button_id;
+
+	return button;
+}
+
+
 /* FIXME: Test API while I knock this up */
 // For now, just pass in a char_id, and use the same shape twice,
 	// just reduce in size on MouseOver...

@@ -7,6 +7,7 @@ use lib '../';
 
 use Gravel::Shape;
 use Gravel::Effect;
+use Gravel::Matrix;
 
 use Data::Dumper qw/DumperX/;
 
@@ -156,7 +157,7 @@ sub bake_movie {
 
 	$b->_bake_library($self);
 
-	print STDERR DumperX $self;
+#	print STDERR DumperX $self;
 
 	$b->_bake_frames($self);
 
@@ -351,49 +352,12 @@ swf_matrix* _matrix_from_frame(int * error, HV * h_frame) {
 		return;
 	}
 
-    if ((matrix = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
-		*error = SWF_EMallocFailure;
-		return;
-    }
-
-	/* Need to check what we need to scale up by so that a=1 in perl
-     * translates up properly here
-	 */
 	ph_matrix = hv_fetch(h_frame, "_matrix", 7, 0);	
-	if (NULL != ph_matrix) {
-		h_matrix = (HV *)SvRV(*ph_matrix);
-
-		p_num = hv_fetch(h_matrix, "_a", 2, 0);
-		if (NULL != p_num) {
-			num = (double)(SvNV(*p_num));
-			matrix->a = (SFIXED)(MATRIX_SCALE * num);
-		}
-		p_num = hv_fetch(h_matrix, "_b", 2, 0);
-		if (NULL != p_num) {
-			num = (double)(SvNV(*p_num));
-			matrix->b = (SFIXED)(MATRIX_SCALE * num);
-		}
-		p_num = hv_fetch(h_matrix, "_c", 2, 0);
-		if (NULL != p_num) {
-			num = (double)(SvNV(*p_num));
-			matrix->c = (SFIXED)(MATRIX_SCALE * num);
-		}
-		p_num = hv_fetch(h_matrix, "_d", 2, 0);
-		if (NULL != p_num) {
-			num = (double)(SvNV(*p_num));
-			matrix->d = (SFIXED)(MATRIX_SCALE * num);
-		}
-
-		p_num = hv_fetch(h_matrix, "_x", 2, 0);
-		if (NULL != p_num) {
-			matrix->tx = (SCOORD)(SvIV(*p_num));
-		}
-		p_num = hv_fetch(h_matrix, "_y", 2, 0);
-		if (NULL != p_num) {
-			matrix->ty = (SCOORD)(SvIV(*p_num));
-		}
-
+	if (NULL == ph_matrix) {
+		return NULL;
 	}
+
+	matrix = (swf_matrix *)_get_struct(*ph_matrix, "_make_struct");
 
 	return matrix;
 }
@@ -568,7 +532,8 @@ void _finalise(SV* obj, SV* self) {
     swf_destroy_movie(m->movie);
 }
 
-void _call_foreign_method(SV* shape, char* method, SV * mov) {
+void _call_foreign_method(SV* shape, char* method, SV * mov) 
+{
 	dSP;
 	ENTER;
 	SAVETMPS;
@@ -584,3 +549,33 @@ void _call_foreign_method(SV* shape, char* method, SV * mov) {
 	LEAVE;
 }
 
+void * 
+_get_struct(SV* obj, char* method) 
+{
+	int count;
+	int ret;
+
+	dSP;
+	ENTER;
+	SAVETMPS;
+
+	PUSHMARK(SP);
+	XPUSHs(obj);
+	PUTBACK;
+
+	count = call_method(method, G_SCALAR);
+
+	SPAGAIN ;
+
+	if (1 != count) {
+		croak("Big trouble\n") ;
+	}
+
+	ret = POPi;
+
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+
+	return (void *)ret;
+}

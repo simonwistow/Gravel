@@ -9,13 +9,13 @@ use Data::Dumper qw/DumperX/;
 
 our $VERSION = '0.10';
 
-#use Cwd qw(cwd abs_path);
-#use Inline C => 'DATA',
+use Cwd qw(cwd abs_path);
+use Inline C => 'DATA',
 #  VERSION => '0.10',
-#  NAME => 'Gravel::Effect',
-#  LIBS => '-L' . abs_path(cwd . '/../../') . ' -lswfparse',
-#  INC => '-I' . abs_path(cwd . '/../../'),
-#  OPTIMIZE => '-g';
+  NAME => 'Gravel::Matrix',
+  LIBS => ' -lswfparse',
+  INC => '-I' . abs_path(cwd . '/../'),
+  OPTIMIZE => '-g';
 #use Inline C => Config => STRUCTS => 'swf_header';
 
 # FIXME
@@ -87,3 +87,65 @@ __DATA__
 
 __C__
 
+#include "swf_types.h"
+#include "swf_movie.h"
+#include "swf_parse.h"
+#include "swf_destroy.h"
+#include "gravel/util.h"
+#include "gravel.h"
+
+void * _make_struct(SV * self) 
+{
+	swf_matrix * matrix;
+	SV** p_num;
+	HV*  h_matrix;
+	double num;
+
+	if ((matrix = (swf_matrix *) calloc(1, sizeof(swf_matrix))) == NULL) {
+		return NULL;
+	}
+	
+	h_matrix = (HV *)SvRV(self);
+	
+	p_num = hv_fetch(h_matrix, "_a", 2, 0);
+	if (NULL == p_num) {
+		return NULL;
+	}
+	num = (double)(SvNV(*p_num));
+	matrix->a = (SFIXED)(MATRIX_SCALE * num);
+
+	p_num = hv_fetch(h_matrix, "_b", 2, 0);
+	if (NULL == p_num) {
+		return NULL;
+	}
+	num = (double)(SvNV(*p_num));
+	matrix->b = (SFIXED)(MATRIX_SCALE * num);
+
+	p_num = hv_fetch(h_matrix, "_c", 2, 0);
+	if (NULL == p_num) {
+		return NULL;
+	}
+	num = (double)(SvNV(*p_num));
+	matrix->c = (SFIXED)(MATRIX_SCALE * num);
+
+	p_num = hv_fetch(h_matrix, "_d", 2, 0);
+	if (NULL == p_num) {
+		return NULL;
+	}
+	num = (double)(SvNV(*p_num));
+	matrix->d = (SFIXED)(MATRIX_SCALE * num);
+	
+	p_num = hv_fetch(h_matrix, "_x", 2, 0);
+	if (NULL == p_num) {
+		return NULL;
+	}
+	matrix->tx = (SCOORD)(SvIV(*p_num));
+
+	p_num = hv_fetch(h_matrix, "_y", 2, 0);
+	if (NULL == p_num) {
+		return NULL;
+	}
+	matrix->ty = (SCOORD)(SvIV(*p_num));
+
+	return (void *)matrix;
+}

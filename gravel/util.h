@@ -18,5 +18,6 @@
 
 swf_colour * gravel_parse_colour (char * s);
 SWF_U8 gravel_parse_hex(char * s);
+swf_shaperecord * gravel_make_line (int * error, SWF_S32 x1, SWF_S32 y1, SWF_S32 x2, SWF_S32 y2);
 
 #define MATRIX_SCALE 65536

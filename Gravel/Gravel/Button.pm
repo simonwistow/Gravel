@@ -6,6 +6,7 @@ use warnings;
 use lib '../';
 
 use Gravel::Effect;
+use Gravel::Matrix;
 use Gravel::Effect::Tween;
 
 use Data::Dumper qw/DumperX/;
@@ -116,8 +117,11 @@ void _bake (SV * shape, SV * mov)
 	HV* bstate;
 	int i, j, num_st, curr, seen;
 	int* p_bst;
-
-//	fprintf(stderr, "In Button::_bake\n");
+	swf_definebutton * button;
+	SV** p_matrix;
+	swf_matrix * mx;
+	SWF_U32 char_id, depth, hit_test, down, over, up;
+	SV** p_num;
 
 /*
   The logic here is basically:
@@ -167,22 +171,108 @@ void _bake (SV * shape, SV * mov)
 		}
 	}
 
+/* FIXME: In this release, the depth attribute is taken from the
+ * Button, not the ButtonState.
+ */
+
 /* 2) Bake the button itself:  
-   (Need to add depth and matrix attributes to the ButtonState
-    hashrefs)
 
 	spin up a definebutton.
 	foreach (states) {
 	    add_relevant_buttonrecs()
     }
-finalise;
+    finalise;
     serialise_button;
     dump_tagrecord;
 
 	*/
 
+	p_num = hv_fetch(h, "_depth", 6, 0);
+    if (NULL == p_num) {
+	    return;
+    }
+    depth = (SWF_U32)(SvIV(*p_num));
+
+	button = swf_make_definebutton(&error, ++m->movie->max_obj_id);
+	for (i=0; i<=num_st; ++i) {
+		p_state = av_fetch(states, i, 0);
+		if (NULL == p_state) {
+			return;
+		}
+		bstate = (HV *) SvRV(*p_state);
+        // char_id from shape lookup.
+     	p_matrix = hv_fetch(bstate, "_matrix", 7, 0);
+		if (NULL == p_matrix) {
+			return;
+		}
+
+	    mx = (swf_matrix *)_get_struct(*p_matrix, "_make_struct");
+        
+        p_num = hv_fetch(bstate, "_up", 3, 0);
+        if (NULL == p_num) {
+			return;
+		}
+        up = (SWF_U32)(SvIV(*p_num));
+
+        p_num = hv_fetch(bstate, "_down", 5, 0);
+        if (NULL == p_num) {
+			return;
+		}
+        down = (SWF_U32)(SvIV(*p_num));
+
+        p_num = hv_fetch(bstate, "_hit", 4, 0);
+        if (NULL == p_num) {
+			return;
+		}
+        hit_test = (SWF_U32)(SvIV(*p_num));
+
+        p_num = hv_fetch(bstate, "_over", 5, 0);
+        if (NULL == p_num) {
+			return;
+		}
+        over = (SWF_U32)(SvIV(*p_num));
+
+        fprintf(stderr, "about to add_buttonrec\n");
+        swf_add_buttonrec(button, &error, char_id, mx, depth, hit_test, down, over, up);
+        fprintf(stderr, "back from add_buttonrec\n");
+
+    }
+
 
 }
+
+
+void * 
+_get_struct(SV* obj, char* method) {
+	int count;
+	int ret;
+
+	dSP;
+	ENTER;
+	SAVETMPS;
+
+	PUSHMARK(SP);
+	XPUSHs(obj);
+	PUTBACK;
+
+	count = call_method(method, G_SCALAR);
+
+	SPAGAIN ;
+
+	if (1 != count) {
+		croak("Big trouble\n") ;
+	}
+
+	ret = POPi;
+
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+
+	return (void *)ret;
+}
+
+
 
 
 void _call_foreign_method(SV* shape, char* method, SV * mov) {

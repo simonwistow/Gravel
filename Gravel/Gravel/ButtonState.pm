@@ -5,6 +5,7 @@ use warnings;
 
 use lib '../';
 
+use Gravel::Matrix;
 use Gravel::Effect;
 use Gravel::Effect::Tween;
 
@@ -32,9 +33,12 @@ sub new {
 	# Set default for the menu flag
 	$self->{_menu} = 0;
 
-	$self->{_hit} = $conf{hit};
-    $self->{_up} = $conf{up};
-    $self->{_down} = $conf{down} || 1;
+	$self->{_hit} = $conf{hit} || 0;
+    $self->{_up} = $conf{up} || 0;
+    $self->{_down} = $conf{down} || 0;
+    $self->{_over} = $conf{over} || 0;
+
+	$self->{_matrix} = $conf{matrix} || Gravel::Matrix->new();
 
 	# FIXME
 	$self->{_shape} = $shape;

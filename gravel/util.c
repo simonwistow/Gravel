@@ -24,6 +24,8 @@
 #include "gravel.h"
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 swf_shaperecord *
 gravel_make_line (int * error, SWF_S32 x1, SWF_S32 y1, SWF_S32 x2, SWF_S32 y2)
