@@ -128,10 +128,15 @@ sub _prepare {
 		my %tmp = %$s;
 		my ($xmin, $ymin, $xmax, $ymax) = @tmp{'_xmin', '_ymin', '_xmax', '_ymax'};
 		foreach my $v (@{$s->vertices}) {
-			$xmin = $v->[0] if $xmin and $v->[0] < $xmin; 
-			$ymin = $v->[1] if $ymin and $v->[1] < $ymin; 
-			$xmax = $v->[0] if $xmax and $v->[0] > $xmax; 
-			$ymax = $v->[1] if $ymax and $v->[1] > $ymax; 
+			$xmin = $v->[0] unless defined $xmin;
+			$ymin = $v->[1] unless defined $ymin;
+			$xmax = $v->[0] unless defined $xmax;
+			$ymax = $v->[1] unless defined $ymax;
+
+			$xmin = $v->[0] if $v->[0] < $xmin; 
+			$ymin = $v->[1] if $v->[1] < $ymin; 
+			$xmax = $v->[0] if $v->[0] > $xmax; 
+			$ymax = $v->[1] if $v->[1] > $ymax; 
 		}
 		($s->{_xmin}, $s->{_ymin}, $s->{_xmax}, $s->{_ymax}) 
 			= ($xmin, $ymin, $xmax, $ymax);
@@ -143,6 +148,8 @@ sub bake_movie {
     my $self = shift;
 
 	$self->_prepare();
+
+#	print STDERR DumperX $self;
 
 	my $b = Gravel::Movie->_create_baked();
 	$b->_bake_header($self);
@@ -238,11 +245,15 @@ void _bake_library(SV* obj, SV* self) {
 	SV** p_num;
 	SV** p_sty;
 	SV** ph_sty;
+	SV** p_fill;
+	SV** ph_fill;
 	SV** p_col;
 	AV* a_sty;
 	HV* h_sty;
+	HV* h_fill;
 	swf_tagrecord * temp;
 	swf_defineshape * mytag;
+	const char * fill_type;
 
 	p_lib = hv_fetch(h, "_library", 8, 0);
 	if (NULL != p_lib) {
@@ -281,24 +292,28 @@ void _bake_library(SV* obj, SV* self) {
 
 		/* Now populate the line styles */
 		p_sty = hv_fetch(h_sh, "_styles", 7, 0);
-		if (NULL == p_sty) {
+		if (NULL != p_sty) {
 			a_sty = (AV *)SvRV(*p_sty); 
 		
 			num_styles = av_len(a_sty);
-			mytag->style->nlines = num_styles;
+			mytag->style->nlines = 1 + num_styles;
+
 			for (j=0; j<=num_styles; ++j) {
 				mytag->style->lines[j] = swf_make_linestyle(&error);
 			
-				ph_sty = av_fetch(a_sty, i, 0);
+				ph_sty = av_fetch(a_sty, j, 0);
 				if (NULL != ph_sty) {
 					h_sty = (HV *)SvRV(*ph_sty); 
-					p_num = hv_fetch(h_sh, "width", 5, 0);
+					p_num = hv_fetch(h_sty, "width", 5, 0);
 					if (NULL != p_num) {
 						mytag->style->lines[j]->width = (U16)(SvIV(*p_num));
+//						fprintf(stderr, "line width should be: %i\n", mytag->style->lines[j]->width);
 					}
-					p_col = hv_fetch(h_sh, "colour", 6, 0);
+
+					p_col = hv_fetch(h_sty, "colour", 6, 0);
 					if (NULL != p_col) {
 						mytag->style->lines[j]->col = gravel_parse_colour((char *)(SvPVX(*p_col)));
+//						fprintf(stderr, "line colour be: %s\n", (char *)(SvPVX(*p_col)));
 					}
 				}
 			}
@@ -311,9 +326,24 @@ void _bake_library(SV* obj, SV* self) {
 			a_sty = (AV *)SvRV(*p_sty); 
 
 			num_styles = av_len(a_sty);
-			mytag->style->nfills = num_styles;
+			mytag->style->nfills = 1 + num_styles;
 			for (j=0; j<=num_styles; ++j) {
-				mytag->style->fills[j] = swf_make_gradient_fillstyle(error, 2, fillLinearGradient);
+				ph_fill = av_fetch(a_sty, j, 0);
+				if (NULL != ph_fill) {
+					h_fill = (HV *)SvRV(*ph_fill);
+				}
+				p_fill = hv_fetch(h_fill, "type", 4, 0);
+				if (NULL != p_fill) {
+					fill_type = (const char *) SvPVX(*p_fill);
+				}
+				if ( (0 == strcmp(fill_type, "solid")) 
+					 || (0 == strcmp(fill_type, "SOLID")) ){
+					mytag->style->fills[j] = swf_make_solid_fillstyle(&error);
+					p_col = hv_fetch(h_fill, "colour", 6, 0);
+					if (NULL != p_col) {
+						mytag->style->fills[j]->col = gravel_parse_colour((char *)(SvPVX(*p_col)));
+					}
+				} /* FIXME: Do the other styles */
 			}			
 		}
 
@@ -323,6 +353,8 @@ void _bake_library(SV* obj, SV* self) {
 			fprintf (stderr, "Calloc Fail\n");
 			return;
 		}
+
+		fprintf(stderr, "Getting to serialise...\n");
 
 		/* Now serialise and dump */
 		swf_serialise_defineshape(temp->buffer, &error, (swf_defineshape *) temp->tag);
@@ -359,8 +391,6 @@ SV* _bake_rest(SV* obj, SV* self) {
     swf_tagrecord * temp;
 
     error = 0;
-
-
 
     swf_add_showframe(m->movie, &error);
     swf_add_end(m->movie, &error);
