@@ -1,13 +1,12 @@
-package Gravel::Effect::Tween;
+package Gravel::Effect::Enlarge;
 
 use strict;
 use warnings;
 
 use lib '../../';
 
+use Gravel::Shape;
 use Gravel::Effect;
-use Gravel::Matrix;
-
 use Gravel::Frame;
 
 use base qw(Gravel::Effect);
@@ -15,8 +14,6 @@ use base qw(Gravel::Effect);
 use Data::Dumper qw/DumperX/;
 
 our $VERSION = '0.10';
-
-# FIXME: 
 
 sub new {
     my $class = shift;
@@ -35,11 +32,8 @@ sub new {
     $self->{_end} = $conf{end};
     $self->{_depth} = $conf{depth} || 1;
 
-    $self->{_startx} = $conf{startx};
-    $self->{_endx} = $conf{endx};
-
-    $self->{_starty} = $conf{starty};
-    $self->{_endy} = $conf{endy};
+    $self->{_stsize} = $conf{start_size} || 1;
+    $self->{_endsize} = $conf{end_size};
 
     return $self;
 }
@@ -52,25 +46,26 @@ sub matrices {
 	unless (defined $self->{_start} and defined $self->{_end}) {
 		return undef;
 	}
-		
+	
 	my $ra_m = [];
 
 	my $numf = $self->{_end} - $self->{_start};
-	my ($x, $y) = ($self->{_startx}, $self->{_starty});
+	my $ds = ( $self->{_endsize} - $self->{_stsize} ) / $numf;
 
-	my $dx = ( $self->{_endx} - $self->{_startx} ) / $numf;
-	my $dy = ( $self->{_endy} - $self->{_starty} ) / $numf;
-
+	my $lambda = $self->{_stsize};
 	for (my $i = $self->{_start}; $i < $self->{_end}; ++$i) {
-		my $m = Gravel::Matrix->new(x => $x, y=> $y);
 
+		my $m = Gravel::Matrix->new(a => $lambda, d => $lambda);
+
+		$lambda += $ds;
 		$ra_m->[$i] = $m;
-		$x += $dx;
-		$y += $dy;
 	}
 
 	return $ra_m;
 }
+
+
+#
 
 #
 

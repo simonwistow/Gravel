@@ -9,6 +9,7 @@ use Gravel::Shape;
 use Gravel::Effect;
 use Gravel::Effect::Tween;
 use Gravel::Effect::Spin;
+use Gravel::Effect::Enlarge;
 
 use Data::Dumper qw/DumperX/;
 
@@ -23,13 +24,17 @@ $g->poly(0, 0, 0, 500, 500, 500, 500, 0, );
 
 my $s = {start => 0, end => 20, depth => 2,
 		 startx => 0, starty => 0, 
-		 endx => 1000, endy => 1000};
+		 endx => 1500, endy => 3000};
 my $e = Gravel::Effect::Tween->new($s);
 my $a = $g->action($e);
 
 my $th = {start_ang => 0, end_ang => 180};
 my $e2 = Gravel::Effect::Spin->new($th);
 $a->add($e2);
+
+$th = {end_size => 4};
+my $e3 = Gravel::Effect::Enlarge->new($th);
+$a->add($e3);
 
 #print STDERR DumperX $e2;
 
