@@ -9,6 +9,10 @@ use Gravel::Edge;
 
 use Data::Dumper qw/DumperX/;
 
+# FIXME
+
+use constant BLACK => 0;
+
 sub new {
     my $proto = shift;
     my $class = ref($proto) || $proto;
@@ -24,17 +28,31 @@ sub new {
 
 	$self->{_edges} = [];
 	$self->{_vertices} = [];
+    $self->{_styles} = $conf{styles} || {0 => {colour => BLACK, width => 20}};
+    $self->{_fills} = $conf{fills} || [];
 
     bless $self => $class;
 
     return $self;
 }
 
+#
+
 sub last_vertex {
     my $self = shift;
 
 	my $last = scalar(@{$self->{_vertices}}) - 1;
 	return $self->{_vertices}->[$last];
+}
+
+#
+
+sub vertex {
+    my $self = shift;
+    my $x = shift;
+    my $y = shift;
+
+	push @{$self->{_vertices}}, [$x, $y];
 }
 
 #
@@ -57,6 +75,9 @@ sub line {
 }
 
 #
+
+# We will still need to check that the first and last vertex
+# are the same at bake time.
 
 sub line_to {
     my $self = shift;
@@ -100,17 +121,40 @@ sub arc {
 
 #
 
+sub arc_to {
+    my $self = shift;
+	my %p;
+	@p{'x2', 'y2', 'ax', 'ay'} = @_;
+
+	my $ra_v = $self->last_vertex();
+    
+	$p{TYPE} = 'QUADRATIC';
+	@p{'x1', 'y1'} = @$ra_v;
+
+	my $e = Gravel::Edge->new(\%p);
+
+    push @{$self->{_edges}}, $e;
+
+	push @{$self->{_vertices}}, [$p{x2}, $p{y2}];
+
+    return scalar(@{$self->{_edges}});
+}
+
+#
+
 sub poly {
     my $self = shift;
+	my $x0 = shift;
+	my $y0 = shift;
+
+	$self->vertex($x0, $y0);
+
     while (my $x = shift) {
 		my $y = shift;
 
-		my $e = Gravel::Edge->new({x => $x, y => $y});
-		push @{$self->{_edges}}, $e;
-		push @{$self->{_vertices}}, [$x, $y];
+		$self->line_to($x, $y);
 	}
-	my $e = Gravel::Edge->new({x => $self->{_start}->{x}, y => $self->{_start}->{y}, });
-	push @{$self->{_edges}}, $e;
+	$self->line_to($x0, $y0);
 
     return scalar(@{$self->{_edges}});
 }
