@@ -155,9 +155,9 @@ sub bake_movie {
 	$b->_bake_header($self);
 	$b->_bake_preamble($self, 0);
 	$b->_bake_library($self);
-#	$b->_bake_frames($self);
+	$b->_bake_frames($self);
 
-	$b->_bake_test($self);
+#	$b->_bake_test($self);
 
 	$b->_bake_end($self);
 	$b->_finalise($self);
@@ -446,8 +446,10 @@ void _bake_library(SV* obj, SV* self)
 	I32 lib_size, i;
 	SCOORD x1, x2, y1, y2;
 	SV** p_num;
+	SV* tag_id;
 	swf_tagrecord * temp;
 	swf_defineshape * mytag;
+	
 
 	p_lib = hv_fetch(h, "_library", 8, 0);
 	if (NULL != p_lib) {
@@ -483,6 +485,11 @@ void _bake_library(SV* obj, SV* self)
 
 	    temp = gravel_create_shape(m->movie, &error, x1, x2, y1, y2);
 		mytag = (swf_defineshape *) temp->tag;
+
+/* Grab this value and set it in the perl hash. 
+		mytag->tagid;
+*/
+	    hv_store(h_sh, "_obj_id", 6, tag_id, 0);
 
 		_bake_styles(&error, mytag, h_sh);
 		_bake_fills(&error, mytag, h_sh);
@@ -531,18 +538,46 @@ SV* _create_baked(char* class) {
 }
 
 
+void _bake_frames(SV* obj, SV* self) {
+	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
+	HV* h_tl = (HV *)SvRV(self); 
+    int error;
+	SV** pa_frames;
+	AV*  a_frames;
+	SV** pa_frame;
+	AV*  a_frame;
+	SV** p_shape;
+	I32  i, j, num_frames;
 
-SV* _bake_frames(SV* obj, SV* self) {
+    pa_frames = hv_fetch(h_tl, "_timeline", 9, 0);	
+	if (NULL != pa_frames) {
+		a_frames = (AV *)SvRV(*pa_frames); 
+
+		for (i=0; i<=av_len(a_frames); ++i) {
+			pa_frame = av_fetch(a_frames, i, 0);
+			if (NULL != pa_frame) {
+				a_frame = (AV *)SvRV(*pa_frame);
+
+				for (j=0; j<=av_len(a_frame); ++j) {
+					p_shape = av_fetch(a_frame, j, 0);
+					if (NULL != p_shape) {
+					}
+				}
+			}
+		}
+	}
+}
+
+void _bake_test(SV* obj, SV* self) {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
     int error;
-    swf_tagrecord * temp;
 	swf_matrix * matrix;
 
     error = 0;
 
     if ((matrix = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
 		error = SWF_EMallocFailure;
-		return 1;
+		return;
     }
 
 /* FIXME: Do object IDs properly */
@@ -553,43 +588,11 @@ SV* _bake_frames(SV* obj, SV* self) {
 
 	swf_add_placeobject(m->movie, &error, matrix, 1, 1);
     swf_add_showframe(m->movie, &error);
-
-    swf_add_end(m->movie, &error);
-
-    swf_make_finalise(m->movie, &error);
-
-    swf_destroy_movie(m->movie);
-    swf_free(temp->buffer->raw);
-
-	fprintf(stderr, "Foo 6\n");
-
-}
-
-SV* _bake_test(SV* obj, SV* self) {
-	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
-    int error;
-	swf_matrix * matrix;
-
-    error = 0;
-
-    if ((matrix = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
-		error = SWF_EMallocFailure;
-		return 1;
-    }
-
-/* FIXME: Do object IDs properly */
-
-/* FIXME: Test matrix */
-    matrix->a  = matrix->d  = 512 * 1000;
-	matrix->tx = matrix->ty = 100 * 20;
-
-	swf_add_placeobject(m->movie, &error, matrix, 1, 1);
-    swf_add_showframe(m->movie, &error);
 }
 
 
 
-SV* _bake_end(SV* obj, SV* self) {
+void _bake_end(SV* obj, SV* self) {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
     int error;
 
@@ -597,7 +600,7 @@ SV* _bake_end(SV* obj, SV* self) {
 }
 
 
-SV* _finalise(SV* obj, SV* self) {
+void _finalise(SV* obj, SV* self) {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
     int error;
 

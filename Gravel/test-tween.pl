@@ -32,11 +32,11 @@ $m->event($e2);
 
 $m->make_timeline();
 
-print STDERR DumperX $m;
 
 my $a = $m->bake_movie();
 
-print STDERR DumperX $a;
+print STDERR DumperX $m;
+#print STDERR DumperX $a;
 
 
 
