@@ -43,19 +43,27 @@ AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
 
 case 1 in
-        $ac_cv_sizeof_char)  SWF_U8="unsigned char";    SWF_S8="signed char";;
+        $ac_cv_sizeof_char)  SWF_U8="unsigned char";    SWF_S8="signed char";
+                            pSWF_U8="uc";              pSWF_S8="c";;
 esac
 
 case 2 in
-        $ac_cv_sizeof_char)  SWF_U16="unsigned char";   SWF_S16="signed char";;
-        $ac_cv_sizeof_short) SWF_U16="unsigned short";  SWF_S16="signed short";;
-        $ac_cv_sizeof_int)   SWF_U16="unsigned int";    SWF_S16="signed int";;
+        $ac_cv_sizeof_char)  SWF_U16="unsigned char";   SWF_S16="signed char";
+                            pSWF_U16="uc";             pSWF_S16="c";;
+        $ac_cv_sizeof_short) SWF_U16="unsigned short";  SWF_S16="signed short";
+                            pSWF_U16="u";              pSWF_S16="d";;
+        $ac_cv_sizeof_int)   SWF_U16="unsigned int";    SWF_S16="signed int";
+                            pSWF_U16="u";              pSWF_S16="d";;
 esac
 
 case 4 in
-        $ac_cv_sizeof_long)  SWF_U32="unsigned long";   SWF_S32="signed long";;
-        $ac_cv_sizeof_short) SWF_U32="unsigned short";  SWF_S32="signed short";;
-        $ac_cv_sizeof_int)   SWF_U32="unsigned int";    SWF_S32="signed int";;
+        $ac_cv_sizeof_short) SWF_U32="unsigned short";  SWF_S32="signed short";
+                            pSWF_U32="u";              pSWF_S32="d";;
+        $ac_cv_sizeof_int)   SWF_U32="unsigned int";    SWF_S32="signed int";
+                            pSWF_U32="u";              pSWF_S32="d";;
+        $ac_cv_sizeof_long)  SWF_U32="unsigned long";   SWF_S32="signed long";
+                            pSWF_U32="ul";             pSWF_S32="ld";;
+
 esac
 
 if test -z "$SWF_U8"; then
@@ -75,6 +83,13 @@ AC_SUBST(SWF_U16)
 AC_SUBST(SWF_S16)
 AC_SUBST(SWF_U32)
 AC_SUBST(SWF_S32)
+AC_SUBST(pSWF_U8)
+AC_SUBST(pSWF_S8)
+AC_SUBST(pSWF_U16)
+AC_SUBST(pSWF_S16)
+AC_SUBST(pSWF_U32)
+AC_SUBST(pSWF_S32)
+
 
 dnl What to do with all this information
 

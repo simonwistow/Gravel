@@ -14,6 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
+ * 	$Id: swf_movie.c,v 1.8 2002/05/09 15:26:55 clampr Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -212,7 +213,7 @@ swf_fillstyle * swf_make_fillstyle(int * error) {
     mystyle->ncolours = 0; /* Just do solid fill for now */
     mystyle->bitmap_id = 0; /* Just do solid fill for now */
     mystyle->matrix = NULL; /* Just do solid fill for now */
-    mystyle->colours = &(mystyle->matrix); /* Just do solid fill for now */
+    mystyle->colours = (swf_rgba_pos **) &(mystyle->matrix); /* Just do solid fill for now */
 
     mystyle->colour = 0; /* Black shape */
 
@@ -529,8 +530,7 @@ void swf_make_finalise(swf_movie * movie, int * error) {
 
   }
 
-
-  printf("File size is: %lu\n", tmp_size);
+  printf("File size is: %"pSWF_U16"\n", tmp_size);
 
   /* Backseek to fix up file size. */
 

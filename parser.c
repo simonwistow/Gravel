@@ -116,12 +116,12 @@ main (int argc, char *argv[])
     }
 
     printf("FWS\n");
-    printf("File version \t%lu\n", header->version);
-    printf("File size \t%lu\n", header->size);
+    printf("File version \t%"pSWF_U32"\n", header->version);
+    printf("File size \t%"pSWF_U32"\n", header->size);
     printf("Movie width \t%lu\n", (header->bounds->xmax - header->bounds->xmin) / 20);
     printf("Movie height \t%lu\n", (header->bounds->ymax - header->bounds->ymin) / 20);
-    printf("Frame rate \t%lu\n", header->rate);
-    printf("Frame count \t%lu\n", header->count);
+    printf("Frame rate \t%"pSWF_U32"\n", header->rate);
+    printf("Frame count \t%"pSWF_U32"\n", header->count);
 
 	swf_destroy_header(header);
     printf("\n----- Reading movie details -----\n");
@@ -131,7 +131,6 @@ main (int argc, char *argv[])
     /* parse all the tags */
     do
     {
-
         next_id = swf_parse_nextid(swf, &error);
         if (error != SWF_ENoError)
         {
@@ -140,7 +139,7 @@ main (int argc, char *argv[])
 
         error = SWF_ENoError;
 
-        printf ("%s [%ld]\n",tag[next_id], next_id);
+        printf ("%s [%"pSWF_U32"]\n", tag[next_id], next_id);
         switch (next_id)
         {
 		case tagEnd :
@@ -287,7 +286,7 @@ main (int argc, char *argv[])
 			break;
 
 		default:
-			printf ("%s%s [%ld]\n", str, tag[next_id], next_id);
+			printf ("%s%s [%"pSWF_U32"]\n", str, tag[next_id], next_id);
 			break;
         }
 		
@@ -322,7 +321,7 @@ parse_frame (swf_parser * context, const char * str)
 {
     context->frame++;
     printf("%stagShowFrame\n", str);
-    printf("\n<----- dumping frame %ld file offset 0x%04x ----->\n", context->frame, swf_parse_tell(context));
+    printf("\n<----- dumping frame %"pSWF_U32" file offset 0x%04x ----->\n", context->frame, swf_parse_tell(context));
 }
 
 void
@@ -347,7 +346,7 @@ parse_setbackgroundcolour (swf_parser * context, const char * str)
 
 	colour = (back->colour->r << 16) | (back->colour->g << 8) | back->colour->b;
 
-	printf("%stagSetBackgroundColor \tRGB_HEX %06lx\n", str, colour);
+	printf("%stagSetBackgroundColor \tRGB_HEX %06"pSWF_U32"x\n", str, colour);
 
     swf_destroy_setbackgroundcolour (back);
 }
@@ -369,7 +368,7 @@ parse_definefont (swf_parser * context, const char * str)
 		return;
 	}
 
-    printf("%stagDefineFont \t\tFont ID %-5lu\n", str, font->fontid);
+    printf("%stagDefineFont \t\tFont ID %-5"pSWF_U32"\n", str, font->fontid);
     printf("%s\tiOffset: 0x%04x\n", str, font->offset);
 	printf("%s\tnumber of glyphs: %d\n", str, font->glyph_count);
 
@@ -400,7 +399,7 @@ parse_definefontinfo (swf_parser * context, const char * str)
 
 	extra = swf_fetch_font_extra(context, info->fontid, 0);
 
-    printf("%stagDefineFontInfo \tFont ID %-5ld\n", str, info->fontid);
+    printf("%stagDefineFontInfo \tFont ID %-5"pSWF_U32"\n", str, info->fontid);
     printf("%s\tNameLen: '%i'\n", str, info->namelen);
   	printf("%s\tFontName: '%s'\n", str, info->fontname);
 	printf("%s\t", str);
@@ -431,7 +430,7 @@ parse_placeobject (swf_parser * context, const char * str)
     }
 
 
-    printf("%stagPlaceObject \ttagid %-5lu depth %-5lu\n", str, place->tagid, place->depth);
+    printf("%stagPlaceObject \ttagid %-5"pSWF_U32" depth %-5"pSWF_U32"\n", str, place->tagid, place->depth);
 
     print_matrix(place->matrix, str);
 
@@ -467,7 +466,7 @@ parse_placeobject2 (swf_parser * context, const char * str)
     /* Get the tag if specified. */
     if (place->flags & splaceCharacter)
     {
-        printf("tag %-5lu\n", place->tag);
+        printf("tag %-5"pSWF_U32"\n", place->tag);
     }
     else
     {
@@ -490,14 +489,14 @@ parse_placeobject2 (swf_parser * context, const char * str)
     if (place->flags & splaceRatio)
     {
         INDENT;
-        printf("ratio %lu\n", place->ratio);
+        printf("ratio %"pSWF_U32"\n", place->ratio);
     }
 
     /* Get the clipdepth if specified. */
     if (place->flags & splaceDefineClip)
     {
         INDENT;
-        printf("clipDepth %li\n", place->clip_depth);
+        printf("clipDepth %"pSWF_S32"\n", place->clip_depth);
     }
 
     /* Get the instance name */
@@ -535,7 +534,7 @@ parse_defineshape_aux (swf_parser * context, int with_alpha, const char * str)
     }
 
 
-    printf("%stagDefineShape \ttagid %-5lu\n", str, shape->tagid);
+    printf("%stagDefineShape \ttagid %-5"pSWF_U32"\n", str, shape->tagid);
 
     print_shapestyle (shape->style, str);
 
@@ -575,7 +574,7 @@ parse_freecharacter (swf_parser * context, const char * str)
     }
 
 
-    printf("%stagFreeCharacter \ttagid %-5lu\n", str, character->tagid);
+    printf("%stagFreeCharacter \ttagid %-5"pSWF_U32"\n", str, character->tagid);
 
     swf_destroy_freecharacter (character);
 }
@@ -593,7 +592,7 @@ parse_removeobject (swf_parser * context, const char * str)
     }
 
 
-    printf("%stagRemoveObject \ttagid %-5lu depth %-5lu\n", str, object->tagid, object->depth);
+    printf("%stagRemoveObject \ttagid %-5"pSWF_U32" depth %-5"pSWF_U32"\n", str, object->tagid, object->depth);
 
     swf_destroy_removeobject (object);
 }
@@ -611,7 +610,7 @@ parse_removeobject2 (swf_parser * context, const char * str)
     }
 
 
-    printf("%stagRemoveObject2 depth %-5lu\n", str, object->depth);
+    printf("%stagRemoveObject2 depth %-5"pSWF_U32"\n", str, object->depth);
 
     swf_destroy_removeobject2 (object);
 }
@@ -623,7 +622,7 @@ parse_startsound (swf_parser *  context, const char * str)
    int error = SWF_ENoError;
     swf_startsound * sound = swf_parse_startsound (context, &error);
 
-    printf("%stagStartSound \ttagid %-5lu\n", str, sound->tagid);
+    printf("%stagStartSound \ttagid %-5"pSWF_U32"\n", str, sound->tagid);
     print_startsound (sound, str);
 
     swf_destroy_startsound (sound);
@@ -647,7 +646,7 @@ parse_definebits (swf_parser * context, const char * str)
         return;
     }
 
-    printf("%stagDefineBits \ttagid %-5lu\n", str, bits->tagid);
+    printf("%stagDefineBits \ttagid %-5"pSWF_U32"\n", str, bits->tagid);
 
     print_imageguts (bits->guts, str);
     swf_destroy_definebits (bits);
@@ -664,7 +663,7 @@ parse_definebitsjpeg2 (swf_parser * context, const char * str)
         return;
     }
 
-    printf("%stagDefineBitsJpeg2 \ttagid %-5lu\n", str, bits->tagid);
+    printf("%stagDefineBitsJpeg2 \ttagid %-5"pSWF_U32"\n", str, bits->tagid);
 
     print_imageguts (bits->guts, str);
 
@@ -682,7 +681,7 @@ parse_definebitsjpeg3 (swf_parser * context, const char * str)
         return;
     }
 
-    printf("%stagDefineBitsJpeg3 \ttagid %-5lu\n", str, bits->tagid);
+    printf("%stagDefineBitsJpeg3 \ttagid %-5"pSWF_U32"\n", str, bits->tagid);
 
     print_imageguts (bits->guts, str);
 
@@ -717,7 +716,7 @@ parse_definetext (swf_parser * context, const char * str)
         return;
     }
 
-    printf("%stagDefineText \t\ttagid %-5lu\n", str, text->tagid);
+    printf("%stagDefineText \t\ttagid %-5"pSWF_U32"\n", str, text->tagid);
 
     print_rect(text->rect, str);
 
@@ -742,7 +741,7 @@ parse_definetext2 (swf_parser * context, const char * str)
         return;
     }
 
-    printf("%stagDefineText2 \t\ttagid %-5lu\n", str, text->tagid);
+    printf("%stagDefineText2 \t\ttagid %-5"pSWF_U32"\n", str, text->tagid);
 
     print_rect(text->rect, str);
 
@@ -767,7 +766,7 @@ parse_definebutton (swf_parser * context, const char * str)
         return;
     }
 
-    printf("%stagDefineButton \ttagid %-5lu\n", str, button->tagid);
+    printf("%stagDefineButton \ttagid %-5"pSWF_U32"\n", str, button->tagid);
 
     print_buttonrecords (button->records, str);
     print_doactions (button->actions, str);
@@ -787,7 +786,7 @@ parse_definebutton2 (swf_parser * context, const char * str)
         return;
     }
 
-    printf("%stagDefineButton2 \ttagid %-5lu\n", str, button->tagid);
+    printf("%stagDefineButton2 \ttagid %-5"pSWF_U32"\n", str, button->tagid);
 
     print_buttonrecords (button->records, str);
     print_button2actions (button->actions, str);
@@ -808,7 +807,7 @@ parse_defineedittext (swf_parser * context, const char * str)
 	    return;
     }
 
-    printf("%stagDefineEditText: tagid %ld flags:%04x ", str, text->tagid, text->flags);
+    printf("%stagDefineEditText: tagid %"pSWF_U32" flags:%04x ", str, text->tagid, text->flags);
 
     if (text->flags & seditTextFlagsHasFont)
     {
@@ -846,7 +845,7 @@ parse_definefont2 (swf_parser * context, const char * str)
 	    return;
     }
 
-    printf("%stagDefineFont2 \ttagid %-5lu flags:%04x nGlyphs:%d\n", str, font->fontid, font->flags, font->glyph_count);
+    printf("%stagDefineFont2 \ttagid %-5"pSWF_U32" flags:%04x nGlyphs:%d\n", str, font->fontid, font->flags, font->glyph_count);
 
     if (font->glyph_count > 0)
     {
@@ -865,7 +864,7 @@ parse_definefont2 (swf_parser * context, const char * str)
         for (i=0; i<font->glyph_count; i++)
         {
             if (font->flags & sfontFlagsWideOffsets) {
-                printf("%02x:[%04lx] ", i, font->code_table[i]);
+                printf("%02x:[%04"pSWF_U32"x] ", i, font->code_table[i]);
             } 
 			else {
                 printf("%02x:[%c] ", i, (char) font->code_table[i]);
@@ -917,7 +916,7 @@ parse_definemorphshape (swf_parser * context, const char * str)
     }
 
 
-    printf("%stagDefineMorphShape: tagid:%ld\n", str, shape->tagid);
+    printf("%stagDefineMorphShape: tagid:%"pSWF_U32"\n", str, shape->tagid);
 
     /* todo simon : no info is shown here - hmmm */
 
@@ -1018,7 +1017,7 @@ parse_namecharacter (swf_parser * context, const char * str)
         return;
     }
 
-    printf("%stagNameCharacter \ttagid %-5lu label '%s'\n", str, name->tagid, name->label);
+    printf("%stagNameCharacter \ttagid %-5"pSWF_U32" label '%s'\n", str, name->tagid, name->label);
 
     swf_destroy_namecharacter(name);
 }
@@ -1054,16 +1053,16 @@ parse_definebuttonsound (swf_parser * context, const char * str)
         return;
     }
 
-    printf("%stagDefineButtonSound \ttagid %-5lu\n", str, button->tagid);
+    printf("%stagDefineButtonSound \ttagid %-5"pSWF_U32"\n", str, button->tagid);
 
     INDENT;
-    printf("%supState \ttagid %-5lu\n", str, button->up_state->tagid);
+    printf("%supState \ttagid %-5"pSWF_U32"\n", str, button->up_state->tagid);
     if (button->up_state->tagid) {  print_startsound (button->up_state, str); }
     INDENT;
-    printf("%soverState \ttagid %-5lu\n", str, button->over_state->tagid);
+    printf("%soverState \ttagid %-5"pSWF_U32"\n", str, button->over_state->tagid);
     if (button->over_state->tagid) { print_startsound (button->over_state, str); }
     INDENT;
-    printf("%sdownState \ttagid %-5lu\n", str, button->down_state->tagid);
+    printf("%sdownState \ttagid %-5"pSWF_U32"\n", str, button->down_state->tagid);
     if (button->down_state->tagid) { print_startsound (button->down_state, str); }
 
     swf_destroy_definebuttonsound (button);

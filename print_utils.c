@@ -16,6 +16,12 @@
  *
  *
  * $Log: print_utils.c,v $
+ * Revision 1.15  2002/05/09 15:26:55  clampr
+ * More stealing from perl, now we have pSWF_* macros which are the printf
+ * formats for out internal data types.
+ *
+ * Plus a few -Wall cleanups
+ *
  * Revision 1.14  2001/07/16 14:14:40  clampr
  * free of null
  *
@@ -103,7 +109,7 @@ print_buttonrecords (swf_buttonrecord_list * list,const char * str)
 
     while (node != NULL)
     {
-		printf("%s\tParseButtonRecord: char:%ld layer:%ld ", str, node->character, node->layer);
+		printf("%s\tParseButtonRecord: char:%"pSWF_U32" layer:%"pSWF_U32" ", str, node->character, node->layer);
 
 		if (node->state_hit_test != 0)  printf("HIT ");
 		if (node->state_down != 0)      printf("DOWN ");
@@ -342,7 +348,7 @@ print_doaction (swf_doaction * action, const char * str)
 		/* property ids are pushed as floats for some reason */
 		if ( action->push_data_type == 1 )
 		{
-			printf("pushData (float): %08lx %.1f\n", action->push_data_float.dw, action->push_data_float.f);
+			printf("pushData (float): %08"pSWF_U32"x %.1f\n", action->push_data_float.dw, action->push_data_float.f);
 		}
 		else
 			if ( action->push_data_type == 0 )
@@ -351,7 +357,7 @@ print_doaction (swf_doaction * action, const char * str)
 			}
 			else
 			{
-				printf( "pushData invalid dataType: %02lx\n", action->push_data_type);
+				printf( "pushData invalid dataType: %02"pSWF_U32"x\n", action->push_data_type);
 			}
 		break;
 
@@ -429,7 +435,7 @@ print_button2actions (swf_button2action_list * list,const char * str)
 void
 print_button2action (swf_button2action * action, const char * str)
 {
-     printf("%sCondition: %04lx\n", str, action->condition);
+     printf("%sCondition: %04"pSWF_U32"x\n", str, action->condition);
      print_doactions (action->doactions, str);
 }
 
@@ -452,7 +458,7 @@ print_textrecord (swf_textrecord * node, const char * str)
 
         if (node->flags & textHasColour)
         {
-            printf("%s\tfontColour: %06lx\n", str, node->colour);
+            printf("%s\tfontColour: %06"pSWF_U32"x\n", str, node->colour);
         }
 
         if (node->flags & textHasXOffset)
@@ -572,14 +578,14 @@ print_startsound (swf_startsound * sound,const char * str)
 
 
     INDENT;
-    printf("%scode %-3lu", str, sound->code);
+    printf("%scode %-3"pSWF_U32, str, sound->code);
 
     if ( sound->code & soundHasInPoint ) {
-        printf(" inpoint %lu ", sound->inpoint);
+        printf(" inpoint %"pSWF_U32" ", sound->inpoint);
     } if ( sound->code & soundHasOutPoint ) {
-        printf(" outpoint %lu", sound->outpoint);
+        printf(" outpoint %"pSWF_U32, sound->outpoint);
     } if ( sound->code & soundHasLoops ) {
-        printf(" loops %lu", sound->loops);
+        printf(" loops %"pSWF_U32, sound->loops);
     }
 
     printf("\n");
@@ -589,9 +595,9 @@ print_startsound (swf_startsound * sound,const char * str)
         {
             printf("\n");
             INDENT;
-            printf("%smark44 %lu", str,  sound->points[i]->mark);
-            printf(" left chanel %lu", sound->points[i]->lc);
-            printf(" right chanel %lu", sound->points[i]->rc);
+            printf("%smark44 %"pSWF_U32, str,  sound->points[i]->mark);
+            printf(" left chanel %"pSWF_U32, sound->points[i]->lc);
+            printf(" right chanel %"pSWF_U32, sound->points[i]->rc);
             printf("\n");
         }
     }
@@ -620,7 +626,7 @@ print_shapestyle (swf_shapestyle * style,const char * str)
             /* Get each of the colors. */
             for (j = 0; j < style->fills[i]->ncolours; j++)
             {
-                printf("%s\tcolor:%d: at:%d  RGBA:%08lx\n", str, j, style->fills[i]->colours[j]->pos, style->fills[i]->colours[j]->rgba);
+                printf("%s\tcolor:%d: at:%d  RGBA:%08"pSWF_U32"x\n", str, j, style->fills[i]->colours[j]->pos, style->fills[i]->colours[j]->rgba);
             }
             printf("%s\tGradient Matrix:\n", str);
             print_matrix(style->fills[i]->matrix, str);
@@ -634,7 +640,7 @@ print_shapestyle (swf_shapestyle * style,const char * str)
         else
         {
             /* A solid color */
-            printf("%s\tSolid Color Fill RGB_HEX %06lx\n", str, style->fills[i]->colour);
+            printf("%s\tSolid Color Fill RGB_HEX %06"pSWF_U32"x\n", str, style->fills[i]->colour);
         }
     }
 
@@ -643,7 +649,8 @@ print_shapestyle (swf_shapestyle * style,const char * str)
     /* Get each of the line styles. */
     for (i = 0; i < style->nlines; i++)
     {
-        printf("%s\tLine style %-5u width %g color RGB_HEX %06lx\n", str, i+1, (double)style->lines[i]->width/20.0, style->lines[i]->colour);
+        printf("%s\tLine style %-5u width %g color RGB_HEX %06"pSWF_U32"x\n", 
+			   str, i+1, (double)style->lines[i]->width/20.0, style->lines[i]->colour);
     }
 }
 

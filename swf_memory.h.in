@@ -13,6 +13,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ *
+ * NOTE: don't edit this file!!!  Edit swf_memory.h.in and rerun either
+ * ./configure or ./config.status (if you've not changed configure)
+ *
  */
 
 #ifndef _SWF_MEMORY_H
@@ -27,6 +31,14 @@ typedef @SWF_U16@ SWF_U16, *P_SWF_U16, **PP_SWF_U16;
 typedef @SWF_S16@ SWF_S16, *P_SWF_S16, **PP_SWF_S16;
 typedef @SWF_U32@ SWF_U32, *P_SWF_U32, **PP_SWF_U32;
 typedef @SWF_S32@ SWF_S32, *P_SWF_S32, **PP_SWF_S32;
+
+/* use these for expanding printf macros */
+#define pSWF_U8  "@pSWF_U8@"
+#define pSWF_S8  "@pSWF_S8@"
+#define pSWF_U16 "@pSWF_U16@"
+#define pSWF_S16 "@pSWF_S16@"
+#define pSWF_U32 "@pSWF_U32@"
+#define pSWF_S32 "@pSWF_S32@"
 
 #endif
 

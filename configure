@@ -8289,19 +8289,27 @@ _ACEOF
 
 
 case 1 in
-        $ac_cv_sizeof_char)  SWF_U8="unsigned char";    SWF_S8="signed char";;
+        $ac_cv_sizeof_char)  SWF_U8="unsigned char";    SWF_S8="signed char";
+                            pSWF_U8="uc";              pSWF_S8="c";;
 esac
 
 case 2 in
-        $ac_cv_sizeof_char)  SWF_U16="unsigned char";   SWF_S16="signed char";;
-        $ac_cv_sizeof_short) SWF_U16="unsigned short";  SWF_S16="signed short";;
-        $ac_cv_sizeof_int)   SWF_U16="unsigned int";    SWF_S16="signed int";;
+        $ac_cv_sizeof_char)  SWF_U16="unsigned char";   SWF_S16="signed char";
+                            pSWF_U16="uc";             pSWF_S16="c";;
+        $ac_cv_sizeof_short) SWF_U16="unsigned short";  SWF_S16="signed short";
+                            pSWF_U16="u";              pSWF_S16="d";;
+        $ac_cv_sizeof_int)   SWF_U16="unsigned int";    SWF_S16="signed int";
+                            pSWF_U16="u";              pSWF_S16="d";;
 esac
 
 case 4 in
-        $ac_cv_sizeof_long)  SWF_U32="unsigned long";   SWF_S32="signed long";;
-        $ac_cv_sizeof_short) SWF_U32="unsigned short";  SWF_S32="signed short";;
-        $ac_cv_sizeof_int)   SWF_U32="unsigned int";    SWF_S32="signed int";;
+        $ac_cv_sizeof_short) SWF_U32="unsigned short";  SWF_S32="signed short";
+                            pSWF_U32="u";              pSWF_S32="d";;
+        $ac_cv_sizeof_int)   SWF_U32="unsigned int";    SWF_S32="signed int";
+                            pSWF_U32="u";              pSWF_S32="d";;
+        $ac_cv_sizeof_long)  SWF_U32="unsigned long";   SWF_S32="signed long";
+                            pSWF_U32="ul";             pSWF_S32="ld";;
+
 esac
 
 if test -z "$SWF_U8"; then
@@ -8319,6 +8327,13 @@ if test -z "$SWF_U32"; then
 echo "$as_me: error: No 32 bit type found on this platform!" >&2;}
    { (exit 1); exit 1; }; }
 fi
+
+
+
+
+
+
+
 
 
 
@@ -8938,6 +8953,12 @@ s,@SWF_U16@,$SWF_U16,;t t
 s,@SWF_S16@,$SWF_S16,;t t
 s,@SWF_U32@,$SWF_U32,;t t
 s,@SWF_S32@,$SWF_S32,;t t
+s,@pSWF_U8@,$pSWF_U8,;t t
+s,@pSWF_S8@,$pSWF_S8,;t t
+s,@pSWF_U16@,$pSWF_U16,;t t
+s,@pSWF_S16@,$pSWF_S16,;t t
+s,@pSWF_U32@,$pSWF_U32,;t t
+s,@pSWF_S32@,$pSWF_S32,;t t
 CEOF
 
 _ACEOF

@@ -426,8 +426,6 @@ swf_parse_get_button2actions (swf_parser * context, int * error)
 {
     swf_button2action_list * list;
     swf_button2action      * temp;
-    SWF_U32                  action_offset = 0;
-    SWF_U32                  next_action   = 0;
     int test = 0;
 
     if ((list = (swf_button2action_list *) calloc (1, sizeof(swf_button2action_list))) == NULL)
@@ -444,10 +442,13 @@ swf_parse_get_button2actions (swf_parser * context, int * error)
 
     while (TRUE)
     {
+		SWF_U32 action_offset = 0;
+		SWF_U32 next_action   = 0;
+
 		action_offset = swf_parse_get_word (context);
 		next_action   = swf_parse_tell (context) + action_offset - 2;
 		
-        dprintf ("[get_button2action_list : action_offset  = %lx %lx (%d)]\n", action_offset, next_action, test);
+        dprintf ("[get_button2action_list : action_offset  = %"pSWF_U32"x %"pSWF_U32"x (%d)]\n", action_offset, next_action, test);
 
 		if ((temp  = (swf_button2action *) calloc (1, sizeof(swf_button2action))) == NULL)
 		{
@@ -943,6 +944,12 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
 
 /*
  * $Log: swf_parse.c,v $
+ * Revision 1.47  2002/05/09 15:26:55  clampr
+ * More stealing from perl, now we have pSWF_* macros which are the printf
+ * formats for out internal data types.
+ *
+ * Plus a few -Wall cleanups
+ *
  * Revision 1.46  2002/05/09 01:33:33  clampr
  *
  * couple of dprintfs written as fprintfs, couple reversed, axed a few Log tags

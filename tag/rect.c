@@ -48,9 +48,7 @@ swf_parse_get_rect (swf_parser * context, int * error)
 void swf_serialise_rect(swf_movie * p, int * error, swf_rect * rect) 
 {
   SWF_U16 max;
-
   SWF_U8 i=2;
-  int err=0;
 
   max = 0;
   if (abs(rect->xmin) > max) {
@@ -79,7 +77,6 @@ void swf_serialise_rect(swf_movie * p, int * error, swf_rect * rect)
   swf_movie_put_sbits(p, i, rect->ymin);
   swf_movie_put_sbits(p, i, rect->ymax);
   swf_movie_flush_bits(p);
-
 }
 
 void
