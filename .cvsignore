@@ -3,8 +3,12 @@ config.cache
 config.status
 sizes.h
 swf_parse
+swf_parse_debug
 text_extract
 *.lo
+*.do
 *.la
 .libs
 libtool
+libswfparse-snapshot-*
+Makefile
