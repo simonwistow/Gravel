@@ -7,8 +7,8 @@ LIBTOOL = ./libtool
 INSTALL = ./install-sh
 
 #flags
-CFLAGS =  -Wall -Wwrite-strings -Wmissing-prototypes -O3 -pipe 
-DEBUG = -DDEBUG -g
+CFLAGS =  -Wall -Wwrite-strings -Wmissing-prototypes -O3 -g -pipe 
+DEBUG = -DDEBUG
 LIBS= 
 
 #other stuff
@@ -109,10 +109,10 @@ text_extract: libswfextract.la $(TEXT_OBJECTS)
 ## Gen stuff. Someone more versed in build procedure than I can fix this
 
 gen_test1: gen_test1.do $(D_LIB_OBJECTS)
-	$(CC) $(CFLAGS) -I . $(DEBUG) -o gen_test1 gen_test1.do $(D_LIB_OBJECTS) $(LIBS)
+	$(CC) $(CFLAGS) -I . $(DEBUG) -o gen_test1 gen_test1.do $(D_LIB_OBJECTS) $(LIBS) -static
 
 gen_test2: gen_test2.do $(D_LIB_OBJECTS)
-	$(CC) $(CFLAGS) -I . $(DEBUG) -o gen_test2 gen_test2.do $(D_LIB_OBJECTS) $(LIBS)
+	$(CC) $(CFLAGS) -I . $(DEBUG) -o gen_test2 gen_test2.do $(D_LIB_OBJECTS) $(LIBS) -static
 
 ## static, but quiet
 
