@@ -26,10 +26,10 @@ swf_parse_get_col (swf_parser * context, int * error, int with_alpha)
 {
 	swf_colour * mycol;
 
-	if ((mycol = (swf_colour *) calloc (1, sizeof (swf_colour *))) == NULL) {
+	if ((mycol = (swf_colour *) calloc (1, sizeof (swf_colour))) == NULL) {
 		*error = SWF_EMallocFailure;
 		return NULL;
-    }
+         }
 
     mycol->r = swf_parse_get_byte(context);
     mycol->g = swf_parse_get_byte(context);
