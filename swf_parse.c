@@ -921,7 +921,7 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
 
     if (font_id == -1) {
         /* somethings gone wrong */
-        dprintf (stderr, "[textrecords_to_text : EFontNotSet]\n");
+        dprintf ("[textrecords_to_text : EFontNotSet]\n");
         //todo simon : why is this not working *error = SWF_EFontNotSet;
         return NULL;
     }
@@ -943,6 +943,10 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
 
 /*
  * $Log: swf_parse.c,v $
+ * Revision 1.46  2002/05/09 01:33:33  clampr
+ *
+ * couple of dprintfs written as fprintfs, couple reversed, axed a few Log tags
+ *
  * Revision 1.45  2001/07/23 22:34:45  muttley
  * Fix warning about comment like text in the logs
  *

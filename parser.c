@@ -14,56 +14,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- *
- * $Log: parser.c,v $
- * Revision 1.22  2001/07/23 23:48:27  clampr
- * fixup the last memleak ktrace can find over the stress suite
- *
- * Revision 1.21  2001/07/19 03:34:01  clampr
- * insomnia-led layout delta o' the day
- *
- * Revision 1.20  2001/07/16 15:05:15  clampr
- * get rid of glib due to randomness (I suspect it may have been a dynamic linking issue)
- *
- * add in a homebrew linked list type for font_extras (ick)
- *
- * Revision 1.19  2001/07/16 01:41:25  clampr
- * glib version of font management
- *
- * Revision 1.18  2001/07/15 17:18:25  clampr
- * revert the previous bug workaround now the bug is fixed
- *
- * Revision 1.17  2001/07/15 16:20:48  clampr
- * patch around bug in swf_parse_get_mp3headers to stop swf_parse segfaulting
- *
- * NOTE: this is not fixing the bug, it's just not failing due to it
- *
- * Revision 1.16  2001/07/15 14:09:46  clampr
- * slice swf_parse.c and swf_destroy.c into tag/*.c files
- *
- * Revision 1.15  2001/07/14 22:16:41  clampr
- * fix up an ugly switch statement
- *
- * Revision 1.14  2001/07/13 15:55:29  muttley
- * Fix for font chars
- *
- * Revision 1.13  2001/07/09 15:48:54  acme
- * Renamed U32 to SWF_U32 and so on
- *
- * Revision 1.12  2001/07/09 12:47:59  muttley
- * Changes for lib_swfextract and text_extract
- *
- * Revision 1.10  2001/06/29 15:10:11  muttley
- * The printing of the actual text of a DefineText (and DefineText2 now)
- * is no longer such a big hack. Font information is kept in the swf_parser
- * context and the function that will take a text_record_list and print out
- * the text (textrecord_list_to_text) has been moved to swf_parse.c ...
- *
- * A couple of potential bugs have also been fixed and some more 'todo's added
- *
- * Revision 1.9  2001/06/26 14:39:20  muttley
- * Make it actually work (forgot to uncomment a line)
- *
  */
 
 #include "parser.h"

@@ -16,6 +16,10 @@
  *
  *
  * $Log: lib_swfextract.c,v $
+ * Revision 1.23  2002/05/09 01:33:33  clampr
+ *
+ * couple of dprintfs written as fprintfs, couple reversed, axed a few Log tags
+ *
  * Revision 1.22  2002/05/09 01:12:02  clampr
  * valgrind found a leak
  *
@@ -212,7 +216,7 @@ destroy_swf (swf_extractor * swf)
     /* delete the pointer to the strings */
     swf_free (swf->strings);
 
-    fprintf ("[destroy_swf : freeing %d urls]\n", swf->num_urls);
+    dprintf ("[destroy_swf : freeing %d urls]\n", swf->num_urls);
 
     /* delete each individual url */
     for (i=0; i<swf->num_urls; i++)
