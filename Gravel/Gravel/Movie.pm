@@ -38,6 +38,7 @@ sub new {
 		%conf = @_;
     }
 	$self->{_bgcol} = $conf{bgcol};
+	$self->{_protect} = $conf{protect};
 
     $self->{_library} = [];
     $self->{_events} = [];
@@ -98,7 +99,7 @@ sub name {
 sub protect {
 	my $self = shift;
 	my $pt = shift;
-	$self->{_protect} = $pt if $pt;
+	$self->{_protect} = $pt if defined $pt;
 	return $self->{_protect};
 }
 
@@ -153,7 +154,7 @@ sub bake_movie {
 
 	my $b = Gravel::Movie->_create_baked();
 	$b->_bake_header($self);
-	$b->_bake_preamble($self, 0);
+	$b->_bake_preamble($self, $self->protect);
 
 	print STDERR DumperX $self;
 

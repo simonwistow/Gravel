@@ -16,6 +16,9 @@
  *
  *
  * $Log: parser.h,v $
+ * Revision 1.13  2003/07/02 16:39:39  kitty_goth
+ * stuff for swf_unprotect. More later
+ *
  * Revision 1.12  2002/07/11 16:16:47  kitty_goth
  * This is still borken. Checkin to carry on at home
  *
@@ -43,6 +46,7 @@
 
 extern void parse_frame                 (swf_parser *, const char *);
 extern void parse_end                   (swf_parser *, const char *);
+extern void parse_protect               (swf_parser *, const char *);
 extern void parse_setbackgroundcolour   (swf_parser *, const char *);
 extern void parse_definefont            (swf_parser *, const char *);
 extern void parse_definefont2           (swf_parser *, const char *);

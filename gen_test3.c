@@ -162,6 +162,7 @@ int main (int argc, char *argv[]) {
 
     obj_id = swf_get_object_id(temp, &error);
 
+    swf_add_protect(movie, &error);
     swf_add_setbackgroundcolour(movie, &error, 0, 255, 0, 255);
     swf_dump_tag(movie, &error, temp);
     swf_add_definebutton(movie, &error, 14, obj_id);

@@ -14,7 +14,7 @@ use Gravel::Effect::Enlarge;
 use Data::Dumper qw/DumperX/;
 
 my $m = Gravel::Movie->new();
-#my $m = Gravel::Movie->new({bgcol => '#00ffff'});
+my $m = Gravel::Movie->new({bgcol => '#00ffff', protect => 1});
 
 $m->name('foo.swf');
 $m->size(0, 0, 10000, 10000);

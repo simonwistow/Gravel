@@ -123,7 +123,7 @@ init_parser (void) {
 	parse[21] = parse_definebitsjpeg2;
 	parse[22] = parse_defineshape2;
 	parse[23] = parse_definebuttoncxform;
-	parse[24] = dummy;         // parse_protect
+	parse[24] = parse_protect; // dumy;
 	parse[25] = dummy; 
 
     //  These are the new tags for Flash 3.
@@ -194,7 +194,7 @@ main (int argc, char *argv[])
 
     swf = swf_parse_create(argv[1], &error);
 
-     parse = init_parser();
+	parse = init_parser();
 
     if (swf == NULL) {
 		fprintf (stderr, "Failed to create SWF context\n");
@@ -234,7 +234,7 @@ main (int argc, char *argv[])
 
         error = SWF_ENoError;
 
-                // printf ("%s [%"pSWF_U32"]\n", tag[next_id], next_id);
+        printf ("%s [%"pSWF_U32"]\n", tag[next_id], next_id);
 		if (next_id <= SWF_PARSER_MAX_TAG_ID) {
 			parse[next_id](swf, str);
 			
@@ -293,6 +293,12 @@ void
 parse_end (swf_parser * context, const char * str)
 {
 	printf("%stagEnd\n", str);
+}
+
+void
+parse_protect (swf_parser * context, const char * str)
+{
+	printf("%stagProtect\n", str);
 }
 
 void
