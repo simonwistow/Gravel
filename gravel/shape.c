@@ -87,7 +87,7 @@ gravel_end_shape(swf_tagrecord* tag, int* error)
  * Process main records
  */
 swf_tagrecord * 
-gravel_create_shape(swf_movie * movie, int * error, SCOORD xmin, SCOORD xmax, SCOORD ymin, SCOORD ymax)
+gravel_make_shape(swf_movie * movie, int * error, SCOORD xmin, SCOORD xmax, SCOORD ymin, SCOORD ymax)
 {
     swf_tagrecord * tag = swf_make_tagrecord(error, tagDefineShape);
     swf_defineshape * shape;

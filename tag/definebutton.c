@@ -17,6 +17,7 @@
 
 #include "tag_handy.h"
 #include "swf_action.h"
+#include "swf_add.h"
 
 #define MAX_BUTTON_SIZE 128
 

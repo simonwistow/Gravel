@@ -532,7 +532,7 @@ void _bake (SV * shape, SV * mov)
 		y2 = (SCOORD)(SvIV(*p_num));
 	}
 	
-	temp = gravel_create_shape(m->movie, &error, x1, x2, y1, y2);
+	temp = gravel_make_shape(m->movie, &error, x1, x2, y1, y2);
 	mytag = (swf_defineshape *) temp->tag;
 	if (SWF_ENoError != error) {
 		fprintf(stderr, "Non-zero error condition 9 detected\n");
