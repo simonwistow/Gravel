@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_destroy.c,v $
+ * Revision 1.30  2001/07/19 03:13:41  clampr
+ * spurious whitespace nits
+ *
  * Revision 1.29  2001/07/19 03:05:03  clampr
  * free up the font_extras list on context destroy
  *
@@ -136,7 +139,7 @@ swf_destroy_fillstyle (swf_fillstyle * style)
     }
 
     for (i=0; i<style->ncolours && style->colours!=NULL; i++) {
-	swf_free (style->colours[i]);
+		swf_free (style->colours[i]);
     }
     swf_free (style->colours);
 
@@ -150,7 +153,7 @@ swf_destroy_textrecord_list (swf_textrecord_list * list)
 {
     swf_textrecord *tmp, *node;
     if (list==NULL){
-	return;
+		return;
     }
 
     *(list->lastp) = NULL;
@@ -160,7 +163,7 @@ swf_destroy_textrecord_list (swf_textrecord_list * list)
         tmp = node;
         node = node->next;
 
-	swf_destroy_textrecord(tmp);
+		swf_destroy_textrecord(tmp);
     }
     swf_free(list);
 
@@ -174,7 +177,7 @@ swf_destroy_shaperecord_list (swf_shaperecord_list * list)
     swf_shaperecord *tmp, *node;
 
     if (list==NULL){
-	return;
+		return;
     }
 
     *(list->lastp) = NULL;
