@@ -1,18 +1,28 @@
 #!/usr/bin/perl -w
+#
+# Given an swf file this will give some diagnostics
+# on where our write_through program is going wrong.
+#
+#
+
 
 use strict;
-use Digest::MD5 qw(md5);
 
 # warning this is a security risk, probably
-my $file = shift;
+my $file = shift || die "Must pass a file name";
 
 # make a temp name
 my $tmp =  $$.time;
 
 # perform a write through an generate the first loads of tags
 my @first = `./write_through $file $tmp`;
-# do the second one
+# do the second one. We should probably error check this.
 my @second = `./write_through $tmp $tmp`;
+
+die "There was an error running the external program './write_through'" unless (@first && @second);
+
+# get rid of the tmp file
+unlink $tmp;
 
 # the current difference
 my $diff = 0;
@@ -45,8 +55,8 @@ for (my $i=0; $i<scalar @first; $i++)
 	
 		my @c = ($first[$i-1]   =~ /^\[(\d+)\] \((\d+)\) (.+) (\**)$/);
 		my @d = ($second[$i-1]  =~ /^\[(\d+)\] \((\d+)\) (.+) (\**)$/);
-		print "$c[2] changed by ".($tdiff-$diff)." bytes in frame $c[0] ";
-		print "(longtag)" if (defined $c [3] && $c[3] eq '*');
+		print "$c[2] changed by ".($tdiff-$diff)." bytes in frame $c[0]";
+		print " (longtag)" if (defined $c [3] && $c[3] eq '*');
 		print ".\n";
 		print "Original tag started at ".$c[1]." and the next tag starts at ".$a[1]." size=".($a[1]-$c[1])."\n";
 		print "The new  tag started at ".$d[1]." and the next tag starts at ".$b[1]." size=".($b[1]-$d[1])."\n";
