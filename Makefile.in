@@ -15,6 +15,7 @@ LIBS=
 LIB_OBJECTS=	\
 	swf_parse.o 			\
 	swf_movie.o 			\
+	swf_buffer.o 			\
 	swf_destroy.o 			\
 	swf_error.o 			\
 	swf_tags.o 			\

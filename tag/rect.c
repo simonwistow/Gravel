@@ -65,12 +65,10 @@ void swf_serialise_rect(swf_movie * p, int * error, swf_rect * rect)
   }
 
   while (1 < max) {
-    fprintf(stderr, "max = %u after shifting %i bits\n", max, i);
     i++;
     max = max >> 1;
   }
 
-  fprintf(stderr, "max = %u after shifting %i bits\n", max, i);
   swf_movie_put_bits(p, 5, i);
   swf_movie_put_sbits(p, i, rect->xmin);
   swf_movie_put_sbits(p, i, rect->xmax);

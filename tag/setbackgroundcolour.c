@@ -51,8 +51,6 @@ swf_add_setbackgroundcolour(swf_movie * movie, int * error, SWF_U8 red, SWF_U8 g
 
     temp = swf_make_tagrecord(error);
 
-	fprintf(stderr, "foo 1\n");
-
     if (*error) {
 		return;
     }

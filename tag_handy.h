@@ -21,6 +21,7 @@
 #include "swf_types.h"
 #include "swf_parse.h"
 #include "swf_movie.h"
+#include "swf_buffer.h"
 #include "swf_serialise.h"
 #include "swf_destroy.h"
 #endif

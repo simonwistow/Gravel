@@ -49,7 +49,7 @@ SWF_U16 swf_get_object_id(swf_tagrecord * mytag, int * error);
 SWF_U16 
 swf_get_object_id(swf_tagrecord * mytag, int * error)
 {
-    return (((SWF_U16) mytag->buffer[1]) << 8) | (SWF_U16) mytag->buffer[0];
+    return (((SWF_U16) mytag->buffer->raw[1]) << 8) | (SWF_U16) mytag->buffer->raw[0];
 }
 
 int main (int argc, char *argv[]) {
@@ -103,12 +103,10 @@ int main (int argc, char *argv[]) {
     temp->id = 0;
     temp->tag = NULL;
     temp->serialised = 0;
-    temp->size = 0;
-    temp->buffer = NULL;
+
 
     swf_get_nth_shape(parser, &error, shape_num, temp);
     obj_id = swf_get_object_id(temp, &error);
-
 
 /* Now generate the output movie */
 
@@ -123,15 +121,17 @@ int main (int argc, char *argv[]) {
     movie->name = "ben2.swf\0";
 
     swf_add_setbackgroundcolour(movie, &error, 0, 255, 0, 255);
-    swf_add_showframe(movie, &error);
     swf_dump_shape(movie, &error, temp);
-    swf_add_showframe(movie, &error);
-//    swf_add_placeobject();
+    printf("foo 5\n");
+    swf_add_placeobject(movie, &error, obj_id);
+    printf("foo 6\n");
     swf_add_showframe(movie, &error);
     swf_add_end(movie, &error);
 
+
     swf_make_finalise(movie, &error);
-    
+    printf("foo 7\n");
+
     swf_destroy_movie(movie);
 
     fprintf (stderr, "OK\n");

@@ -16,6 +16,11 @@
  */
 
 #include "tag_handy.h"
+#define MAX_PLACE_SIZE 64
+/* This is the maximum size a tagPlaceObject can be in serialised form.
+ * This is a highly conservative estimate. 52 would be closer to the true
+ * maximum value.
+ */
 
 swf_placeobject *
 swf_parse_placeobject (swf_parser * context, int * error)
@@ -54,28 +59,52 @@ swf_parse_placeobject (swf_parser * context, int * error)
 void
 swf_add_placeobject (swf_movie * movie, int * error, SWF_U16 char_id) 
 {
-    swf_tagrecord * temp;
+	swf_tagrecord * temp;
 	SWF_U16 depth;
+	swf_matrix * mym;
 
     temp = swf_make_tagrecord(error);
 
     if (*error) {
 		return;
     }
-
+   
     temp->next = NULL;
     temp->id = tagPlaceObject;
     temp->tag = NULL;
     temp->serialised = 0;
 
 /* Place Object specifics */
+    if ((temp->buffer->raw = (SWF_U8 *) calloc (MAX_PLACE_SIZE, sizeof (SWF_U8))) == NULL) {
+		*error = SWF_EMallocFailure;
+		return;
+    }
+
+    if ((mym = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
+		*error = SWF_EMallocFailure;
+		return;
+    }
+
+    printf("foo A\n");
+
+	mym->a  = mym->c  = 512 * 100;
+	mym->b  = mym->d  = 0;
+	mym->tx = 300 * 20;
+	mym->ty = 150 * 20;
+
 	depth = 1;
 	
-	swf_movie_put_word(movie, error, char_id);
-	swf_movie_put_word(movie, error, depth);
+    printf("foo B\n");
+	swf_buffer_put_word(temp->buffer, error, char_id);
+    printf("foo C\n");
+	swf_buffer_put_word(temp->buffer, error, depth);
     temp->buffer->size = 4;
 
+	swf_serialise_matrix(temp->buffer, error, mym);
 	
+    temp->serialised = 1;
+	
+	printf("foo D\n");
 /* Footer ... */
 
     *(movie->lastp) = temp;

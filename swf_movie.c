@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.10 2002/05/10 17:07:51 kitty_goth Exp $	
+ * 	$Id: swf_movie.c,v 1.11 2002/05/11 12:00:43 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -140,14 +140,6 @@ swf_tagrecord * swf_make_tagrecord (int * error) {
     }
     tag->buffer->raw  = NULL;
     tag->buffer->size = 0;
-
-
-    /*    movie->header = NULL;
-
-    movie->max_obj_id = 0;
-
-    movie->first = NULL;
-    movie->lastp = &(movie->first); */
 
     return tag;
 }
@@ -287,11 +279,14 @@ void swf_get_raw_shape (swf_parser * swf, int * error, swf_tagrecord * mytag) {
     startpos = swf->filepos;
     length = swf->cur_tag_len;
 
-    /* mytag should not have a calloc'd buffer */
+    /* mytag should not have a calloc'd raw buffer */
 
-    if (mytag->buffer != NULL) {
+    if (mytag->buffer->raw != NULL) {
+        fprintf(stderr, "alloc fuckup 1\n");
 	return;
     }
+
+    printf("foo a\n");
 
     if ((mytag->buffer = (swf_buffer *) calloc (1, sizeof (swf_buffer))) == NULL) {
 	*error = SWF_EMallocFailure;
@@ -500,7 +495,7 @@ void swf_make_finalise(swf_movie * movie, int * error) {
     temp = node;
     node = node->next;
     
-    printf("Walking waka-waka : id = %i\n", temp->id);
+/* printf("Walking waka-waka : id = %i\n", temp->id); */
 
     if (tagShowFrame == temp->id) {
       tmp_16++;
@@ -598,9 +593,7 @@ swf_movie_put_byte(swf_movie * context, int * error, SWF_U8 byte)
 void 
 swf_movie_put_bytes (swf_movie * context, int * error, int nbytes, SWF_U8 * bytes) 
 {
-    printf("can 1\n");
     swf_movie_initbits(context);
-    printf("can 2\n");
 /* FIXME: Need a write error code */
 
     if( fwrite(bytes, 1, nbytes, context->file) != nbytes){
