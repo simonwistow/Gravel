@@ -16,6 +16,9 @@
  *
  *
  * $Log: lib_swfextract.c,v $
+ * Revision 1.19  2001/07/19 23:23:30  clampr
+ * last few(?) pointer deference bugs
+ *
  * Revision 1.18  2001/07/19 23:12:18  clampr
  * dereference the pointer
  *
@@ -333,7 +336,7 @@ parse_doaction (swf_extractor * swf, int * error)
     fprintf (stderr, "[parse_doaction: list is %s ]\n", (list==NULL)?"NULL":"Ok");
     #endif
 
-    if (list == NULL || error != SWF_ENoError)
+    if (list == NULL || *error != SWF_ENoError)
     {
         return;
     }
@@ -394,7 +397,7 @@ parse_defineedittext (swf_extractor * swf, int * error)
     fprintf (stderr, "[parse_defineedittext: text is %s ]\n", (text==NULL)?"NULL":"Ok");
     #endif
 
-    if (text == NULL || error != SWF_ENoError)
+    if (text == NULL || *error != SWF_ENoError)
     {
         return;
     }
@@ -479,7 +482,7 @@ parse_definetext2 (swf_extractor * swf, int * error)
 
     string = swf_parse_textrecords_to_text(swf->parser, error, text->records);
 
-    if (error == SWF_ENoError)
+    if (*error == SWF_ENoError)
     {
         add_string (swf, error, string);
     }
