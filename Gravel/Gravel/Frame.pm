@@ -1,4 +1,4 @@
-package Gravel::Effect;
+package Gravel::Frame;
 
 use strict;
 use warnings;
@@ -10,15 +10,6 @@ use Gravel::Shape;
 use Data::Dumper qw/DumperX/;
 
 our $VERSION = '0.10';
-
-use Cwd qw(cwd abs_path);
-use Inline C => 'DATA',
-  VERSION => '0.10',
-  NAME => 'Gravel::Effect',
-  LIBS => '-L' . abs_path(cwd . '/../../') . ' -lswfparse',
-  INC => '-I' . abs_path(cwd . '/../../'),
-  OPTIMIZE => '-g';
-use Inline C => Config => STRUCTS => 'swf_header';
 
 # FIXME
 
@@ -35,8 +26,6 @@ sub new {
 	%conf = @_;
     }
 
-    $self->{_shape} = $conf{shape};
-
     bless $self => $class;
 
     return $self;
@@ -50,7 +39,4 @@ sub new {
 
 1;
 
-__DATA__
-
-__C__
 

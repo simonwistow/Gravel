@@ -37,6 +37,8 @@ sub new {
     }
 
     $self->{_library} = [];
+    $self->{_events} = [];
+    $self->{_timeline} = [];
 
     bless $self => $class;
 
@@ -44,6 +46,26 @@ sub new {
 }
 
 #
+
+sub event {
+    my $self = shift;
+    my $e = shift;
+    push @{$self->{_events}}, $e;
+}
+
+
+#
+
+sub make_timeline {
+    my $self = shift;
+
+    foreach my $e (@{$self->{_events}}) {
+	my $ra_f = $e->frames();
+	foreach (@$ra_f) {
+	    
+	}
+    }
+}
 
 #
 
