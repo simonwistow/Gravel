@@ -16,6 +16,12 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.19  2001/07/05 17:14:24  kitty_goth
+ * A problem I thought I'd fixed seems to have come back.
+ *
+ * Backing out my change while I figure it out. Thought I was
+ * being over-eager. --Kitty
+ *
  * Revision 1.18  2001/07/05 12:06:58  muttley
  * Whoops, I didn't resolve the conflict in last commit.
  *
@@ -773,7 +779,13 @@ swf_parse_definefont (swf_parser * context, int * error)
         xlast = 0;
         ylast = 0;
 
-        font->shape_records[n] = swf_parse_get_shaperecords(context, error);
+        font->shape_records[n] = NULL;
+//        font->shape_records[n] = swf_parse_get_shaperecords(context, error);
+/*
+  I'm keeping this out of the main development flow until I understand
+  why it occasionally stops parsing here. I suspect memory allocation
+  issues -- Kitty
+ */
     }
 
     free (offset_table);
