@@ -76,7 +76,7 @@ sub make_timeline {
     foreach my $e (@{$self->{_events}}) {
 		my $ra_f = $e->frames();
 		for(my $i = 0; $i < scalar(@$ra_f); ++$i) {
-			$self->{_timeline}->[$i] = $ra_f->[$i] if $ra_f->[$i];
+			push @{$self->{_timeline}->[$i]}, $ra_f->[$i] if $ra_f->[$i];
 		}
     }
 }
@@ -155,9 +155,12 @@ sub bake_movie {
 	$b->_bake_header($self);
 	$b->_bake_preamble($self, 0);
 	$b->_bake_library($self);
+#	$b->_bake_frames($self);
 
+	$b->_bake_test($self);
 
-	$b->_bake_rest($self);
+	$b->_bake_end($self);
+	$b->_finalise($self);
 
 	return $b;
 }
@@ -366,8 +369,6 @@ void _bake_edge(int * error, swf_defineshape * mytag, HV * h_edge)
 
 	record = swf_make_shaperecord(error, 1);
 
-	fprintf(stderr, "Doing an edge...\n");
-
 	p_type = hv_fetch(h_edge, "_EDGE_TYPE", 10, 0);	
 	if (NULL != p_type) {
 		type = (const char *)SvPVX(*p_type);		
@@ -530,7 +531,8 @@ SV* _create_baked(char* class) {
 }
 
 
-SV* _bake_rest(SV* obj, SV* self) {
+
+SV* _bake_frames(SV* obj, SV* self) {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
     int error;
     swf_tagrecord * temp;
@@ -561,6 +563,47 @@ SV* _bake_rest(SV* obj, SV* self) {
 
 	fprintf(stderr, "Foo 6\n");
 
+}
+
+SV* _bake_test(SV* obj, SV* self) {
+	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
+    int error;
+	swf_matrix * matrix;
+
+    error = 0;
+
+    if ((matrix = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
+		error = SWF_EMallocFailure;
+		return 1;
+    }
+
+/* FIXME: Do object IDs properly */
+
+/* FIXME: Test matrix */
+    matrix->a  = matrix->d  = 512 * 1000;
+	matrix->tx = matrix->ty = 100 * 20;
+
+	swf_add_placeobject(m->movie, &error, matrix, 1, 1);
+    swf_add_showframe(m->movie, &error);
+}
+
+
+
+SV* _bake_end(SV* obj, SV* self) {
+	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
+    int error;
+
+    swf_add_end(m->movie, &error);
+}
+
+
+SV* _finalise(SV* obj, SV* self) {
+	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
+    int error;
+
+    swf_make_finalise(m->movie, &error);
+
+    swf_destroy_movie(m->movie);
 }
 
 

@@ -162,10 +162,12 @@ sub poly {
     
     $self->vertex($x0, $y0);
     
-    while (my $x = shift) {
+	my $x = shift;
+    while (defined $x) {
 		my $y = shift;
 	
 		$self->line_to($x, $y);
+		$x = shift;
     }
     $self->line_to($x0, $y0);
 
