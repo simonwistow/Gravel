@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.17  2001/07/12 11:33:25  muttley
+ * *cough* remove a couple of commented out bits so it actually works
+ *
  * Revision 1.16  2001/07/12 11:27:08  muttley
  * Remove all the tags and put them in swf_tags
  * Add comments for every type
@@ -332,7 +335,7 @@ struct swf_parser {
     int headers_parsed;   /* have the headers been parsed yet */
 
     SWF_U32 cur_tag_len;  /* the length of the current tag we're parsing */
-    /* SWF_U32 filepos;   */
+    SWF_U32 filepos;   
     SWF_U32 next_tag_pos; /* what the position of the next tag is */
     SWF_U32 frame;        /* what the current frame we're on is */
 
@@ -341,13 +344,13 @@ struct swf_parser {
     SWF_U32 bitbuf;       /* the bit buffer, used for storing bits */
 
     /* Tag parsing information. */
-/*
+
     SWF_U32 tagstart;
     SWF_U32 tagzero;
     SWF_U32 tagend;
 
     SWF_U32 taglen;
-*/
+
     int fill_bits;       /* the current number of fill bits we're using */
     int line_bits;       /* the current number of fill bits we're using */
                          /* todo simon : not sure these should be in the context */
@@ -862,7 +865,7 @@ struct swf_mp3header_list {
 struct swf_textrecord {
 
     swf_textrecord * next;  /* pointer to the next text record in the linked list */
-    SWF_U8 flags;           /* the flags for this text record /* /* todo simon : is this necessary */
+    SWF_U8 flags;           /* the flags for this text record */ /* todo simon : is this necessary */
     long font_id;           /* the id of the font we use */ /* todo simon : long? */
     SWF_U32 colour;         /* the colour of this text */
     int xoffset;            /* the xoffset of this text */
