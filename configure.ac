@@ -15,14 +15,6 @@ AC_MSG_NOTICE([starting libtool test])
 AC_PROG_LIBTOOL
 AC_MSG_NOTICE([libtool test done])
 
-AC_CHECK_PROG(PROG_GLIB_CONFIG,glib-config,glib-config)
-if test -n "$PROG_GLIB_CONFIG" ; then
-	GLIB_CFLAGS="`glib-config --cflags glib`"
-	GLIB_LIBS="`glib-config --libs glib`"
-else
-	AC_ERROR([Need glib - I'm gonna cry])
-fi
-
 dnl ====================================
 dnl Set some general compile options
 dnl ====================================
@@ -77,8 +69,6 @@ if test -z "$SWF_U32"; then
 fi
 
 AC_SUBST(CC)
-AC_SUBST(GLIB_CFLAGS)
-AC_SUBST(GLIB_LIBS)
 AC_SUBST(SWF_U8)
 AC_SUBST(SWF_S8)
 AC_SUBST(SWF_U16)

@@ -16,6 +16,11 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.24  2001/07/16 15:05:16  clampr
+ * get rid of glib due to randomness (I suspect it may have been a dynamic linking issue)
+ *
+ * add in a homebrew linked list type for font_extras (ick)
+ *
  * Revision 1.23  2001/07/16 01:41:25  clampr
  * glib version of font management
  *
@@ -74,11 +79,9 @@
 #ifndef SWF_TYPES_H
 #define SWF_TYPES_H
 
-/* glib.h also provides true and false, but only if they're not already defined */
 #define TRUE (1)
 #define FALSE (0)
 
-#include "glib.h"
 #include <stdio.h>
 
 #define tagEnd                 (0)
@@ -337,6 +340,8 @@ typedef struct swf_definebuttonsound swf_definebuttonsound;
 typedef struct swf_soundstreamblock swf_soundstreamblock;
 typedef struct swf_soundstreamhead swf_soundstreamhead;
 
+typedef struct swf_font_extra swf_font_extra;
+
 
 struct swf_header {
     SWF_U32 size;      /* size of file in bytes */
@@ -387,15 +392,16 @@ struct swf_parser {
     int stream_sample_stereo_mono;
     int n_stream_samples;
 
-
-	GHashTable *font_extras;
+	swf_font_extra *font_extras;
 };
 
-typedef struct {
+struct swf_font_extra {
+	int fontid;
+	swf_font_extra *next;
 	int n;
 	char *glyphs;
 	char *chars;
-} swf_font_extra;
+};
 
 /* a raw swf tag */
 /* todo simon : this should have the raw data in as well */

@@ -16,6 +16,11 @@
  *
  *
  * $Log: parser.c,v $
+ * Revision 1.20  2001/07/16 15:05:15  clampr
+ * get rid of glib due to randomness (I suspect it may have been a dynamic linking issue)
+ *
+ * add in a homebrew linked list type for font_extras (ick)
+ *
  * Revision 1.19  2001/07/16 01:41:25  clampr
  * glib version of font management
  *
@@ -410,28 +415,19 @@ parse_definefont (swf_parser * context, const char * str)
 	{
 		fprintf (stderr, "ERROR: couldn't parse DefineFont  : '%s'\n", swf_error_code_to_string(error));
 		return;
-
 	}
 
-
     printf("%stagDefineFont \t\tFont ID %-5lu\n", str, font->fontid);
-
-
     printf("%s\tiOffset: 0x%04x\n", str, font->offset);
-
 	printf("%s\tnumber of glyphs: %d\n", str, font->glyph_count);
-
 
     while (n < font->glyph_count && font->shape_records != NULL)
     {
         print_shaperecords (font->shape_records [n++], str);
     }
 
-
 	swf_destroy_definefont (font);
-
 	return;
-
 }
 
 
@@ -445,24 +441,21 @@ parse_definefontinfo (swf_parser * context, const char * str)
 	swf_font_extra *extra;
 	swf_definefontinfo * info = swf_parse_definefontinfo (context, &error);
 
-
-	if (info == NULL)
+	if (!info || error)
 	{
 		fprintf (stderr, "ERROR: couldn't parse DefineFontInfo : '%s'\n", swf_error_code_to_string(error));
 		return;
-
 	}
 
-    printf("%stagDefineFontInfo \tFont ID %-5lu\n", str, info->fontid);
-	extra = g_hash_table_lookup(context->font_extras, &info->fontid);
+	extra = swf_fetch_font_extra(context, info->fontid, 0);
 
+    printf("%stagDefineFontInfo \tFont ID %-5ld\n", str, info->fontid);
     printf("%s\tNameLen: '%i'\n", str, info->namelen);
   	printf("%s\tFontName: '%s'\n", str, info->fontname);
 	printf("%s\t", str);
 	for(n=0; n < extra->n; n++)
 	{
         	printf("[%d,'%c'] ", info->code_table[n], (char) info->code_table[n]);
-
     }
 
 	printf("\n\n");

@@ -25,7 +25,6 @@ swf_parse_definefont2 (swf_parser * context, int * error)
     SWF_U32 code_offset;
     SWF_U32 * offset_table;
 	swf_font_extra *extra;
-	gint fontid;
 
     if ((font = (swf_definefont2 *) calloc (1, sizeof (swf_definefont2))) == NULL) {
         *error = SWF_EMallocFailure;
@@ -38,7 +37,7 @@ swf_parse_definefont2 (swf_parser * context, int * error)
     font->kerning_pairs = NULL;
     font->bounds = NULL;
 
-    fontid = font->fontid = swf_parse_get_word (context);
+    font->fontid = swf_parse_get_word (context);
     font->flags = swf_parse_get_word (context);
     font->name_len = swf_parse_get_byte (context);
 
@@ -51,22 +50,16 @@ swf_parse_definefont2 (swf_parser * context, int * error)
         font->name[i] = (char) swf_parse_get_byte(context);
     }
 
-    if (!(extra = (swf_font_extra *) calloc (1, sizeof(swf_font_extra)))) {
-  	    *error = SWF_EMallocFailure;
-    	goto FAIL;
-    }
-
     /* Get the number of glyphs. */
-	extra->n = font->glyph_count = swf_parse_get_word(context);
+	font->glyph_count = swf_parse_get_word(context);
 
+    
     if (font->glyph_count > 0)
     {
-	    if ( (!(extra->chars  = (char *) calloc (font->glyph_count, sizeof (char)))) ||
-			 (!(extra->glyphs = (char *) calloc (font->glyph_count, sizeof (char)))))
-	    {
-		    *error = SWF_EMallocFailure;
-		    goto FAIL;
-	    }
+		if (!(extra = swf_fetch_font_extra(context, font->fontid, font->glyph_count))) {
+			*error = SWF_EMallocFailure;
+			goto FAIL;
+		}
 
 		data_pos = swf_parse_tell(context);
 
@@ -195,7 +188,6 @@ swf_parse_definefont2 (swf_parser * context, int * error)
         }
     }
 
-	g_hash_table_insert(context->font_extras, &fontid, extra);
     return font;
 
  FAIL:

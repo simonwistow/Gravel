@@ -16,6 +16,11 @@
  *
  *
  * $Log: swf_parse.h,v $
+ * Revision 1.13  2001/07/16 15:05:16  clampr
+ * get rid of glib due to randomness (I suspect it may have been a dynamic linking issue)
+ *
+ * add in a homebrew linked list type for font_extras (ick)
+ *
  * Revision 1.12  2001/07/09 15:48:54  acme
  * Renamed U32 to SWF_U32 and so on
  *
@@ -76,8 +81,7 @@ extern void         swf_parse_seek       (swf_parser *, int);
 extern int          swf_parse_tell       (swf_parser *);
 
 
-
-
+extern swf_font_extra          *swf_fetch_font_extra           (swf_parser *, int, int);
 
 
 extern swf_rect                * swf_parse_get_rect            (swf_parser * , int *);

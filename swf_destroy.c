@@ -16,6 +16,11 @@
  *
  *
  * $Log: swf_destroy.c,v $
+ * Revision 1.28  2001/07/16 15:05:15  clampr
+ * get rid of glib due to randomness (I suspect it may have been a dynamic linking issue)
+ *
+ * add in a homebrew linked list type for font_extras (ick)
+ *
  * Revision 1.27  2001/07/16 01:41:25  clampr
  * glib version of font management
  *
@@ -96,15 +101,6 @@
  * Free up the memory of context.
  */
 
-static void
-destroy_extra(gpointer key, gpointer v, gpointer data)
-{
-	swf_font_extra *val = v;
-	swf_free(val->glyphs);
-	swf_free(val->chars);
-	swf_free(val);
-}
-
 void
 swf_destroy_parser (swf_parser * context)
 {
@@ -113,9 +109,6 @@ swf_destroy_parser (swf_parser * context)
     fclose(context->file);
     swf_free(context->name);
     swf_free(context->header);
-
-	g_hash_table_foreach(context->font_extras, destroy_extra, NULL);
-	g_hash_table_destroy(context->font_extras);
     swf_free (context);
 }
 

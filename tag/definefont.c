@@ -25,7 +25,6 @@ swf_parse_definefont (swf_parser * context, int * error)
     int * offset_table;
     SWF_U16 fillbits, linebits;
 	swf_font_extra *extra;
-	gint fontid;
 
     if ((font = (swf_definefont *) calloc (1, sizeof (swf_definefont))) == NULL) {
 		*error = SWF_EMallocFailure;
@@ -33,27 +32,18 @@ swf_parse_definefont (swf_parser * context, int * error)
     }
 
     font->shape_records = NULL;
-    fontid = font->fontid = (SWF_U32) swf_parse_get_word(context);
+    font->fontid = (SWF_U32) swf_parse_get_word(context);
 
 
     start = swf_parse_tell(context);
     font->offset = swf_parse_get_word (context);
 
-    if ((extra = (swf_font_extra *) calloc (1, sizeof (swf_font_extra))) == NULL) {
+    font->glyph_count = font->offset/2;
+
+    if (!(extra = swf_fetch_font_extra(context, font->fontid, font->glyph_count))) {
 		*error = SWF_EMallocFailure;
 		goto FAIL;
     }
-
-    extra->n = font->glyph_count = font->offset/2;
-
-    if ((!(extra->glyphs = (char *) calloc (font->glyph_count, sizeof (char)))) ||
-		(!(extra->chars  = (char *) calloc (font->glyph_count, sizeof (char)))))
-    {
-        *error = SWF_EMallocFailure;
-        goto FAIL;
-    }
-
-	g_hash_table_insert(context->font_extras, &fontid, extra);
 
     if  ((offset_table =  (int *) calloc (font->glyph_count, sizeof (int))) == NULL) {
 		*error = SWF_EMallocFailure;

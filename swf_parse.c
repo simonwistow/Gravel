@@ -16,6 +16,11 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.43  2001/07/16 15:05:15  clampr
+ * get rid of glib due to randomness (I suspect it may have been a dynamic linking issue)
+ *
+ * add in a homebrew linked list type for font_extras (ick)
+ *
  * Revision 1.42  2001/07/16 01:41:25  clampr
  * glib version of font management
  *
@@ -146,7 +151,6 @@ swf_parse_create (char * name, int * error)
 	context->bitbuf = 0;
 	context->headers_parsed = 0;
 	context->frame  = 0;
-	context->font_extras = g_hash_table_new(g_int_hash, g_int_equal);
 
 	return context;
 }
@@ -424,7 +428,38 @@ swf_parse_tell (swf_parser * context)
     return (int) ftell (context->file);
 }
 
+/* nsyms also flags creation */
+swf_font_extra*
+swf_fetch_font_extra(swf_parser* context, int fontid, int nsyms)
+{
+	swf_font_extra *extra, *last;
 
+	last = NULL;
+	extra = context->font_extras;
+	while (extra) {
+		if (fontid == extra->fontid) return extra;
+		last = extra;
+		extra = extra->next;
+	}
+	if (!nsyms) return NULL;
+	if (!((extra = calloc(1, sizeof(swf_font_extra))) &&
+		  (extra->glyphs = calloc(nsyms, sizeof(char))) &&
+		  (extra->chars  = calloc(nsyms, sizeof(char))) ))
+	{
+		return NULL;
+	}
+
+	extra->fontid = fontid;
+	extra->n = nsyms;
+	if (last) {
+		last->next = extra;
+	}
+	else {
+		context->font_extras = extra;
+	}
+	
+	return extra;
+}
 
 
 /*
@@ -925,7 +960,7 @@ char *
 swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_textrecord_list * list)
 {
     int g;
-    gint font_id = -1;
+    int font_id = -1;
     char * str = NULL;
     swf_textrecord *node, *tmp;
 	swf_font_extra *font;
@@ -983,7 +1018,7 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
             fprintf (stderr, "[textrecords_to_text : malloced string]\n");
             #endif
 
-            if (!(font = g_hash_table_lookup(context->font_extras, &font_id)))
+            if (!(font = swf_fetch_font_extra(context, font_id, 0)))
             {
                 *error = SWF_EFontNotSet;
                 return NULL;
