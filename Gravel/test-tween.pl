@@ -22,9 +22,9 @@ $m->event($e);
 
 $m->make_timeline();
 
-my $a = $m->bake_movie();
-
 print STDERR DumperX $m;
+
+my $a = $m->bake_movie();
 
 print STDERR DumperX $a;
 
