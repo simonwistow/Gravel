@@ -16,6 +16,11 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.12  2001/06/30 12:33:19  kitty_goth
+ * Move to a linked list representation of shaperecords - I was getting
+ * SEGFAULT due to not large enough free chunk's. Seems much faster now.
+ * --Kitty
+ *
  * Revision 1.11  2001/06/29 15:10:11  muttley
  * The printing of the actual text of a DefineText (and DefineText2 now)
  * is no longer such a big hack. Font information is kept in the swf_parser
@@ -203,6 +208,7 @@ typedef struct swf_doaction swf_doaction;
 typedef struct swf_doaction_list swf_doaction_list;
 
 typedef struct swf_shaperecord swf_shaperecord;
+
 typedef struct swf_shaperecord_list swf_shaperecord_list;
 
 typedef struct swf_button2action swf_button2action;
@@ -767,11 +773,14 @@ struct swf_shaperecord {
     S32 cx;
     S32 cy;
 
+    swf_shaperecord * next;
 };
 
 struct swf_shaperecord_list {
-        swf_shaperecord ** records;
-        int record_count;
+    int record_count;
+
+    swf_shaperecord * first;
+    swf_shaperecord ** lastp;
 };
 
 struct swf_button2action {

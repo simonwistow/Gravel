@@ -16,6 +16,11 @@
  *
  *
  * $Log: swf_destroy.c,v $
+ * Revision 1.12  2001/06/30 12:33:18  kitty_goth
+ * Move to a linked list representation of shaperecords - I was getting
+ * SEGFAULT due to not large enough free chunk's. Seems much faster now.
+ * --Kitty
+ *
  * Revision 1.11  2001/06/29 15:10:11  muttley
  * The printing of the actual text of a DefineText (and DefineText2 now)
  * is no longer such a big hack. Font information is kept in the swf_parser
@@ -136,24 +141,67 @@ swf_destroy_defineshape (swf_defineshape * shape)
 }
 
 void
-swf_destroy_shaperecord_list (swf_shaperecord_list * list)
+swf_destroy_textrecord (swf_textrecord * record)
 {
-    int i = 0;
+    int i=0;
 
-    if (list==NULL) {
+    if (record==NULL) {
         return;
     }
 
-/* FIXME : record_count might not be accurate. check for NULL-ness of list->records[i] */
-    for (i=0; i<list->record_count; i++) {
-
-        swf_destroy_shaperecord(list->records[i]);
+    for (i=0; i<record->glyph_count; i++) {
+        free (record->glyphs[i]);
     }
-    free (list->records);
+    free (record->glyphs);
 
-    free (list);
+    free (record);
+
     return;
+}
 
+void
+swf_destroy_textrecord_list (swf_textrecord_list * list)
+{
+    swf_textrecord *tmp, *node;
+
+    if (list==NULL){
+	return;
+    }
+
+    *(list->lastp) = NULL;
+    node = list->first;
+
+    while (node != NULL) {
+        tmp = node;
+        node = node->next;
+
+	swf_destroy_textrecord(tmp);
+    }
+    
+    return;
+}
+
+
+void
+swf_destroy_shaperecord_list (swf_shaperecord_list * list)
+{
+    swf_shaperecord *tmp, *node;
+
+    if (list==NULL){
+	return;
+    }
+
+    *(list->lastp) = NULL;
+    node = list->first;
+
+    while (node != NULL) {
+        tmp = node;
+        node = node->next;
+
+	swf_destroy_shaperecord(tmp);
+    }
+    
+    return;
 }
 
 void
@@ -172,10 +220,11 @@ swf_destroy_definemorphshape (swf_definemorphshape * shape)
         free (shape->fills[i]->matrix1);
     	free (shape->fills[i]->matrix2);
 
-	    for (j=0; j<shape->fills[i]->ncolours; j++) {
-	        free (shape->fills[i]->colours[j]);
-	    }
-	    free (shape->fills[i]->colours);
+	for (j=0; j<shape->fills[i]->ncolours; j++) {
+	    free (shape->fills[i]->colours[j]);
+	}
+
+	free (shape->fills[i]->colours);
     }
 
     free (shape->fills);
@@ -183,11 +232,11 @@ swf_destroy_definemorphshape (swf_definemorphshape * shape)
     for (i=0; i<shape->nlines; i++) {
     	free (shape->lines[i]);
     }
+
     free (shape->lines);
 
-
-    swf_destroy_shaperecord_list (shape->records1);
-    swf_destroy_shaperecord_list (shape->records2);
+    swf_destroy_shaperecord_list(shape->records1);
+    swf_destroy_shaperecord_list(shape->records2);
 
     free (shape);
 
@@ -294,8 +343,8 @@ swf_destroy_linestyle (swf_linestyle * style)
 void
 swf_destroy_linestyle2 (swf_linestyle2 * style)
 {
-
     free (style);
+
     return;
 }
 
@@ -408,46 +457,6 @@ swf_destroy_mp3header_list (swf_mp3header_list * list)
     return;
 }
 
-void
-swf_destroy_textrecord (swf_textrecord * record)
-{
-    int i=0;
-
-    if (record==NULL) {
-        return;
-    }
-
-    for (i=0; i<record->glyph_count; i++) {
-        free (record->glyphs[i]);
-    }
-    free (record->glyphs);
-
-    free (record);
-
-    return;
-}
-
-void
-swf_destroy_textrecord_list (swf_textrecord_list * list)
-{
-    swf_textrecord *tmp, *node;
-
-    if (list==NULL){
-            return;
-    }
-
-    *(list->lastp) = NULL;
-    node = list->first;
-
-    while (node != NULL)
-    {
-        tmp = node;
-        node = node->next;
-        free (tmp);
-    }
-
-    return;
-}
 
 void
 swf_destroy_buttonrecord (swf_buttonrecord * record)

@@ -16,6 +16,11 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.15  2001/06/30 12:33:18  kitty_goth
+ * Move to a linked list representation of shaperecords - I was getting
+ * SEGFAULT due to not large enough free chunk's. Seems much faster now.
+ * --Kitty
+ *
  * Revision 1.14  2001/06/30 09:55:35  kitty_goth
  * Synch with Simons mods
  *
@@ -742,7 +747,7 @@ swf_parse_definefont (swf_parser * context, int * error)
     }
 
     for(n=0; n<font->glyph_count; n++) {
-        font->shape_records [n] = NULL;
+        font->shape_records[n] = NULL;
 
         swf_parse_seek(context, offset_table[n] + start);
 
@@ -754,7 +759,8 @@ swf_parse_definefont (swf_parser * context, int * error)
         xlast = 0;
         ylast = 0;
 
-        font->shape_records [n] = NULL; // todo simon swf_parse_get_shaperecords(context, error);
+        font->shape_records[n] = NULL; 
+/* TODO swf_parse_get_shaperecords(context, error);*/
     }
 
     free (offset_table);
@@ -1599,12 +1605,11 @@ swf_parse_definefont2 (swf_parser * context, int * error)
 
         /* Get the Glyphs */
 	if ((font->glyphs = (swf_shaperecord_list **) calloc (font->glyph_count, sizeof(swf_shaperecord_list *))) == NULL) {
-        goto FAIL;
+	    goto FAIL;
 	}
 
 
-        for(n=0; n<font->glyph_count; n++)
-        {
+        for(n=0; n<font->glyph_count; n++) {
 
     	    swf_parse_seek (context, data_pos + offset_table[n]);
     	    swf_parse_initbits (context); /* reset bit counter */
@@ -1632,19 +1637,17 @@ swf_parse_definefont2 (swf_parser * context, int * error)
 	    }
 
     	/* Get the CodeTable */
-        for (i=0; i<font->glyph_count; i++)
-        {
+        for (i=0; i<font->glyph_count; i++) {
+
             if (font->flags & sfontFlagsWideOffsets) {
                 font->code_table [i] = swf_parse_get_word (context);
             } else {
                 font->code_table [i] = swf_parse_get_byte (context);
-	        }
-
+	    }
         }
     }
 
-    if (font->flags & sfontFlagsHasLayout)
-    {
+    if (font->flags & sfontFlagsHasLayout) {
 
         /* Get "layout" fields */
 
@@ -1653,13 +1656,13 @@ swf_parse_definefont2 (swf_parser * context, int * error)
         font->leading = swf_parse_get_word (context);
 
         /* Skip Advance table */
-	    /* todo simon : does this need to be done ???*/
+	/* todo simon : does this need to be done ???*/
         swf_parse_skip (context, font->glyph_count * 2);
 
 
 
         /* Get BoundsTable */
-	    if ((font->bounds = (swf_rect **) calloc (font->glyph_count, sizeof(swf_rect*))) == NULL) {
+	if ((font->bounds = (swf_rect **) calloc (font->glyph_count, sizeof(swf_rect*))) == NULL) {
             *error = SWF_EMallocFailure;
             goto FAIL;
 	    }
@@ -2401,43 +2404,34 @@ swf_parse_get_textrecord (swf_parser * context, int * error, int has_alpha, int 
 swf_textrecord_list  *
 swf_parse_get_textrecords (swf_parser * context, int * error, int has_alpha, int glyph_bits, int advance_bits)
 {
-
     swf_textrecord_list * list;
     swf_textrecord * temp;
 
-
-
-    if ((list = (swf_textrecord_list *) calloc (1, sizeof (swf_textrecord_list))) == NULL)
-    {
+    if ((list = (swf_textrecord_list *) calloc (1, sizeof (swf_textrecord_list))) == NULL) {
         goto FAIL;
     }
 
     list->first = NULL;
     list->lastp = &(list->first);
 
-    while (1)
-    {
-         if ((temp = swf_parse_get_textrecord(context, error, has_alpha, glyph_bits, advance_bits)) == NULL)
-         {
-            if (*error!=SWF_ENoError)
-            {
+    while (1) {
+	if ((temp = swf_parse_get_textrecord(context, error, has_alpha, glyph_bits, advance_bits)) == NULL) {
+            if (*error != SWF_ENoError) {
                 goto FAIL;
             }
             break;
-        }
+	 }
 
          *(list->lastp) = temp;
-	     list->lastp = &(temp->next);
+	 list->lastp = &(temp->next);
     }
 
 
     return list;
 
-    FAIL:
+ FAIL:
     swf_destroy_textrecord_list (list);
     return NULL;
-
-
 }
 
 
@@ -2446,47 +2440,41 @@ swf_parse_get_shaperecords (swf_parser * context, int * error)
 {
     /* TODO */
 
-    int block_size = 0;
     int xlast = 0;
     int ylast = 0;
     int at_end = FALSE;
 
     swf_shaperecord_list * list;
+    swf_shaperecord * temp;
+
 
     if ((list = (swf_shaperecord_list *) calloc (1, sizeof (swf_shaperecord_list))) == NULL) {
         *error = SWF_EMallocFailure;
         return NULL;
     }
 
-    if ((list->records = (swf_shaperecord **) calloc(2, block_size * sizeof (swf_shaperecord *) )) == NULL) {
-	*error = SWF_EMallocFailure;
-	goto FAIL;
-    }
+    list->first = NULL;
+    list->lastp = &(list->first);
 
     while (!at_end) {
-        if (list->record_count > block_size) {
-            block_size += 10;
-
-            if ( (list->records = (swf_shaperecord **) realloc (list->records, block_size * sizeof (swf_shaperecord *)) ) == NULL) {
-                *error = SWF_EMallocFailure;
+	if ((temp = swf_parse_get_shaperecord(context, error, &at_end, xlast, ylast, FALSE) ) == NULL) {
+            if (*error != SWF_ENoError) {
                 goto FAIL;
             }
-
+            break;
 	}
+	
+	*(list->lastp) = temp;
+	list->lastp = &(temp->next);
 
-        /* TODO */
-        list->records[list->record_count+1] = NULL;
-        list->records[list->record_count++] = swf_parse_get_shaperecord(context, error, &at_end, xlast, ylast, FALSE);
+	list->record_count++;
     }
-
-
 
     return list;
 
  FAIL:
     swf_destroy_shaperecord_list (list);
     return NULL;
-
 }
 
 
