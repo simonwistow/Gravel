@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_destroy.c,v $
+ * Revision 1.21  2001/07/13 13:47:02  clampr
+ * move to swf_free over free
+ *
  * Revision 1.20  2001/07/13 13:26:55  muttley
  * Added handling for button2actions.
  * We should be able to parse all URLs now
@@ -82,15 +85,15 @@ swf_destroy_parser (swf_parser * context)
         return;
     }
     fclose(context->file);
-    if (context->name)   free(context->name);
-    if (context->header) free(context->header);
+    swf_free(context->name);
+    swf_free(context->header);
 
     /* todo: fix this magic number */
     for (i=0; i<256; i++) {
-	  if (context->font_chars[i]) free (context->font_chars[i]);
+	  swf_free (context->font_chars[i]);
     }
-    if (context->font_chars) free(context->font_chars);
-    free (context);
+    swf_free(context->font_chars);
+    swf_free (context);
 
     return;
 }
@@ -117,17 +120,17 @@ swf_destroy_shapestyle (swf_shapestyle * style)
     }
 
     for (i=0; i<style->nlines && style->lines[i] != NULL; i++) {
-       free (style->lines[i]);
+       swf_free (style->lines[i]);
     }
 
-    free (style->lines);
+    swf_free (style->lines);
 
     for (i=0; i<style->nfills && style->fills[i] != NULL; i++) {
         swf_destroy_fillstyle (style->fills[i]);
     }
-    free (style->fills);
+    swf_free (style->fills);
 
-    free (style);
+    swf_free (style);
 
     return;
 }
@@ -142,13 +145,13 @@ swf_destroy_fillstyle (swf_fillstyle * style)
     }
 
     for (i=0; i<style->ncolours && style->colours!=NULL; i++) {
-	free (style->colours[i]);
+	swf_free (style->colours[i]);
     }
-    free (style->colours);
+    swf_free (style->colours);
 
-    free (style->matrix);
+    swf_free (style->matrix);
 
-    free (style);
+    swf_free (style);
 
     return;
 }
@@ -163,7 +166,7 @@ swf_destroy_defineshape (swf_defineshape * shape)
     swf_destroy_rect (shape->rect);
     swf_destroy_shapestyle (shape->style);
     swf_destroy_shaperecord_list (shape->record);
-    free(shape);
+    swf_free(shape);
     return;
 }
 
@@ -177,10 +180,10 @@ swf_destroy_textrecord (swf_textrecord * record)
     }
 
     for (i=0; i<record->glyph_count; i++) {
-        free (record->glyphs[i]);
+        swf_free (record->glyphs[i]);
     }
-    if (record->glyphs) free (record->glyphs);
-    free (record);
+    swf_free (record->glyphs);
+    swf_free (record);
 
     return;
 }
@@ -202,7 +205,7 @@ swf_destroy_textrecord_list (swf_textrecord_list * list)
 
 	swf_destroy_textrecord(tmp);
     }
-    free(list);
+    swf_free(list);
 
     return;
 }
@@ -243,28 +246,28 @@ swf_destroy_definemorphshape (swf_definemorphshape * shape)
     swf_destroy_rect (shape->r2);
 
     for (i=0; i<shape->nfills; i++) {
-        free (shape->fills[i]->matrix1);
-    	free (shape->fills[i]->matrix2);
+        swf_free (shape->fills[i]->matrix1);
+    	swf_free (shape->fills[i]->matrix2);
 
 	for (j=0; j<shape->fills[i]->ncolours; j++) {
-	    free (shape->fills[i]->colours[j]);
+	    swf_free (shape->fills[i]->colours[j]);
 	}
 
-	free (shape->fills[i]->colours);
+	swf_free (shape->fills[i]->colours);
     }
 
-    free (shape->fills);
+    swf_free (shape->fills);
 
     for (i=0; i<shape->nlines; i++) {
-    	free (shape->lines[i]);
+    	swf_free (shape->lines[i]);
     }
 
-    free (shape->lines);
+    swf_free (shape->lines);
 
     swf_destroy_shaperecord_list(shape->records1);
     swf_destroy_shaperecord_list(shape->records2);
 
-    free (shape);
+    swf_free (shape);
 
     return;
 }
@@ -277,7 +280,7 @@ swf_destroy_tag (swf_tag * tag)
     if (tag==NULL) {
         return;
     }
-    free (tag);
+    swf_free (tag);
 
     return;
 }
@@ -289,7 +292,7 @@ swf_destroy_rect (swf_rect * rect)
         return;
     }
 
-    free (rect);
+    swf_free (rect);
 
     return;
 }
@@ -302,7 +305,7 @@ swf_destroy_header (swf_header * header)
     }
     swf_destroy_rect (header->bounds);
 
-    free (header);
+    swf_free (header);
 
     return;
 }
@@ -314,7 +317,7 @@ swf_destroy_colour (swf_colour * colour)
         return;
     }
 
-    free (colour);
+    swf_free (colour);
 
     return;
 }
@@ -326,7 +329,7 @@ swf_destroy_gradcolour (swf_gradcolour * colour)
         return;
     }
 
-    free (colour);
+    swf_free (colour);
 
     return;
 }
@@ -338,7 +341,7 @@ swf_destroy_cxform (swf_cxform * cxform)
         return;
     }
 
-    free (cxform);
+    swf_free (cxform);
 
     return;
 }
@@ -350,7 +353,7 @@ swf_destroy_matrix (swf_matrix * matrix)
         return;
     }
 
-    free (matrix);
+    swf_free (matrix);
     return;
 }
 
@@ -362,14 +365,14 @@ swf_destroy_linestyle (swf_linestyle * style)
         return;
     }
 
-    free (style);
+    swf_free (style);
     return;
 }
 
 void
 swf_destroy_linestyle2 (swf_linestyle2 * style)
 {
-    free (style);
+    swf_free (style);
 
     return;
 }
@@ -392,9 +395,9 @@ swf_destroy_fillstyle2 (swf_fillstyle2 * style)
         swf_destroy_gradcolour (style->colours[i]);
     }
 
-    free (style->colours);
+    swf_free (style->colours);
 
-    free (style);
+    swf_free (style);
 
     return;
 }
@@ -405,7 +408,7 @@ swf_destroy_rgba_pos (swf_rgba_pos * colour)
     if (colour==NULL) {
         return;
     }
-    free (colour);
+    swf_free (colour);
 
     return;
 }
@@ -417,7 +420,7 @@ swf_destroy_soundpoint (swf_soundpoint * point)
         return;
     }
 
-    free (point);
+    swf_free (point);
 	return;
 }
 
@@ -428,8 +431,8 @@ swf_destroy_imageguts (swf_imageguts * guts)
         return;
     }
 
-    free (guts->data);
-    free (guts);
+    swf_free (guts->data);
+    swf_free (guts);
 	return;
 }
 
@@ -439,7 +442,7 @@ swf_destroy_kerningpair (swf_kerningpair * pair)
     if (pair==NULL) {
         return;
     }
-    free (pair);
+    swf_free (pair);
     return;
 }
 
@@ -449,7 +452,7 @@ swf_destroy_adpcm (swf_adpcm * adpcm)
     if (adpcm==NULL) {
         return;
     }
-    free (adpcm);
+    swf_free (adpcm);
     return;
 }
 
@@ -459,8 +462,8 @@ swf_destroy_mp3header (swf_mp3header * header)
     if (header==NULL) {
         return;
     }
-    free (header->data);
-    free (header);
+    swf_free (header->data);
+    swf_free (header);
 
     return;
 }
@@ -477,8 +480,8 @@ swf_destroy_mp3header_list (swf_mp3header_list * list)
     for (i=0; i<list->header_count; i++) {
         swf_destroy_mp3header(list->headers[i]);
     }
-    free (list->headers);
-    free (list);
+    swf_free (list->headers);
+    swf_free (list);
 
     return;
 }
@@ -497,8 +500,8 @@ swf_destroy_buttonrecord (swf_buttonrecord * record)
     for (i=0; i<record->ncharacters; i++) {
         swf_destroy_cxform (record->characters[i]);
     }
-    free (record->characters);
-    free (record);
+    swf_free (record->characters);
+    swf_free (record);
 
     return;
 }
@@ -526,7 +529,7 @@ swf_destroy_buttonrecord_list (swf_buttonrecord_list * list)
 	    swf_destroy_buttonrecord(tmp);
     }
 
-    free (list);
+    swf_free (list);
     return;
 }
 
@@ -538,12 +541,12 @@ swf_destroy_doaction (swf_doaction * action)
         return;
     }
 
-    free (action->url);
-    free (action->target);
-    free (action->goto_label);
-    free (action->push_data_string);
+    swf_free (action->url);
+    swf_free (action->target);
+    swf_free (action->goto_label);
+    swf_free (action->push_data_string);
 
-    free (action);
+    swf_free (action);
 
     return;
 }
@@ -569,7 +572,7 @@ swf_destroy_doaction_list (swf_doaction_list * list)
 	    swf_destroy_doaction(tmp);
     }
 
-    free (list);
+    swf_free (list);
     return;
 }
 
@@ -581,7 +584,7 @@ swf_destroy_shaperecord (swf_shaperecord * record)
     }
 
     swf_destroy_shapestyle (record->shapestyle);
-    free (record);
+    swf_free (record);
 
     return;
 }
@@ -595,7 +598,7 @@ swf_destroy_button2action (swf_button2action * action)
     }
 
     swf_destroy_doaction_list (action->doactions);
-    free (action);
+    swf_free (action);
 
     return;
 }
@@ -619,8 +622,8 @@ swf_destroy_button2action_list (swf_button2action_list * list)
 
 	    swf_destroy_button2action(tmp);
     }
-
-    free (list);
+    swf_free (list->actions);
+    swf_free (list);
 
     return;
 }
@@ -632,7 +635,7 @@ swf_destroy_setbackgroundcolour (swf_setbackgroundcolour * tag)
         return;
     }
     swf_destroy_colour (tag->colour);
-    free (tag);
+    swf_free (tag);
 
     return;
 }
@@ -646,7 +649,7 @@ swf_destroy_definesound (swf_definesound * sound)
     }
     swf_destroy_mp3header_list (sound->mp3header_list);
     swf_destroy_adpcm (sound->adpcm);
-    free (sound);
+    swf_free (sound);
 
     return;
 }
@@ -664,8 +667,8 @@ swf_destroy_definefont (swf_definefont * font)
         swf_destroy_shaperecord_list (font->shape_records[i]);
     }
 
-    free (font->shape_records);
-    free (font);
+    swf_free (font->shape_records);
+    swf_free (font);
 
     return;
 }
@@ -684,16 +687,16 @@ swf_destroy_definefont2 (swf_definefont2 * font)
         swf_destroy_rect (font->bounds[i]);
     }
 
-    free (font->glyphs);
-    free (font->name);
-    free (font->code_table);
-    free (font->bounds);
+    swf_free (font->glyphs);
+    swf_free (font->name);
+    swf_free (font->code_table);
+    swf_free (font->bounds);
 
     for (i=0; i<font->nkerning_pairs; i++) {
         swf_destroy_kerningpair (font->kerning_pairs[i]);
     }
 
-    free (font);
+    swf_free (font);
 
     return;
 }
@@ -705,9 +708,9 @@ swf_destroy_definefontinfo (swf_definefontinfo * info)
         return;
     }
 
-    free (info->code_table);
-    free (info->fontname);
-    free (info);
+    swf_free (info->code_table);
+    swf_free (info->fontname);
+    swf_free (info);
 
     return;
 }
@@ -722,7 +725,7 @@ swf_destroy_placeobject (swf_placeobject * object)
     swf_destroy_matrix (object->matrix);
     swf_destroy_cxform (object->cxform);
 
-    free (object);
+    swf_free (object);
 
     return;
 }
@@ -737,8 +740,8 @@ swf_destroy_placeobject2 (swf_placeobject2 * object)
     swf_destroy_matrix (object->matrix);
     swf_destroy_cxform (object->cxform);
 
-    free (object->name);
-    free (object);
+    swf_free (object->name);
+    swf_free (object);
 
     return;
 }
@@ -752,7 +755,7 @@ swf_destroy_freecharacter (swf_freecharacter * object)
         return;
     }
 
-    free (object);
+    swf_free (object);
 
     return;
 }
@@ -764,8 +767,8 @@ swf_destroy_namecharacter (swf_namecharacter * object)
         return;
     }
 
-    free (object->label);
-    free (object);
+    swf_free (object->label);
+    swf_free (object);
 	return;
 }
 
@@ -777,7 +780,7 @@ swf_destroy_removeobject (swf_removeobject * object)
     }
 
 
-    free (object);
+    swf_free (object);
 	return;
 }
 
@@ -788,7 +791,7 @@ swf_destroy_removeobject2 (swf_removeobject2 * object)
         return;
     }
 
-    free (object);
+    swf_free (object);
 	return;
 }
 
@@ -805,8 +808,8 @@ swf_destroy_startsound (swf_startsound * sound)
     for (i=0; i<sound->npoints; i++) {
         swf_destroy_soundpoint(sound->points[i]);
     }
-    free (sound->points);
-    free (sound);
+    swf_free (sound->points);
+    swf_free (sound);
 	return;
 }
 
@@ -819,7 +822,7 @@ swf_destroy_definebits (swf_definebits * bits)
     }
 
     swf_destroy_imageguts (bits->guts);
-    free (bits);
+    swf_free (bits);
 
     return;
 }
@@ -832,7 +835,7 @@ swf_destroy_jpegtables (swf_jpegtables * bits)
     }
 
     swf_destroy_imageguts (bits->guts);
-    free (bits);
+    swf_free (bits);
 
 
     return;
@@ -847,7 +850,7 @@ swf_destroy_definebitsjpeg2 (swf_definebitsjpeg2 * bits)
     }
 
     swf_destroy_imageguts (bits->guts);
-    free (bits);
+    swf_free (bits);
 
 
     return;
@@ -861,7 +864,7 @@ swf_destroy_definebitsjpeg3 (swf_definebitsjpeg3 * bits)
     }
 
     swf_destroy_imageguts (bits->guts);
-    free (bits);
+    swf_free (bits);
 
 
     return;
@@ -888,7 +891,7 @@ swf_destroy_definetext (swf_definetext * text)
     swf_destroy_rect (text->rect);
     swf_destroy_matrix (text->matrix);
     swf_destroy_textrecord_list (text->records);
-    free (text);
+    swf_free (text);
 
     return;
 }
@@ -903,7 +906,7 @@ swf_destroy_definetext2 (swf_definetext2 * text)
     swf_destroy_rect (text->rect);
     swf_destroy_matrix (text->matrix);
     swf_destroy_textrecord_list (text->records);
-    free (text);
+    swf_free (text);
 
 
     return;
@@ -918,7 +921,7 @@ swf_destroy_definebutton (swf_definebutton * button)
 
     swf_destroy_buttonrecord_list(button->records);
     swf_destroy_doaction_list (button->actions);
-    free (button);
+    swf_free (button);
 
     return;
 }
@@ -932,7 +935,7 @@ swf_destroy_definebutton2 (swf_definebutton2 * button)
 
     swf_destroy_buttonrecord_list(button->records);
     swf_destroy_button2action_list (button->actions);
-    free (button);
+    swf_free (button);
 
     return;
 }
@@ -945,12 +948,12 @@ swf_destroy_defineedittext (swf_defineedittext * text)
         return;
     }
 
-    free (text->variable);
-    free (text->initial_text);
+    swf_free (text->variable);
+    swf_free (text->initial_text);
 
     swf_destroy_rect (text->bounds);
 
-    free (text);
+    swf_free (text);
 
     return;
 }
@@ -962,8 +965,8 @@ swf_destroy_framelabel (swf_framelabel * label)
         return;
     }
 
-    free (label->label);
-    free (label);
+    swf_free (label->label);
+    swf_free (label);
     return;
 }
 
@@ -980,9 +983,9 @@ swf_destroy_definebuttoncxform (swf_definebuttoncxform * button)
     for (i=0; i<button->ncxforms; i++) {
         swf_destroy_cxform (button->cxforms[i]);
     }
-    free (button->cxforms);
+    swf_free (button->cxforms);
 
-    free (button);
+    swf_free (button);
 
 	return;
 }
@@ -997,7 +1000,7 @@ swf_destroy_definebuttonsound (swf_definebuttonsound * button)
     swf_destroy_startsound (button->up_state);
     swf_destroy_startsound (button->over_state);
     swf_destroy_startsound (button->down_state);
-    free (button);
+    swf_free (button);
 
 	return;
 }
@@ -1011,7 +1014,7 @@ swf_destroy_soundstreamblock (swf_soundstreamblock * block)
 
     swf_destroy_adpcm (block->adpcm);
     swf_destroy_mp3header_list (block->mp3header_list);
-    free (block);
+    swf_free (block);
 	return;
 }
 
@@ -1022,7 +1025,7 @@ swf_destroy_soundstreamhead (swf_soundstreamhead * head)
         return;
     }
 
-    free (head);
+    swf_free (head);
 
     return;
 }
