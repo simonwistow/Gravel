@@ -15,15 +15,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-typedef struct swf_action swf_action;
 
-struct swf_action {
-  swf_action * next;
-  int code;                 /* what type it is */
-  int frame;                /* goto this frame */
-
-};
-
+extern void swf_action_put_play(swf_buffer * buffer, int * error);
 extern void swf_action_put_gotoframe(swf_buffer * buffer, int * error, SWF_U16 frame);
 
 
