@@ -16,6 +16,9 @@
  *
  *
  * $Log: parser.c,v $
+ * Revision 1.22  2001/07/23 23:48:27  clampr
+ * fixup the last memleak ktrace can find over the stress suite
+ *
  * Revision 1.21  2001/07/19 03:34:01  clampr
  * insomnia-led layout delta o' the day
  *
@@ -170,6 +173,7 @@ main (int argc, char *argv[])
     printf("Frame rate \t%lu\n", header->rate);
     printf("Frame count \t%lu\n", header->count);
 
+	swf_destroy_header(header);
     printf("\n----- Reading movie details -----\n");
 
     printf("\n<----- dumping frame %d file offset 0x%04x ----->\n", 0, swf_parse_tell(swf));
