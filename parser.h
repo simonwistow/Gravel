@@ -16,6 +16,10 @@
  *
  *
  * $Log: parser.h,v $
+ * Revision 1.11  2002/05/19 09:46:21  kitty_goth
+ * Delta for a first stab at a dispatch handler. We should benchmark this versus
+ * the switch statement version.
+ *
  * Revision 1.10  2001/07/14 00:17:55  clampr
  * added emacs file variables to avoid clashing with existing style (now I know what it is)
  *
@@ -73,11 +77,15 @@ extern void parse_soundstreamhead2      (swf_parser *, const char *);
 extern void parse_doaction              (swf_parser *, const char *);
 
 
+extern void dummy                       (swf_parser *, const char *);
+
+extern void foo                         (swf_parser *, const char *);
 
 
 extern void usage                       (void);
 
-const char ** init_tags                 (void);
+extern void * init_parser               (void);
+extern const char ** init_tags          (void);
 
 
 

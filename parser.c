@@ -21,12 +21,13 @@
 #include "swf_destroy.h"
 #include "print_utils.h"
 
+#define SWF_PARSER_MAX_TAG_ID 48
 
 const char **
 init_tags (void)
 {
 
-    const char ** tag  = (const char **) calloc (49, sizeof (char *));
+    const char ** tag  = (const char **) calloc (1 + SWF_PARSER_MAX_TAG_ID, sizeof (char *));
 
     tag[0] = "End";
     tag[1] = "ShowFrame";
@@ -72,6 +73,77 @@ init_tags (void)
     return tag;
 }
 
+void * 
+init_parser (void) {
+    void (**parse)();
+
+	parse = calloc((1 + SWF_PARSER_MAX_TAG_ID), sizeof(void * ));
+
+	/* CHECKME:
+	 * I'm not sure calloc'ing to the sizeof(void *) is 
+	 * totally correct here, but it works over here. --BE
+	 */
+
+	/* FIXME:
+	 * Replace the hard numerical constants here with
+	 * our English #define's ?
+	 */
+
+	parse[0]  = parse_end;
+	parse[1]  = parse_frame;
+	parse[2]  = parse_defineshape;
+	parse[3]  = parse_freecharacter;
+	parse[4]  = parse_placeobject;
+	parse[5]  = parse_removeobject;
+	parse[6]  = parse_definebits;
+	parse[7]  = parse_definebutton;
+	parse[8]  = parse_jpegtables;
+	parse[9]  = parse_setbackgroundcolour;
+	parse[10] = parse_definefont;
+	parse[11] = parse_definetext;
+	parse[12] = parse_doaction;
+	parse[13] = parse_definefontinfo;
+	parse[14] = parse_definesound;
+	parse[15] = parse_startsound;
+	parse[16] = dummy;
+	parse[17] = parse_definebuttonsound;
+	parse[18] = parse_soundstreamhead;
+	parse[19] = parse_soundstreamblock;
+	parse[20] = dummy;         /* parse_definebitslossless */
+	parse[21] = parse_definebitsjpeg2;
+	parse[22] = parse_defineshape2;
+	parse[23] = parse_definebuttoncxform;
+	parse[24] = dummy;         /* parse_protect */
+	parse[25] = dummy; 
+    /*  These are the new tags for Flash 3. */
+
+	parse[26] = parse_placeobject2;
+	parse[27] = dummy; 
+	parse[28] = parse_removeobject2;
+	parse[29] = dummy; 
+	parse[30] = dummy; 
+	parse[31] = dummy; 
+	parse[32] = parse_defineshape3;
+	parse[33] = parse_definetext2;
+	parse[34] = parse_definebutton2;
+	parse[35] = parse_definebitsjpeg3;
+	parse[36] = dummy;         /* parse_definebitslossless2 */
+	parse[37] = parse_defineedittext;
+	parse[38] = dummy; 
+	parse[39] = dummy;         /* parse_definesprite */
+	parse[40] = parse_namecharacter;
+	parse[41] = dummy; 
+	parse[42] = dummy; 
+	parse[43] = parse_framelabel;
+	parse[44] = dummy; 
+	parse[45] = parse_soundstreamhead2;
+	parse[46] = parse_definemorphshape;
+	parse[47] = dummy; 
+	parse[48] = parse_definefont2;
+
+	return (void *) parse;
+}
+
 
 /*
  * The main function
@@ -83,6 +155,8 @@ main (int argc, char *argv[])
     swf_parser * swf;
     swf_header * header;
     int        error = SWF_ENoError;
+
+    void (**parse)();	
 
     const char ** tag;
     const char * str = "";
@@ -100,6 +174,8 @@ main (int argc, char *argv[])
     }
 
     swf = swf_parse_create(argv[1], &error);
+
+	parse = init_parser();
 
     if (swf == NULL) {
 		fprintf (stderr, "Failed to create SWF context\n");
@@ -132,168 +208,23 @@ main (int argc, char *argv[])
     do
     {
         next_id = swf_parse_nextid(swf, &error);
-        if (error != SWF_ENoError)
-        {
+        if (error != SWF_ENoError) {
 	        fprintf (stderr, "ERROR: There was an error parsing the next id  : '%s'\n",  swf_error_code_to_string(error));
         }
 
         error = SWF_ENoError;
 
         printf ("%s [%"pSWF_U32"]\n", tag[next_id], next_id);
-        switch (next_id)
-        {
-		case tagEnd :
-			parse_end (swf, str);
-			break;
-			
-		case tagShowFrame:
-			parse_frame (swf, str);
-			break;
-
-		case tagSetBackgroundColour:
-			parse_setbackgroundcolour (swf, str);
-			break;
-
-		case tagDefineFont:
-			parse_definefont (swf, str);
-			break;
-
-		case tagDefineFont2:
-			parse_definefont2 (swf, str);
-			break;
-
-		case tagDefineFontInfo:
-			parse_definefontinfo (swf, str);
-			break;
-
-		case tagPlaceObject:
-			parse_placeobject (swf, str);
-			break;
-
-		case tagPlaceObject2:
-			parse_placeobject2 (swf, str);
-			break;
-
-		case tagRemoveObject:
-			parse_removeobject (swf, str);
-			break;
-
-		case tagRemoveObject2:
-			parse_removeobject2 (swf, str);
-			break;
-
-		case tagDefineShape:
-			parse_defineshape (swf, str);
-			break;
-
-		case tagDefineShape2:
-			parse_defineshape2 (swf, str);
-			break;
-
-		case tagDefineShape3:
-			parse_defineshape3 (swf, str);
-			break;
-
-		case tagDefineMorphShape:
-			parse_definemorphshape (swf, str);
-			break;
-			
-		case tagFreeCharacter:
-			parse_freecharacter (swf, str);
-			break;
-			
-		case tagNameCharacter:
-			parse_namecharacter (swf, str);
-			break;
-
-		case tagProtect:
-			/* Ignore.
-			 * Its presence says that we should
-			 * not be examining this file. Pah
-			 */
-			break;
-
-		case tagStartSound:
-			parse_startsound (swf, str);
-			break;
-
-		case tagDefineBits:
-			parse_definebits (swf, str);
-			break;
-
-		case tagJPEGTables:
-			parse_jpegtables (swf, str);
-			break;
-						
-		case tagDefineBitsJPEG2:
-			parse_definebitsjpeg2 (swf, str);
-			break;
-
-		case tagDefineBitsJPEG3:
-			parse_definebitsjpeg3 (swf, str);
-			break;
-
-		case tagDefineText:
-			parse_definetext (swf, str);
-			break;
-
-		case tagDefineText2:
-			parse_definetext2 (swf, str);
-			break;
-
-		case tagDefineButton:
-			parse_definebutton (swf, str);
-			break;
-
-		case tagDefineButton2:
-			parse_definebutton2 (swf, str);
-			break;
-
-		case tagDefineButtonSound:
-			parse_definebuttonsound (swf, str);
-			break;
-
-		case tagDefineEditText:
-			parse_defineedittext (swf, str);
-			break;
-
-		case tagDefineSound:
-			parse_definesound (swf, str);
-			break;
-
-		case tagFrameLabel:
-			parse_framelabel (swf, str);
-			break;
-
-		case tagDefineButtonCxform:
-			parse_definebuttoncxform (swf, str);
-			break;
-			
-		case tagSoundStreamBlock:
-			parse_soundstreamblock (swf, str);
-			break;
-			
-		case tagSoundStreamHead:
-			parse_soundstreamhead (swf, str);
-			break;
-
-		case tagSoundStreamHead2:
-			parse_soundstreamhead2 (swf, str);
-			break;
-
-		case tagDoAction:
-			parse_doaction (swf, str);
-			break;
-
-		default:
-			printf ("%s%s [%"pSWF_U32"]\n", str, tag[next_id], next_id);
-			break;
-        }
+		if (next_id <= SWF_PARSER_MAX_TAG_ID) {
+			parse[next_id](swf, str);
+		}
 		
-        if (error != SWF_ENoError)
-        {
+		/* FIXME: 
+		 * This is useless, as &error isn't an argument to the parse
+		 * function. --BE
+		 */
+        if (error != SWF_ENoError) {
 	        fprintf (stderr, "ERROR: There was an error parsing the last tag : '%s'  : '%s'\n", tag[next_id], swf_error_code_to_string(error));
-
         }
 
     }
@@ -302,7 +233,8 @@ main (int argc, char *argv[])
     printf("\n***** Finished Dumping SWF File Information *****\n");
 
 
-    free (tag);
+    free(tag);
+	free(parse);
     swf_destroy_parser(swf);
 
     return 0;
@@ -312,6 +244,18 @@ main (int argc, char *argv[])
     return -1;
 }
 
+
+void 
+dummy(swf_parser * context, const char * str)
+{
+	return;
+}
+
+void 
+foo(swf_parser * context, const char * str)
+{
+	printf("\n foo: %s\n", str);
+}
 
 
 

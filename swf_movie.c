@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.13 2002/05/15 16:45:27 kitty_goth Exp $	
+ * 	$Id: swf_movie.c,v 1.14 2002/05/19 09:46:21 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -25,9 +25,13 @@
 #include "swf_destroy.h"
 #include "swf_serialise.h"
 
+#define MAX_TAG_ID 26
+
 #include <stdio.h>
 
-void swf_make_header_blank (swf_movie * movie, int * error, int ver, int speed) {
+void 
+swf_make_header_blank (swf_movie * movie, int * error, int ver, int speed) 
+{
     swf_header * header;
 
     if ((ver < 0) || (ver > MAXVER) || (speed < 0) || (speed > MAXSPEED) ) {
@@ -65,7 +69,9 @@ void swf_make_header_blank (swf_movie * movie, int * error, int ver, int speed) 
 }
 
 
-void swf_make_header_raw (swf_movie * movie, int * error, swf_rect * rect) {
+void
+swf_make_header_raw (swf_movie * movie, int * error, swf_rect * rect) 
+{
     swf_header * header;
 
     header = movie->header;
@@ -85,7 +91,9 @@ void swf_make_header_raw (swf_movie * movie, int * error, swf_rect * rect) {
     return;
 }
 
-void swf_make_header (swf_movie * movie, int * error, SCOORD x1, SCOORD x2, SCOORD y1, SCOORD y2) {
+void
+swf_make_header (swf_movie * movie, int * error, SCOORD x1, SCOORD x2, SCOORD y1, SCOORD y2) 
+{
     swf_rect * rect;
 
     if ((rect = (swf_rect *) calloc (1, sizeof (swf_rect))) == NULL) {
@@ -103,7 +111,9 @@ void swf_make_header (swf_movie * movie, int * error, SCOORD x1, SCOORD x2, SCOO
     return;
 }
 
-swf_movie * swf_make_movie (int * error) {
+swf_movie * 
+swf_make_movie (int * error) 
+{
     swf_movie * movie;
 
     if ((movie = (swf_movie *) calloc (1, sizeof (swf_movie))) == NULL) {
@@ -126,7 +136,9 @@ swf_movie * swf_make_movie (int * error) {
     return movie;
 }
 
-swf_tagrecord * swf_make_tagrecord (int * error) {
+swf_tagrecord * 
+swf_make_tagrecord (int * error) 
+{
     swf_tagrecord * tag;
 
     if ((tag = (swf_tagrecord *) calloc (1, sizeof (swf_tagrecord))) == NULL) {
@@ -145,10 +157,14 @@ swf_tagrecord * swf_make_tagrecord (int * error) {
 }
 
 
+/* Replace with an array of function pointers */
 
-void swf_destroy_tagrecord (swf_tagrecord * tagrec) {
+void 
+swf_destroy_tagrecord (swf_tagrecord * tagrec) 
+{
     void * tmp;
     int tagid;
+    void (*destroy[1 + MAX_TAG_ID])();
 
     tagid = tagrec->id;
     tmp = tagrec->tag;
