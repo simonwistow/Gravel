@@ -8,7 +8,7 @@ CFLAGS =  -Wall -Wwrite-strings -Wmissing-prototypes  -O3
 DEBUG = -DDEBUG -g
 
 #other stuff
-LIB_OBJECTS=swf_parse.lo swf_destroy.lo swf_error.lo
+LIB_OBJECTS=swf_parse.lo swf_destroy.lo swf_error.lo swf_tags.lo
 OBJECTS=parser.o print_utils.o
 TEXT_OBJECTS=text_extract.o lib_swfextract.o
 D_OBJECTS=swf_parse.do parser.do swf_destroy.do swf_error.do print_utils.do
@@ -67,10 +67,10 @@ reallyclean: clean
 # dependencies - you don't need to be explicit about .c to .o, that's
 # handled by the default rules
 # it's .*o to glom together all the depencies for .o .do and .lo
-$(ALL_OBJECTS): 	swf_types.h
+$(ALL_OBJECTS): 	swf_types.h	swf_tags.h
 swf_destroy.*o:		swf_destroy.h
 swf_error.*o: 				swf_error.h
-swf_parse.*o:		swf_destroy.h	swf_error.h	swf_parse.h
+swf_parse.*o:		swf_destroy.h	swf_error.h	swf_parse.h						
 
 print_utils.*o:								print_utils.h
 parser.*o:		swf_destroy.h 			swf_parse.h	print_utils.h
