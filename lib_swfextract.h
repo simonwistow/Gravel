@@ -16,6 +16,9 @@
  *
  *
  * $Log: lib_swfextract.h,v $
+ * Revision 1.6  2001/07/14 00:17:55  clampr
+ * added emacs file variables to avoid clashing with existing style (now I know what it is)
+ *
  * Revision 1.5  2001/07/13 14:04:51  clampr
  * use one of the debug targets if you want debugging messages on
  *
@@ -74,9 +77,18 @@ void parse_definebutton2  (swf_extractor * swf, int * error);
 
 
 /* externally visible functions */
-extern swf_extractor * load_swf           (char * file_name, int * error);
+extern swf_extractor *      load_swf           (char * file_name, int * error);
 extern void                 destroy_swf        (swf_extractor * swf);
 extern int                  get_number_strings (swf_extractor * swf);
 extern int                  get_number_urls    (swf_extractor * swf);
 extern char **              get_strings        (swf_extractor * swf);
 extern char **              get_urls           (swf_extractor * swf);
+
+
+/* 
+Local Variables:
+mode: C
+c-basic-offset: 4
+tab-width: 4
+End:
+*/

@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_tags.h,v $
+ * Revision 1.2  2001/07/14 00:17:55  clampr
+ * added emacs file variables to avoid clashing with existing style (now I know what it is)
+ *
  * Revision 1.1  2001/07/12 11:28:14  muttley
  * Initial revision
  * Removed all the tags from swf_types.h and put them in here
@@ -32,3 +35,12 @@ extern const char * swf_tag_to_string (int);
 
 
 #endif /* SWF_TAGS_H */
+
+
+/* 
+Local Variables:
+mode: C
+c-basic-offset: 4
+tab-width: 4
+End:
+*/

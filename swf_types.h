@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.22  2001/07/14 00:17:55  clampr
+ * added emacs file variables to avoid clashing with existing style (now I know what it is)
+ *
  * Revision 1.21  2001/07/13 13:46:47  clampr
  * use  swf_memory.h not swf_sizes.h
  *
@@ -1007,12 +1010,17 @@ struct swf_button2action {
 };
 
 struct swf_button2action_list {
-        swf_button2action *  first;
-        swf_button2action ** lastp;
+	swf_button2action *  first;
+	swf_button2action ** lastp;
 };
 
 
 #endif /*SWFTYPES*/
 
-
-
+/* 
+Local Variables:
+mode: C
+c-basic-offset: 4
+tab-width: 4
+End:
+*/

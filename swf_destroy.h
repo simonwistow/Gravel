@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_destroy.h,v $
+ * Revision 1.9  2001/07/14 00:17:55  clampr
+ * added emacs file variables to avoid clashing with existing style (now I know what it is)
+ *
  * Revision 1.8  2001/06/26 13:46:54  muttley
  * Changes for new swf_text_records type
  *
@@ -88,4 +91,10 @@ extern void swf_destroy_soundstreamhead (swf_soundstreamhead *);
 extern void swf_destroy_shapestyle (swf_shapestyle * style);
 #endif
 
-
+/* 
+Local Variables:
+mode: C
+c-basic-offset: 4
+tab-width: 4
+End:
+*/

@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_destroy.c,v $
+ * Revision 1.24  2001/07/14 00:17:55  clampr
+ * added emacs file variables to avoid clashing with existing style (now I know what it is)
+ *
  * Revision 1.23  2001/07/13 16:15:40  clampr
  * some fonts don't have bounds
  *
@@ -1035,6 +1038,14 @@ swf_destroy_soundstreamhead (swf_soundstreamhead * head)
     return;
 }
 
+
+/* 
+Local Variables:
+mode: C
+c-basic-offset: 4
+tab-width: 4
+End:
+*/
 
 
 

@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.33  2001/07/14 00:17:55  clampr
+ * added emacs file variables to avoid clashing with existing style (now I know what it is)
+ *
  * Revision 1.32  2001/07/13 15:58:08  muttley
  * Bad Simon! Don't turn on DEBUG in a file, use make
  *
@@ -3174,6 +3177,13 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
     #endif
 
     return str;
-
-
 }
+
+
+/* 
+Local Variables:
+mode: C
+c-basic-offset: 4
+tab-width: 4
+End:
+*/

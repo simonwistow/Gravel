@@ -16,6 +16,9 @@
  *
  *
  * $Log: parser.h,v $
+ * Revision 1.10  2001/07/14 00:17:55  clampr
+ * added emacs file variables to avoid clashing with existing style (now I know what it is)
+ *
  * Revision 1.9  2001/07/09 12:47:59  muttley
  * Changes for lib_swfextract and text_extract
  *
@@ -81,4 +84,12 @@ const char ** init_tags                 (void);
 
 #endif
 
+
+/* 
+Local Variables:
+mode: C
+c-basic-offset: 4
+tab-width: 4
+End:
+*/
 

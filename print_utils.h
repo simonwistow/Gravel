@@ -16,6 +16,9 @@
  *
  *
  * $Log: print_utils.h,v $
+ * Revision 1.12  2001/07/14 00:17:55  clampr
+ * added emacs file variables to avoid clashing with existing style (now I know what it is)
+ *
  * Revision 1.11  2001/07/13 13:26:55  muttley
  * Added handling for button2actions.
  * We should be able to parse all URLs now
@@ -70,3 +73,10 @@ extern void print_shapestyle            (swf_shapestyle * style, const char * st
 #endif
 
 
+/* 
+Local Variables:
+mode: C
+c-basic-offset: 4
+tab-width: 4
+End:
+*/

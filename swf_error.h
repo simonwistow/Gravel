@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_error.h,v $
+ * Revision 1.8  2001/07/14 00:17:55  clampr
+ * added emacs file variables to avoid clashing with existing style (now I know what it is)
+ *
  * Revision 1.7  2001/06/29 15:10:11  muttley
  * The printing of the actual text of a DefineText (and DefineText2 now)
  * is no longer such a big hack. Font information is kept in the swf_parser
@@ -53,4 +56,12 @@ extern const char * swf_error_code_to_string (int);
 
 #endif
 
+
+/* 
+Local Variables:
+mode: C
+c-basic-offset: 4
+tab-width: 4
+End:
+*/
 
