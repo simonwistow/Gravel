@@ -60,14 +60,17 @@ swf_parse_debug: $(D_LIB_OBJECTS) $(D_OBJECTS)
 swf_parse_ef: $(D_LIB_OBJECTS) $(D_OBJECTS)
 	$(CC) $(CFLAGS) -I . $(DEBUG) -o swf_parse_ef $(D_LIB_OBJECTS) $(D_OBJECTS) -lefence
 
+swf_parse_debauch: $(D_LIB_OBJECTS) $(D_OBJECTS)
+	$(CC) $(CFLAGS) -I . $(DEBUG) -o swf_parse_debauch $(D_LIB_OBJECTS) $(D_OBJECTS) -ldebauch
+
 swf_parse_ktrace: $(D_LIB_OBJECTS) $(D_OBJECTS)
 	$(CC) $(CFLAGS) -I . $(DEBUG) -o swf_parse_ktrace $(D_LIB_OBJECTS) $(D_OBJECTS) -lktrace
 
 text_extract_debug: $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS)
 	$(CC) $(CFLAGS) -I . $(DEBUG) -o text_extract_debug $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS)
 
-text_extract_ccmalloc: $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS)
-	$(CC) $(CFLAGS) -I . $(DEBUG) -o text_extract_ccmalloc $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS) -lccmalloc -ldl
+text_extract_debauch: $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS)
+	$(CC) $(CFLAGS) -I . $(DEBUG) -o text_extract_debauch $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS) -ldebauch
 
 text_extract_ef: $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS)
 	$(CC) $(CFLAGS) -I . $(DEBUG) -o text_extract_ef $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS) -lefence
