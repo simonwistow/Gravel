@@ -1,5 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(libswfparse)
+AC_INIT
+AC_CONFIG_SRCDIR([swf_parse.c])
 
 dnl Library versioning
 
@@ -8,6 +9,10 @@ dnl Check for programs
 dnl ====================================
 
 AC_PROG_CC
+AC_PROG_CPP
+AC_MSG_NOTICE([starting libtool test])
+AC_PROG_LIBTOOL
+AC_MSG_NOTICE([libtool test done])
 
 dnl ====================================
 dnl Set some general compile options
@@ -20,6 +25,12 @@ dnl ==============================
 dnl ==============================
 dnl Checks for header files
 dnl ==============================
+AC_CHECK_HEADERS([stdlib.h string.h])
+
+dnl ==============================
+dnl Checks for library functions
+dnl ==============================
+AC_CHECK_FUNCS([strdup])
 
 dnl ==============================
 dnl Checks for types
@@ -66,5 +77,6 @@ AC_SUBST(S32)
 
 dnl What to do with all this information
 
-AC_OUTPUT( sizes.h )
+AC_CONFIG_FILES([sizes.h ])
+AC_OUTPUT
 
