@@ -10,6 +10,7 @@ use Gravel::Edge;
 use Gravel::Constants qw(:all);
 
 use Data::Dumper qw/DumperX/;
+use Digest::MD5 qw(md5_base64);
 
 our $VERSION = '0.10';
 
@@ -44,6 +45,13 @@ sub new {
     bless $self => $class;
 
     return $self;
+}
+
+#
+
+sub hash {
+    my $self = shift;
+	$self->{_hash} = md5_base64(DumperX($self));
 }
 
 #

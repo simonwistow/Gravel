@@ -155,9 +155,9 @@ sub bake_movie {
 	$b->_bake_header($self);
 	$b->_bake_preamble($self, 0);
 
-	$b->_bake_library($self);
-
 	print STDERR DumperX $self;
+
+	$b->_bake_library($self);
 
 	$b->_bake_frames($self);
 

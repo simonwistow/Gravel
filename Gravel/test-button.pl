@@ -20,17 +20,24 @@ $m->size(-20000, -20000, 20000, 20000);
 
 my $g = Gravel::Shape->new({fills => [{colour => HAZY_RED, type => 'solid'}]});
 $g->poly(0, 0, 0, 500, 500, 500, 500, 0, );
+my $g2 = Gravel::Shape->new({fills => [{colour => BLUE, type => 'solid'}]});
+$g2->poly(0, 0, 0, 500, 500, 500, );
+my $g3 = Gravel::Shape->new({fills => [{colour => GREEN, type => 'solid'}]});
+$g3->poly(0, 0, 0, 500, 500, 500, );
 
-my $mx = Gravel::Matrix->new({a => 0.5, d => 0.5, });
+my $mx = Gravel::Matrix->new({a => 1.8, d => 2, });
 
-my $s = {start => 1, end => 5, depth => 2, tx => 2000, ty => 2000};
+my $s = {start => 1, end => 2, depth => 2, tx => 2000, ty => 2000};
 
-my $bs = Gravel::ButtonState->new($g, {up => 1, down => 1});
-my $bs2 = Gravel::ButtonState->new($g, {hit => 1, matrix => $mx});
+my $bs = Gravel::ButtonState->new($g, {over => 1, layer => 1});
+my $bs2 = Gravel::ButtonState->new($g2, {up => 1, matrix => $mx, layer => 3, });
+my $bs3 = Gravel::ButtonState->new($g2, {down => 1, layer => 2});
+my $bs4 = Gravel::ButtonState->new($g2, {hit => 1, layer => 2});
 
 my $b = Gravel::Button->new($s);
 
-my $a = $b->make([$bs, $bs2]);
+my $a = $b->make([$bs, $bs2, $bs3, $bs4]);
+#my $a = $b->make([$bs, $bs2, $bs4]);
 
 $m->event($a);
 

@@ -52,7 +52,7 @@ swf_parse_definebutton (swf_parser * context, int * error)
 
 void
 swf_add_buttonrec(swf_definebutton * button, int * error, SWF_U32 char_id, 
-				  swf_matrix * matrix, SWF_U32 depth, SWF_U32 hit_test, 
+				  swf_matrix * matrix, SWF_U32 layer, SWF_U32 hit_test, 
 				  SWF_U32 down, SWF_U32 over, SWF_U32 up)
 {
 	swf_buttonrecord * temp;
@@ -68,7 +68,7 @@ swf_add_buttonrec(swf_definebutton * button, int * error, SWF_U32 char_id,
 	temp->state_up = up;
 
 	temp->character = char_id;
-	temp->layer = depth;
+	temp->layer = layer;
 	temp->matrix = matrix;
 
     *(button->records->lastp) = temp;

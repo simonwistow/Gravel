@@ -77,6 +77,10 @@ sub make {
 	
 	$self->{_states} = $ra_g;
 
+	foreach (@$ra_g) {
+		$_->hash_shape;
+	}
+
 	my $s = {start => $self->{_start}, end => $self->{_end}, 
 			 startx => $self->{_tx}, endx => $self->{_tx},
 			 starty => $self->{_ty}, endy => $self->{_ty},
@@ -101,7 +105,40 @@ __C__
 #include "gravel/util.h"
 #include "gravel.h"
 
-/* This needs to know how to bake its component shapes */
+#define HASH_LENGTH 22
+
+int _check_obj_hash(HV * shape, char ** bst, int * curr) 
+{
+	int i, match;
+	SV** p_hash;
+	char * tmp;
+	char * hash;
+
+	if ((hash = (char *) calloc(HASH_LENGTH, sizeof(char))) == NULL) {
+		return 0;
+	}	
+
+	p_hash = hv_fetch(shape, "_hash", 5, 0);
+	if (NULL == p_hash) {
+		return 0;
+	}
+	tmp = (char *)SvPVX(*p_hash);
+	for (i=0; i<HASH_LENGTH; ++i) {
+		hash[i] = tmp[i];
+	}
+
+	match = 0;
+	for (i=0; i<=*curr; ++i) {
+		match = strcmp((const char *) hash, (const char *)(bst[i]));
+		if (0 == match) {
+			return match;
+		}
+	}
+	bst[(*curr)++] = hash;
+
+	return match;
+}
+
 
 /* We are baking the library in this function */
 void _bake (SV * shape, SV * mov) 
@@ -121,7 +158,7 @@ void _bake (SV * shape, SV * mov)
 	swf_definebutton * button;
 	SV** p_matrix;
 	swf_matrix * mx;
-	SWF_U32 char_id, depth, hit_test, down, over, up, button_id;
+	SWF_U32 char_id, depth, hit_test, down, over, up, button_id, layer;
 	SV** p_num;
 	swf_tagrecord * temp;
 
@@ -149,11 +186,16 @@ void _bake (SV * shape, SV * mov)
 
 	curr = 0;
 	num_st = av_len(states);
-	if ((p_bst = (int *) calloc(num_st, sizeof(int))) == NULL) {
+	if ((p_bst = (char **) calloc(1 + num_st, sizeof(char *))) == NULL) {
 		return;
 	}
 
+    /* This needs to know how to bake its component shapes */
 	for (i=0; i<=num_st; ++i) {
+		if ((p_bst[i] = (char *) calloc(HASH_LENGTH, sizeof(char))) == NULL) {
+			return;
+		}
+
 		p_state = av_fetch(states, i, 0);
 		if (NULL == p_state) {
 			return;
@@ -163,15 +205,8 @@ void _bake (SV * shape, SV * mov)
 		if (NULL == p_shape) {
 			return;
 		}
-		seen = 0;
-		for (j=0; j<curr; ++j) {
-			if (p_bst[j] == (int)*p_shape) {
-				++seen;
-			}
-		}
 		/* We havent seen this shape before */
-		if (0 == seen) {
-			p_bst[curr++] = (int)*p_shape;
+		if (_check_obj_hash((HV *)SvRV(*p_shape), p_bst, &curr)) {
 			_call_foreign_method(*p_shape, "_bake", mov);			
 		}
 	}
@@ -252,7 +287,13 @@ void _bake (SV * shape, SV * mov)
 		}
         over = (SWF_U32)(SvIV(*p_num));
 
-        swf_add_buttonrec(button, &error, char_id, mx, depth, hit_test, down, over, up);
+        p_num = hv_fetch(bstate, "_layer", 6, 0);
+        if (NULL == p_num) {
+			return;
+		}
+        layer = (SWF_U32)(SvIV(*p_num));
+
+        swf_add_buttonrec(button, &error, char_id, mx, layer, hit_test, down, over, up);
     }
 
 	if ((temp->buffer->raw = (SWF_U8 *) calloc (10240, sizeof (SWF_U8))) == NULL) {

@@ -18,7 +18,7 @@
 
 extern swf_definebutton * swf_make_definebutton(int * error, SWF_U32 button_id);
 
-extern void swf_add_buttonrec(swf_definebutton * button, int * error, SWF_U32 char_id, swf_matrix * matrix, SWF_U32 depth, SWF_U32 hit_test, SWF_U32 down, SWF_U32 over, SWF_U32 up);
+extern void swf_add_buttonrec(swf_definebutton * button, int * error, SWF_U32 char_id, swf_matrix * matrix, SWF_U32 layer, SWF_U32 hit_test, SWF_U32 down, SWF_U32 over, SWF_U32 up);
 
 
 extern void swf_add_buttonrecord (swf_definebutton * button, int * error, swf_buttonrecord * temp);

@@ -37,6 +37,7 @@ sub new {
     $self->{_up} = $conf{up} || 0;
     $self->{_down} = $conf{down} || 0;
     $self->{_over} = $conf{over} || 0;
+    $self->{_layer} = $conf{layer} || 1;
 
 	$self->{_matrix} = $conf{matrix} || Gravel::Matrix->new();
 
@@ -47,6 +48,10 @@ sub new {
 
 	return $self;
 }
+
+#
+
+sub hash_shape { return (shift)->{_shape}->hash; }
 
 #
 

@@ -55,7 +55,7 @@ sub matrices {
 		
 	my $ra_m = [];
 
-	my $numf = $self->{_end} - $self->{_start};
+	my $numf = 1 + $self->{_end} - $self->{_start};
 	my ($x, $y) = ($self->{_startx}, $self->{_starty});
 
 	my $dx = ( $self->{_endx} - $self->{_startx} ) / $numf;
