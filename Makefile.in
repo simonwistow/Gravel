@@ -62,6 +62,9 @@ text_extract_ccmalloc: $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS)
 text_extract_ef: $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS)
 	$(CC) $(CFLAGS) -I . $(DEBUG) -o text_extract_ef $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS) -lefence
 
+text_extract_ktrace: $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS)
+	$(CC) $(CFLAGS) -I . $(DEBUG) -o text_extract_ktrace $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS) -lktrace
+
 
 install: all
 	echo richardc is really slack

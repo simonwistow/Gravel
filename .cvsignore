@@ -9,6 +9,7 @@ text_extract
 text_extract_debug
 text_extract_ccmalloc
 text_extract_ef
+text_extract_ktrace
 *.lo
 *.do
 *.la
