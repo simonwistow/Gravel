@@ -52,8 +52,21 @@ sub event {
     my $self = shift;
     my $e = shift;
     push @{$self->{_events}}, $e;
+    my $g = $e->shape();
+    foreach (@{$self->{_library}}) {
+	return if $_ == $g;
+    }
+    push @{$self->{_library}}, $g;
 }
 
+#
+
+sub library {
+    my $self = shift;
+    my $g = shift;
+    return $self->{_library} unless $g;
+    push @{$self->{_library}}, $g;
+}
 
 #
 

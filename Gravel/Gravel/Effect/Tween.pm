@@ -6,6 +6,9 @@ use warnings;
 use lib '../../';
 
 use Gravel::Shape;
+use Gravel::Effect;
+
+use base qw(Gravel::Effect);
 
 use Data::Dumper qw/DumperX/;
 
@@ -31,8 +34,8 @@ sub new {
     $self->{_start} = $conf{start};
     $self->{_end} = $conf{end};
 
-    $self->{_startpos} = $self->{startpos};
-    $self->{_endpos} = $self->{endpos};
+    $self->{_startpos} = $conf{startpos};
+    $self->{_endpos} = $conf{endpos};
 
     return $self;
 }

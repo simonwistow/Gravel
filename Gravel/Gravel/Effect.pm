@@ -37,6 +37,9 @@ sub new {
 
 #
 
+sub shape {return (shift)->{_shape};}
+
+#
 
 
 #

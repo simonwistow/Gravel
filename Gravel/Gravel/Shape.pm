@@ -23,7 +23,7 @@ use Cwd qw(cwd abs_path);
 
 # FIXME
 
-use constant BLACK => 0;
+use constant BLACK => '#000000';
 
 sub new {
     my $proto = shift;
@@ -41,7 +41,7 @@ sub new {
     $self->{_edges} = [];
     $self->{_vertices} = [];
     $self->{_styles} = $conf{styles} || {0 => {colour => BLACK, width => 20}};
-    $self->{_fills} = $conf{fills} || [];
+    $self->{_fills} = $conf{fills} || [{colour => BLACK, type => 'solid'}];
 
     bless $self => $class;
 
