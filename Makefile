@@ -1,0 +1,39 @@
+#variable definitions
+CC = gcc
+CFLAGS =  -Wall -Wwrite-strings -Wmissing-prototypes -Werror -O3
+DEBUG = -DDEBUG
+
+OBJECTS=swf_parse.o parser.o swf_destroy.o swf_error.o print_utils.o
+SOURCES=swf_parse.c parser.c swf_destroy.c swf_error.c print_utils.c
+HEADERS=swf_parse.h parser.h swf_destroy.h swf_error.h print_utils.h  swf_types.h
+MISC=Makefile readme todo gpl.txt dos.pl oldswfparse.cpp
+
+
+
+#build rules
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+all: swf_parse
+
+
+swf_parse: $(OBJECTS)
+	$(CC) $(CFLAGS) -I . -o swf_parse $(OBJECTS)
+
+swf_destroy.o: swf_destroy.c swf_destroy.h swf_types.h
+
+swf_error.o: swf_error.c swf_error.h
+
+print_utils.o: print_utils.c print_utils.h
+
+swf_parse.o: swf_parse.c swf_parse.h swf_error.h swf_types.h swf_destroy.h
+
+parser.o: parser.c swf_parse.h swf_types.h swf_destroy.h print_utils.h
+
+zip: $(SOURCES) $(HEADERS) $(MISC)
+	tar -cf - $(SOURCES) $(HEADERS) $(MISC) | gzip > libswf.tar.gz
+
+clean:
+	rm *.o *.tar.gz swf_parse *~
+
