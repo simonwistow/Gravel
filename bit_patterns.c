@@ -533,6 +533,7 @@ test_serialise_defineshape (swf_buffer * buffer, int * error, swf_defineshape * 
     fprintf(stderr, "\nShaperecord:\n");
     test_buffer_shaperecord(buffer, error, temp, shape->style, 1);
   }
+  test_buffer_flush_bits(buffer, 0);
   
 }
 

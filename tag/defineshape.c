@@ -121,6 +121,7 @@ swf_serialise_defineshape (swf_buffer * buffer, int * error, swf_defineshape * s
 		swf_buffer_shaperecord(buffer, error, temp, shape->style);
 	}
 
+	swf_buffer_flush_bits(buffer);
 }
 
 void
