@@ -16,6 +16,9 @@
  *
  *
  * $Log: parser.c,v $
+ * Revision 1.19  2001/07/16 01:41:25  clampr
+ * glib version of font management
+ *
  * Revision 1.18  2001/07/15 17:18:25  clampr
  * revert the previous bug workaround now the bug is fixed
  *
@@ -437,10 +440,9 @@ parse_definefont (swf_parser * context, const char * str)
 void
 parse_definefontinfo (swf_parser * context, const char * str)
 {
-
     int error = SWF_ENoError;
 	int n;
-
+	swf_font_extra *extra;
 	swf_definefontinfo * info = swf_parse_definefontinfo (context, &error);
 
 
@@ -451,15 +453,13 @@ parse_definefontinfo (swf_parser * context, const char * str)
 
 	}
 
-
-
     printf("%stagDefineFontInfo \tFont ID %-5lu\n", str, info->fontid);
-
+	extra = g_hash_table_lookup(context->font_extras, &info->fontid);
 
     printf("%s\tNameLen: '%i'\n", str, info->namelen);
   	printf("%s\tFontName: '%s'\n", str, info->fontname);
 	printf("%s\t", str);
-	for(n=0; n < context->glyph_counts [info->fontid]; n++)
+	for(n=0; n < extra->n; n++)
 	{
         	printf("[%d,'%c'] ", info->code_table[n], (char) info->code_table[n]);
 

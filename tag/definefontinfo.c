@@ -25,8 +25,9 @@ swf_definefontinfo *
 swf_parse_definefontinfo (swf_parser * context, int * error)
 {
     int n, glyph_count;
-
+	swf_font_extra * extra;
     swf_definefontinfo * info;
+	gint fontid;
 
     if ((info = (swf_definefontinfo *) calloc (1, sizeof (swf_definefontinfo))) == NULL) {
 		*error = SWF_EMallocFailure;
@@ -53,7 +54,12 @@ swf_parse_definefontinfo (swf_parser * context, int * error)
 
     /* The glyph counts (ie, how many symbols are in each font) have
        presumably already been read into place by a DefineFont tag */
-    glyph_count = context->glyph_counts[info->fontid];
+	fontid = info->fontid;
+	if(!(extra = g_hash_table_lookup(context->font_extras, &fontid))) {
+        *error = SWF_EFontNotSet;
+		goto FAIL;
+	}
+    glyph_count = extra->n;
 
     if ((info->code_table = (int *) calloc (glyph_count, sizeof(int) ) ) == NULL) {
         *error = SWF_EMallocFailure;
@@ -67,15 +73,12 @@ swf_parse_definefontinfo (swf_parser * context, int * error)
     {
         if (info->flags & FONT_WIDE_CODES) {
             info->code_table[n] = (int) swf_parse_get_word (context);
-        } else {
+        } 
+		else {
 	        info->code_table[n] = (int) swf_parse_get_byte (context);
         }
-
-        context->font_chars [info->fontid][n] = (char) info->code_table[n];
-
+        extra->chars[n] = (char) info->code_table[n];
     }
-
-
 
     return info;
 

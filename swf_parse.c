@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.42  2001/07/16 01:41:25  clampr
+ * glib version of font management
+ *
  * Revision 1.41  2001/07/15 15:12:53  clampr
  * move the mp3 stuff to definesound
  *
@@ -120,7 +123,6 @@
 swf_parser *
 swf_parse_create (char * name, int * error)
 {
-	
 	swf_parser * context;
 	FILE * file;
 
@@ -131,7 +133,6 @@ swf_parse_create (char * name, int * error)
 	if (file == NULL) {
 		*error = SWF_EFileOpenFailure;
 		return NULL;
-		
 	}
 
 	if ((context = (swf_parser *) calloc (1, sizeof (swf_parser))) == NULL) {
@@ -145,15 +146,7 @@ swf_parse_create (char * name, int * error)
 	context->bitbuf = 0;
 	context->headers_parsed = 0;
 	context->frame  = 0;
-
-	/* todo: fix this magic number */
-	if ((context->font_chars = (char **) calloc (256, sizeof (char *))) == NULL)
-	{
-	    *error = SWF_EMallocFailure;
-	    return NULL;
-	}
-	context->number_of_fonts = 0;
-
+	context->font_extras = g_hash_table_new(g_int_hash, g_int_equal);
 
 	return context;
 }
@@ -932,9 +925,10 @@ char *
 swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_textrecord_list * list)
 {
     int g;
-    int font_id = -1;
+    gint font_id = -1;
     char * str = NULL;
     swf_textrecord *node, *tmp;
+	swf_font_extra *font;
 
     if (list==NULL)
     {
@@ -968,14 +962,14 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
             if ( node->flags & textHasFont)
             {
                 font_id = node->font_id;
-                #ifdef SWF_PARSE_DEBUG
+                #ifdef DEBUG
                 fprintf (stderr, "[textrecords_to_text : font_id is %d]\n", font_id);
                 #endif
             }
-        }else{
-
-            #ifdef SWF_PARSE_DEBUG
-            fprintf (stderr, "[textrecords_to_text : mallocing string]\n");
+        }
+		else {
+            #ifdef DEBUG
+            fprintf (stderr, "[textrecords_to_text : mallocing string %d : fontid now %d]\n", node->glyph_count, font_id);
             #endif
 
             /* malloc to the size of the string */
@@ -985,23 +979,24 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
                 return NULL;
             }
 
-            /* check fontchars[font_id] */
-            if (context->font_chars[font_id] == NULL)
+            #ifdef DEBUG
+            fprintf (stderr, "[textrecords_to_text : malloced string]\n");
+            #endif
+
+            if (!(font = g_hash_table_lookup(context->font_extras, &font_id)))
             {
                 *error = SWF_EFontNotSet;
                 return NULL;
             }
 
-            #ifdef SWF_PARSE_DEBUG
+            #ifdef DEBUG
             fprintf (stderr, "[textrecords_to_text : number of glyphs is  %d]\n", node->glyph_count);
             #endif
 
             /* ... and then set it */
             for (g=0; g< node->glyph_count; g++)
             {
-                /* this requires that font_chars[font_id] has actually been set of course*/
-                str[g] = context->font_chars[font_id][node->glyphs[g][0]];
-
+				str[g] = font->chars[node->glyphs[g][0]];
             }
             str[g]='\0';
 
@@ -1012,7 +1007,6 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
 
             return str;
         }
-
 
 
         tmp = node;

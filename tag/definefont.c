@@ -24,6 +24,8 @@ swf_parse_definefont (swf_parser * context, int * error)
     int n, start, xlast, ylast;
     int * offset_table;
     SWF_U16 fillbits, linebits;
+	swf_font_extra *extra;
+	gint fontid;
 
     if ((font = (swf_definefont *) calloc (1, sizeof (swf_definefont))) == NULL) {
 		*error = SWF_EMallocFailure;
@@ -31,31 +33,27 @@ swf_parse_definefont (swf_parser * context, int * error)
     }
 
     font->shape_records = NULL;
-    font->fontid = (SWF_U32) swf_parse_get_word(context);
+    fontid = font->fontid = (SWF_U32) swf_parse_get_word(context);
+
 
     start = swf_parse_tell(context);
     font->offset = swf_parse_get_word (context);
 
-    font->glyph_count = font->offset/2;
+    if ((extra = (swf_font_extra *) calloc (1, sizeof (swf_font_extra))) == NULL) {
+		*error = SWF_EMallocFailure;
+		goto FAIL;
+    }
 
+    extra->n = font->glyph_count = font->offset/2;
 
-    context->glyph_counts[font->fontid] = font->glyph_count;
-
-    context->number_of_fonts++;
-    /* todo :
-     * maybe the number of fonts and the font id will get out of sync.
-     * Should we have a lookup up table?
-     * Also, what happens if we define more than 255 fonts? Should
-     * put checks in for that
-     */
-
-    if ((context->font_chars [font->fontid] = (char *) calloc (font->glyph_count, sizeof (char))) == NULL)
+    if ((!(extra->glyphs = (char *) calloc (font->glyph_count, sizeof (char)))) ||
+		(!(extra->chars  = (char *) calloc (font->glyph_count, sizeof (char)))))
     {
         *error = SWF_EMallocFailure;
         goto FAIL;
-
     }
 
+	g_hash_table_insert(context->font_extras, &fontid, extra);
 
     if  ((offset_table =  (int *) calloc (font->glyph_count, sizeof (int))) == NULL) {
 		*error = SWF_EMallocFailure;

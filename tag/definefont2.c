@@ -24,12 +24,14 @@ swf_parse_definefont2 (swf_parser * context, int * error)
     int i, n, data_pos;
     SWF_U32 code_offset;
     SWF_U32 * offset_table;
+	swf_font_extra *extra;
+
+	printf("definefont2\n");
 
     if ((font = (swf_definefont2 *) calloc (1, sizeof (swf_definefont2))) == NULL) {
         *error = SWF_EMallocFailure;
     	return NULL;
     }
-
 
     font->name = NULL;
     font->code_table = NULL;
@@ -50,23 +52,17 @@ swf_parse_definefont2 (swf_parser * context, int * error)
         font->name[i] = (char) swf_parse_get_byte(context);
     }
 
+    if (!(extra = (swf_font_extra *) calloc (1, sizeof(swf_font_extra)))) {
+  	    *error = SWF_EMallocFailure;
+    	goto FAIL;
+    }
+
     /* Get the number of glyphs. */
-    font->glyph_count = swf_parse_get_word(context);
-
-
-    context->glyph_counts[font->fontid] = font->glyph_count;
-
-    context->number_of_fonts++;
-    /* todo :
-     * maybe the number of fonts and the font id will get out of sync.
-     * Should we have a lookup up table?
-     * Also, what happens if we define more than 255 fonts? Should
-     * put checks in for that
-     */
+	extra->n = font->glyph_count = swf_parse_get_word(context);
 
     if (font->glyph_count > 0)
     {
-	    if ((context->font_chars [font->fontid] = (char *) calloc (font->glyph_count, sizeof (char))) == NULL)
+	    if ((extra->chars = (char *) calloc (font->glyph_count, sizeof (char))) == NULL)
 	    {
 		    *error = SWF_EMallocFailure;
 		    goto FAIL;
@@ -75,7 +71,6 @@ swf_parse_definefont2 (swf_parser * context, int * error)
 		data_pos = swf_parse_tell(context);
 
         /* Get the FontOffsetTable */
-
 
         if ((offset_table = (SWF_U32 *) calloc (font->glyph_count, sizeof (SWF_U32))) == NULL)
         {
@@ -92,8 +87,6 @@ swf_parse_definefont2 (swf_parser * context, int * error)
     	}
 
         /* Get the CodeOffset */
-
-
         code_offset = 0;
         if (font->flags & sfontFlagsWideOffsets) {
             code_offset = swf_parse_get_dword(context);
@@ -106,9 +99,7 @@ swf_parse_definefont2 (swf_parser * context, int * error)
 			goto FAIL;
 		}
 
-
         for(n=0; n<font->glyph_count; n++) {
-
     	    swf_parse_seek (context, data_pos + offset_table[n]);
     	    swf_parse_initbits (context); /* reset bit counter */
 
@@ -117,7 +108,6 @@ swf_parse_definefont2 (swf_parser * context, int * error)
             context->line_bits = (SWF_U16) swf_parse_get_bits(context, 4);
 
     	    font->glyphs[n] = (swf_shaperecord_list *) swf_parse_get_shaperecords(context, error);
-
         }
 
     	swf_free (offset_table);
@@ -205,7 +195,7 @@ swf_parse_definefont2 (swf_parser * context, int * error)
         }
     }
 
-
+	g_hash_table_insert(context->font_extras, &font->fontid, extra);
     return font;
 
     FAIL:

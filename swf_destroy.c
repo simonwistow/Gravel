@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_destroy.c,v $
+ * Revision 1.27  2001/07/16 01:41:25  clampr
+ * glib version of font management
+ *
  * Revision 1.26  2001/07/15 15:12:53  clampr
  * move the mp3 stuff to definesound
  *
@@ -92,25 +95,28 @@
 /*
  * Free up the memory of context.
  */
+
+static void
+destroy_extra(gpointer key, gpointer v, gpointer data)
+{
+	swf_font_extra *val = v;
+	swf_free(val->glyphs);
+	swf_free(val->chars);
+	swf_free(val);
+}
+
 void
 swf_destroy_parser (swf_parser * context)
 {
-    int i;
-    if (context==NULL) {
-        return;
-    }
+    if (!context) return;
+
     fclose(context->file);
     swf_free(context->name);
     swf_free(context->header);
 
-    /* todo: fix this magic number */
-    for (i=0; i<256; i++) {
-	  swf_free (context->font_chars[i]);
-    }
-    swf_free(context->font_chars);
+	g_hash_table_foreach(context->font_extras, destroy_extra, NULL);
+	g_hash_table_destroy(context->font_extras);
     swf_free (context);
-
-    return;
 }
 
 void
@@ -130,9 +136,8 @@ swf_destroy_fillstyle (swf_fillstyle * style)
     swf_free (style->matrix);
 
     swf_free (style);
-
-    return;
 }
+
 void
 swf_destroy_textrecord_list (swf_textrecord_list * list)
 {

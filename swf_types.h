@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.23  2001/07/16 01:41:25  clampr
+ * glib version of font management
+ *
  * Revision 1.22  2001/07/14 00:17:55  clampr
  * added emacs file variables to avoid clashing with existing style (now I know what it is)
  *
@@ -71,10 +74,12 @@
 #ifndef SWF_TYPES_H
 #define SWF_TYPES_H
 
-#include <stdio.h>
-
+/* glib.h also provides true and false, but only if they're not already defined */
 #define TRUE (1)
 #define FALSE (0)
+
+#include "glib.h"
+#include <stdio.h>
 
 #define tagEnd                 (0)
 #define tagShowFrame           (1)
@@ -254,15 +259,6 @@
 /* Global Types*/
 
 /*
-typedef unsigned long SWF_U32, *P_U32, **PP_U32;
-typedef signed long SWF_S32, *P_S32, **PP_S32;
-typedef unsigned short SWF_U16, *P_U16, **PP_U16;
-typedef signed short SWF_S16, *P_S16, **PP_S16;
-typedef unsigned char SWF_U8, *P_U8, **PP_U8;
-typedef signed char SWF_S8, *P_S8, **PP_S8;
-*/
-
-/*
  * Hmm, this trhwos up lots of warnings so revoke to having
  * everything
  */
@@ -379,10 +375,6 @@ struct swf_parser {
     int line_bits;       /* the current number of fill bits we're using */
                          /* todo simon : not sure these should be in the context */
 
-    /* Font glyph counts (gotta save it somewhere!) */
-    int glyph_counts [256]; /* how many glyphs are in each font */
-                            /* todo simon : stop hard coding it to 256*/
-
     SWF_U8* src_adpcm;          /* the src of the adpcm we're parsing*? ?* todo simon: should this be in the context?*/
     SWF_U32 bitbuf_adpcm;       /* adpcm bit buffer : this should always contain at least 24 bits of data */
     SWF_S32 bitpos_adpcm;       /* the current position in the adpcm bit buffer */
@@ -396,13 +388,14 @@ struct swf_parser {
     int n_stream_samples;
 
 
-    char ** font_chars;         /* the actual characters defined by font and font info tags */
-    int  number_of_fonts;       /* how many fonts we've parsed so far */
-                                /* todo : this might get out of sync with the id of the font
-                                 * i.e font_id 6 might be only the thrid font - probably
-                                 * ought to fix that */
-
+	GHashTable *font_extras;
 };
+
+typedef struct {
+	int n;
+	char *glyphs;
+	char *chars;
+} swf_font_extra;
 
 /* a raw swf tag */
 /* todo simon : this should have the raw data in as well */
@@ -466,7 +459,7 @@ struct swf_setbackgroundcolour {
 struct swf_definefont {
     SWF_U32 fontid;  /* the font we're defining */
     int offset;      /* its offset in the glyph tables */ /* todo simon : check this */
-    int glyph_count; /* the number of glyphs it has */ /* todo simon : is this necessary */
+    int glyph_count; /* the number of glyphs it has */
     swf_shaperecord_list ** shape_records; /* an array of shapes which define how the glyphs look*/
 };
 
