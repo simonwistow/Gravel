@@ -22,9 +22,11 @@ my $g = Gravel::Shape->new({fills => [{colour => HAZY_RED, type => 'solid'}]});
 $g->poly(0, 0, 0, 500, 500, 500, 500, 0, );
 
 my $s = {start => 0, end => 10, startx => 0, starty => 0, endx => 1000, endy => 1000};
-my $e = Gravel::Effect::Tween->new($g, $s);
+my $e = Gravel::Effect::Tween->new($s);
+my $a = $g->action($e);
 
-$m->event($e);
+$m->event($a);
+
 
 
 #my $g2 = Gravel::Shape->new({fills => [{colour => BLUE, type => 'solid'}]});
@@ -45,7 +47,9 @@ $m->event($e);
 
 $m->make_timeline();
 
-my $a = $m->bake_movie();
+print STDERR DumperX $e;
+
+my $a2 = $m->bake_movie();
 
 #print STDERR DumperX $m;
 #print STDERR DumperX $a;

@@ -27,9 +27,6 @@ sub new {
     my $class = ref($proto) || $proto;
     my $self = {};
 
-    # The first argument to an Effect constructor is a shape.
-    $self->{_shape} = shift;
-
     bless $self => $class;
 
     return $self;
@@ -37,9 +34,11 @@ sub new {
 
 #
 
+# start and end refer to start and end frames
+
 sub shape {return (shift)->{_shape};}
-sub startpos {return (shift)->{_startpos};}
-sub endpos   {return (shift)->{_endpos};}
+sub start {return (shift)->{_start};}
+sub end   {return (shift)->{_end};}
 
 #
 

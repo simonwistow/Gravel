@@ -5,6 +5,7 @@ use warnings;
 
 use lib '../';
 
+use Gravel::Actor;
 use Gravel::Edge;
 use Gravel::Constants qw(:all);
 
@@ -190,7 +191,13 @@ sub set_stroke {
 sub set_fill {
 }
 
+#
 
+sub action {
+    my $self = shift;
+	my $e = shift;
+	return Gravel::Actor->new({shape => $self, effect => $e, });
+}
 
 
 

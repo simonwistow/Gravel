@@ -19,9 +19,10 @@ our $VERSION = '0.10';
 
 sub new {
     my $class = shift;
-    my $g = shift;
+#    my $g = shift;
 
-    my $self = $class->SUPER::new($g, @_);
+#	my $self = {};
+    my $self = $class->SUPER::new(@_);
 
     my $cf = ref($_[0]);
     my %conf;
