@@ -3,3 +3,7 @@ config.cache
 config.status
 sizes.h
 swf_parse
+text_extract
+*.lo
+*.la
+.libs
