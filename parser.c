@@ -14,8 +14,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
+ *
+ * $Log: parser.c,v $
+ * Revision 1.7  2001/06/22 17:16:51  muttley
+ * Fixed get_textrecords and get_textrecord and associated destructors and printers
+ *
  */
-
 
 #include "parser.h"
 #include "swf_parse.h"

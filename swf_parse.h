@@ -14,6 +14,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
+ *
+ * $Log: swf_parse.h,v $
+ * Revision 1.6  2001/06/22 17:16:51  muttley
+ * Fixed get_textrecords and get_textrecord and associated destructors and printers
+ *
  */
 
 
@@ -70,7 +75,7 @@ extern U32                       swf_parse_get_colour          (swf_parser * , i
 extern char                    * swf_parse_get_string          (swf_parser * , int *);
 
 extern swf_textrecord          * swf_parse_get_textrecord      (swf_parser * , int *, int, int, int);
-extern swf_textrecord_list     * swf_parse_get_textrecords     (swf_parser * , int *, int, int, int);
+extern swf_textrecord          * swf_parse_get_textrecords     (swf_parser * , int *, int, int, int);
 
 extern swf_mp3header_list      * swf_parse_get_mp3headers      (swf_parser * , int *, int);
 

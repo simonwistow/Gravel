@@ -14,6 +14,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
+ *
+ * $Log: swf_types.h,v $
+ * Revision 1.8  2001/06/22 17:16:51  muttley
+ * Fixed get_textrecords and get_textrecord and associated destructors and printers
+ *
  */
 
 
@@ -236,25 +241,25 @@ struct swf_parser {
     FILE * file;
     char * name;
     swf_header * header;
-    
+
     int headers_parsed;
-    
+
     U32 cur_tag_len;
     U32 filepos;
     U32 next_tag_pos;
     U32 frame;
-    
+
     /* Bit Handling. */
     S32 bitpos;
     U32 bitbuf;
-    
+
     /* Tag parsing information. */
     U32 tagstart;
     U32 tagzero;
     U32 tagend;
-    
+
     U32 taglen;
-    
+
     int fill_bits;
     int line_bits;
 
@@ -272,7 +277,7 @@ struct swf_parser {
     int stream_sample_size;
     int stream_sample_stereo_mono;
     int n_stream_samples;
-    
+
 };
 
 struct swf_tag {
@@ -345,10 +350,10 @@ struct swf_placeobject {
 
 };
 
-/* 
+/*
  * TODO
- * Should we change the property tag to be called tagid to 
- * match swf_placeobject? --BE 
+ * Should we change the property tag to be called tagid to
+ * match swf_placeobject? --BE
  */
 
 struct swf_placeobject2 {
@@ -460,7 +465,7 @@ struct swf_definetext {
     U32 tagid;
     swf_rect    * rect;
     swf_matrix  * matrix;
-    swf_textrecord_list* records;
+    swf_textrecord * records;
 };
 
 
@@ -468,7 +473,7 @@ struct swf_definetext2 {
     U32 tagid;
     swf_rect    * rect;
     swf_matrix  * matrix;
-    swf_textrecord_list  * records;
+    swf_textrecord  * records;
 };
 
 
@@ -679,6 +684,7 @@ struct swf_mp3header_list {
 
 struct swf_textrecord {
 
+    swf_textrecord * next;
     U8 flags;
     long font_id;
     U32 colour;

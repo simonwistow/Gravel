@@ -14,8 +14,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
+ *
+ * $Log: print_utils.h,v $
+ * Revision 1.6  2001/06/22 17:16:51  muttley
+ * Fixed get_textrecords and get_textrecord and associated destructors and printers
+ *
  */
-
 
 #include "swf_types.h"
 #include "swf_parse.h"
@@ -30,7 +34,8 @@ extern void print_cxform                (swf_cxform *, const char *);
 extern void print_matrix                (swf_matrix *, const char *);
 extern void print_rect                  (swf_rect   *  , const char *);
 extern void print_shaperecords          (swf_shaperecord_list *, const char *);
-extern void print_textrecords           (swf_textrecord_list *, const char *);
+extern void print_textrecord            (swf_textrecord *, const char *);
+extern void print_textrecords           (swf_textrecord *, const char *);
 extern void print_buttonrecords         (swf_buttonrecord_list *, const char *);
 extern void print_doactions             (swf_doaction_list *, const char *);
 extern void print_imageguts             (swf_imageguts *, const char *);

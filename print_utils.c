@@ -14,6 +14,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
+ *
+ * $Log: print_utils.c,v $
+ * Revision 1.6  2001/06/22 17:16:51  muttley
+ * Fixed get_textrecords and get_textrecord and associated destructors and printers
+ *
  */
 
 #include "print_utils.h"
@@ -125,9 +130,74 @@ print_button2actions (swf_button2action_list * actions,const char * str)
 
 
 void
-print_textrecords (swf_textrecord_list * records,const char * str)
+print_textrecord (swf_textrecord * node, const char * str)
 {
-    //todo simon
+
+    int g;
+
+    printf("\n%s\tflags: 0x%02x\n", str, node->flags);
+
+    if (node->flags & isTextControl)
+    {
+        if (node->flags & textHasFont)
+        {
+            printf("%s\tfontId: %ld\n", str, node->font_id);
+        }
+
+        if (node->flags & textHasColour)
+        {
+            printf("%s\tfontColour: %06lx\n", str, node->colour);
+        }
+
+        if (node->flags & textHasXOffset)
+        {
+
+            printf("%s\tX-offset: %d\n", str, node->xoffset);
+        }
+        if (node->flags & textHasYOffset)
+        {
+            printf("%s\tY-offset: %d\n", str, node->yoffset);
+        }
+        if (node->flags & textHasFont)
+        {
+
+            printf("%s\tFont Height: %d\n", str, node->font_height);
+        }
+    }
+    else
+    {
+
+        printf("%s\tnumber of glyphs: %d\n", str, node->glyph_count);
+
+
+        printf("%s\t", str);
+
+        for (g = 0; g < node->glyph_count; g++)
+        {
+            printf("[%d,%d] ", node->glyphs[g][0], node->glyphs[g][1]);
+        }
+
+        printf("\n");
+    }
+
+
+
+}
+
+void
+print_textrecords (swf_textrecord * node, const char * str)
+{
+    swf_textrecord * tmp;
+
+
+    while (node != NULL)
+    {
+
+        tmp = node;
+        node = node->next;
+        print_textrecord (tmp, str);
+    }
+
     return;
 }
 

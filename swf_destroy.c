@@ -14,8 +14,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
+ *
+ * $Log: swf_destroy.c,v $
+ * Revision 1.8  2001/06/22 17:16:51  muttley
+ * Fixed get_textrecords and get_textrecord and associated destructors and printers
+ *
  */
-
 #include "swf_destroy.h"
 #include <stdlib.h>
 
@@ -47,7 +51,7 @@ swf_destroy_parser (swf_parser * context)
  *
  * I think what is needed here is for the ith line/fillstyle
  * to be free'd (with a check to make sure it points at something)
- * 
+ *
  * There's no need to keep track of how many we've actually allocated
  * (for the case where we crash out halfway through) as we're
  * using calloc for memory allocation, so test-for-NULL will do
@@ -55,7 +59,7 @@ swf_destroy_parser (swf_parser * context)
  */
 
 void
-swf_destroy_shapestyle (swf_shapestyle * style) 
+swf_destroy_shapestyle (swf_shapestyle * style)
 {
     int i;
 
@@ -80,7 +84,7 @@ swf_destroy_shapestyle (swf_shapestyle * style)
 }
 
 void
-swf_destroy_fillstyle (swf_fillstyle * style) 
+swf_destroy_fillstyle (swf_fillstyle * style)
 {
     int i;
 
@@ -115,7 +119,7 @@ swf_destroy_defineshape (swf_defineshape * shape)
 }
 
 void
-swf_destroy_shaperecord_list (swf_shaperecord_list * list) 
+swf_destroy_shaperecord_list (swf_shaperecord_list * list)
 {
     int i = 0;
 
@@ -135,7 +139,7 @@ swf_destroy_shaperecord_list (swf_shaperecord_list * list)
 }
 
 void
-swf_destroy_definemorphshape (swf_definemorphshape * shape) 
+swf_destroy_definemorphshape (swf_definemorphshape * shape)
 {
     int i, j;
 
@@ -155,7 +159,7 @@ swf_destroy_definemorphshape (swf_definemorphshape * shape)
 	    }
 	    free (shape->fills[i]->colours);
     }
-    
+
     free (shape->fills);
 
     for (i=0; i<shape->nlines; i++) {
@@ -204,7 +208,7 @@ swf_destroy_header (swf_header * header)
         return;
     }
     swf_destroy_rect (header->bounds);
-    
+
     free (header);
 
     return;
@@ -406,20 +410,17 @@ swf_destroy_textrecord (swf_textrecord * record)
 }
 
 void
-swf_destroy_textrecord_list (swf_textrecord_list * list)
+swf_destroy_textrecord_list (swf_textrecord * node)
 {
-    int i=0;
+    swf_textrecord * tmp;
 
-    if (list==NULL) {
-        free (list);
-        return;
-    }
 
-    for (i=0; i<list->record_count; i++) {
-        swf_destroy_textrecord(list->records[i]);
+    while (node != NULL)
+    {
+        tmp = node;
+        node = node->next;
+        free (tmp);
     }
-    free (list->records);
-    free (list);
 
     return;
 }
@@ -458,7 +459,7 @@ swf_destroy_buttonrecord_list (swf_buttonrecord_list * list)
     free (list->records);
 
     free (list);
-	
+
     return;
 }
 
@@ -469,7 +470,7 @@ swf_destroy_doaction (swf_doaction * action)
         return;
     }
     free (action);
-	
+
     return;
 }
 
@@ -488,7 +489,7 @@ swf_destroy_doaction_list (swf_doaction_list * list)
     free (list->actions);
 
     free (list);
-    
+
     return;
 }
 
@@ -498,7 +499,7 @@ swf_destroy_shaperecord (swf_shaperecord * record)
     if (record==NULL) {
         return;
     }
-    
+
     swf_destroy_shapestyle (record->shapestyle);
     free (record);
 
