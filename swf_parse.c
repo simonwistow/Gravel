@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.36  2001/07/14 23:03:18  clampr
+ * avoid a calloc(0)
+ *
  * Revision 1.35  2001/07/14 22:14:09  clampr
  * avoid calloc(0)
  *
@@ -2051,11 +2054,13 @@ swf_parse_definemorphshape (swf_parser * context, int * error)
         shape->nfills = swf_parse_get_word(context);
     }
 
-    if ((shape->fills = (swf_fillstyle2 **) calloc (shape->nfills, sizeof (swf_linestyle2 *))) == NULL)
-    {
-        *error = SWF_EMallocFailure;
-        goto FAIL;
-    }
+	if (shape->nfills) {
+		if ((shape->fills = (swf_fillstyle2 **) calloc (shape->nfills, sizeof (swf_linestyle2 *))) == NULL)
+		{
+			*error = SWF_EMallocFailure;
+			goto FAIL;
+		}
+	}
 
     for (i = 0; i < shape->nfills; i++ )
     {
