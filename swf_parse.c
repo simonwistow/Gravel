@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.22  2001/07/13 00:32:31  clampr
+ * juggle to avoid calloc(0, sizeof(SWF_U8))
+ *
  * Revision 1.21  2001/07/09 15:48:54  acme
  * Renamed U32 to SWF_U32 and so on
  *
@@ -1246,16 +1249,16 @@ swf_parse_get_imageguts (swf_parser * context, int * error)
     }
 
 
-    if ((guts->data = (SWF_U8 *) calloc (size, sizeof (SWF_U8))) == NULL) {
-        *error = SWF_EMallocFailure;
-        goto FAIL;
-    }
-
-
     while (swf_parse_tell (context) < context->next_tag_pos) {
         if ((count % SWF_IMAGE_GUTS_BLOCK_SIZE) == 0) {
             size+= SWF_IMAGE_GUTS_BLOCK_SIZE;
-            if ((guts->data = (SWF_U8 *) realloc (guts->data, sizeof(SWF_U8) * size)) == NULL) {
+	    if (guts->data != NULL) {
+		    guts->data = (SWF_U8 *) realloc (guts->data, sizeof(SWF_U8) * size);
+	    }
+	    else {
+		    guts->data = (SWF_U8 *) calloc (size, sizeof(SWF_U8));
+	    }
+	    if (guts->data == NULL) {
                 *error = SWF_EReallocFailure;
                 goto FAIL;
             }
