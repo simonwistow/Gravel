@@ -47,6 +47,7 @@ LIB_OBJECTS=	\
 	tag/namecharacter.o		\
 	tag/placeobject.o		\
 	tag/placeobject2.o		\
+	tag/protect.o			\
 	tag/rect.o			\
 	tag/removeobject.o		\
 	tag/removeobject2.o		\
