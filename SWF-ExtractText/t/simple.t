@@ -7,7 +7,7 @@
 
 use strict;
 use Test;
-BEGIN { plan tests => 2 };
+BEGIN { plan tests => 4 };
 use SWF::ExtractText;
 ok(1); # If we made it this far, we're ok.
 
@@ -16,8 +16,15 @@ ok(1); # If we made it this far, we're ok.
 # Insert your test code below, the Test module is use()ed here so read
 # its man page ( perldoc Test ) for help writing this test script.
 
-ok(1);
-
 my $swf = SWF::ExtractText->new("../swfs/turkstud.swf");
+ok(ref($swf));
 
-ok(1);
+my @strings = $swf->strings;
+my @urls = $swf->urls;
+ok(scalar(@strings), 8);
+ok(scalar(@urls), 0);
+
+#foreach my $s ($swf->strings) { warn "string: $s\n"; }
+#foreach my $u ($swf->urls) { warn "   url: $u\n"; }
+
+

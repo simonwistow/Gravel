@@ -29,12 +29,12 @@ use Cwd qw(cwd abs_path);
 use Inline C => 'DATA',
   VERSION => '0.10',
   NAME => 'SWF::ExtractText',
-  LIBS => '-L' . abs_path(cwd . '/..') . ' -llib_swfextract',
+  LIBS => '-L' . abs_path(cwd . '/..') . ' -lswfextract',
   INC => '-I' . abs_path(cwd . '/..');
 
-use Inline Config =>
-  FORCE_BUILD => 1,
-  CLEAN_AFTER_BUILD => 0;
+#use Inline Config =>
+#  FORCE_BUILD => 1,
+#  CLEAN_AFTER_BUILD => 0;
 
 # Preloaded methods go here.
 
@@ -51,12 +51,9 @@ SWF::ExtractText - Extract text and URLs from SWF files
 =head1 DESCRIPTION
 
 This module extracts the strings and URLs from a SWF flash file. It
-uses the lib_swfextract library from the gravel libswfparse project
-(available from http://sourceforge.net/projects/gravel/).
-
-=head1 BUGS
-
-It does not quite work yet.
+uses the libswfextract library from the gravel libswfparse project
+(available from http://sourceforge.net/projects/gravel/), which must
+be installed before you can use this library.
 
 =head1 AUTHOR
 
@@ -84,9 +81,7 @@ SV* new(char* class, char* filename) {
   swf_extractor* swf;
   int error = SWF_ENoError;
 
-  printf("Loading %s...\n", filename);
   swf = load_swf(filename, &error);
-  printf("Loaded!\n");
 
   sv_setiv(obj, (IV)swf);
   SvREADONLY_on(obj);
@@ -111,7 +106,6 @@ void strings(SV * obj) {
   strings = get_strings(swf);
 
   for (i = 0; i < num; i++) {
-    printf("  string: %s\n", strings[i]);
     Inline_Stack_Push(newSVpv(strings[i], PL_na));
   }
 
@@ -131,7 +125,6 @@ void urls(SV * obj) {
   urls = get_urls(swf);
 
   for (i = 0; i < num; i++) {
-    printf("  url: %s\n", urls[i]);
     Inline_Stack_Push(newSVpv(urls[i], PL_na));
   }
 
