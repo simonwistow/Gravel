@@ -7,23 +7,53 @@ LIBTOOL = ./libtool
 INSTALL = ./install-sh
 
 #flags
-CFLAGS =  -Wall -Wwrite-strings -Wmissing-prototypes  -O3 -pipe 
+CFLAGS =  -Wall -Wwrite-strings -Wmissing-prototypes -O3 -pipe 
 DEBUG = -DDEBUG -g
 LIBS= 
 
 #other stuff
-LIB_OBJECTS=swf_parse.o swf_destroy.o swf_error.o swf_tags.o \
-	tag/cxform.o		tag/definebits.o	tag/definebitsjpeg2.o	tag/definebitsjpeg3.o 	\
-	tag/definebitslossless.o			tag/definebitslossless2.o			\
-	tag/definebutton.o	tag/definebutton2.o	tag/definebuttoncxform.o			\
-	tag/definebuttonsound.o	tag/defineedittext.o	tag/definefont.o	tag/definefont2.o	\
-	tag/definefontinfo.o	tag/definemorphshape.o	tag/defineshape.o	tag/definesound.o	\
-	tag/definetext.o	tag/definetext2.o	tag/doaction.o		tag/framelabel.o	\
-	tag/freecharacter.o	tag/imageguts.o		tag/jpegtables.o	tag/matrix.o		\
-	tag/namecharacter.o	tag/placeobject.o	tag/placeobject2.o	tag/rect.o		\
-	tag/removeobject.o	tag/removeobject2.o	tag/setbackgroundcolour.o			\
-	tag/soundstreamblock.o	tag/soundstreamhead.o	tag/soundstreamhead2.o	\
-	tag/startsound.o	tag/textrecord.o \
+LIB_OBJECTS=	\
+	swf_parse.o 			\
+	swf_destroy.o 			\
+	swf_error.o 			\
+	swf_tags.o 			\
+	tag/cxform.o			\
+	tag/definebits.o		\
+	tag/definebitsjpeg2.o		\
+	tag/definebitsjpeg3.o 		\
+	tag/definebitslossless.o	\
+	tag/definebitslossless2.o	\
+	tag/definebutton.o		\
+	tag/definebutton2.o		\
+	tag/definebuttoncxform.o	\
+	tag/definebuttonsound.o		\
+	tag/defineedittext.o		\
+	tag/definefont.o		\
+	tag/definefont2.o		\
+	tag/definefontinfo.o		\
+	tag/definemorphshape.o		\
+	tag/defineshape.o		\
+	tag/definesound.o		\
+	tag/definetext.o		\
+	tag/definetext2.o		\
+	tag/doaction.o			\
+	tag/framelabel.o		\
+	tag/freecharacter.o		\
+	tag/imageguts.o			\
+	tag/jpegtables.o		\
+	tag/matrix.o			\
+	tag/namecharacter.o		\
+	tag/placeobject.o		\
+	tag/placeobject2.o		\
+	tag/rect.o			\
+	tag/removeobject.o		\
+	tag/removeobject2.o		\
+	tag/setbackgroundcolour.o	\
+	tag/soundstreamblock.o		\
+	tag/soundstreamhead.o		\
+	tag/soundstreamhead2.o		\
+	tag/startsound.o		\
+	tag/textrecord.o 		\
 	type/shapestyle.o
 
 DLIB_OBJECTS=$(LIB_OBJECTS:.o=.lo)
@@ -129,8 +159,7 @@ tag_handy.h:		swf_types.h	swf_parse.h	swf_destroy.h
 tag/*.*o:		tag_handy.h
 swf_destroy.*o:		swf_destroy.h
 swf_error.*o: 				swf_error.h
-swf_parse.*o:		swf_destroy.h	swf_error.h	swf_parse.h						
-
+swf_parse.*o:		swf_destroy.h	swf_error.h	swf_parse.h
 print_utils.*o:								print_utils.h
 parser.*o:		swf_destroy.h 			swf_parse.h	print_utils.h
 
