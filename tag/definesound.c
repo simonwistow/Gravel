@@ -87,6 +87,179 @@ swf_destroy_definesound (swf_definesound * sound)
 
 
 
+/* MPEG tables */
+const int swf_MPEG_VerTab[4]={2,3,1,0};
+const int swf_MPEG_FreqTab[4]={44100,48000,32000};
+const int swf_MPEG_RateTab[2][3][16]=
+{
+	{
+		{  0, 32, 64, 96,128,160,192,224,256,288,320,352,384,416,448,  0},
+		{  0, 32, 48, 56, 64, 80, 96,112,128,160,192,224,256,320,384,  0},
+		{  0, 32, 40, 48, 56, 64, 80, 96,112,128,160,192,224,256,320,  0},
+	},
+	{
+		{  0, 32, 48, 56, 64, 80, 96,112,128,144,160,176,192,224,256,  0},
+		{  0,  8, 16, 24, 32, 40, 48, 56, 64, 80, 96,112,128,144,160,  0},
+		{  0,  8, 16, 24, 32, 40, 48, 56, 64, 80, 96,112,128,144,160,  0},
+	},
+};
+//todo : since these are exported do they need to be declared final?
+const char * swf_MPEG_Ver[4] = {"1","2","2.5","3?"};
+
+
+
+swf_mp3header_list *
+swf_parse_get_mp3headers (swf_parser * context, int * error, int samples_per_frame)
+{
+
+    int frame_count = 0;
+    int header_store_size  = 0;
+    swf_mp3header_list * header_list;
+    SWF_U8 hdr[4];
+    int i;
+
+
+    if ((header_list = (swf_mp3header_list *) calloc (1, sizeof (swf_mp3header_list))) == NULL) {
+        *error = SWF_EMallocFailure;
+        return NULL;
+    }
+
+    if (samples_per_frame > 0)
+    {
+        while (TRUE)
+        {
+            if (header_store_size==frame_count)
+            {
+                header_store_size += 10;
+                if (header_list->headers) {
+					header_list->headers = (swf_mp3header **) realloc (header_list->headers, sizeof(swf_mp3header *) * header_store_size);
+				}
+				else {
+					header_list->headers = (swf_mp3header **) calloc (header_store_size, sizeof(swf_mp3header *));
+				}
+                if (!header_list->headers) {
+                    *error = SWF_EMallocFailure;
+                    goto FAIL;
+                }
+            }
+			
+            header_list->headers[frame_count] = NULL;
+            if ((header_list->headers[frame_count] = (swf_mp3header *) calloc (1, sizeof(swf_mp3header))) == NULL)
+            {
+                *error = SWF_EMallocFailure;
+                goto FAIL;
+            }
+
+            /* Get the MP3 frame header */
+            for (i=0; i<4; i++) {
+                hdr[i] = swf_parse_get_byte (context);
+            }
+
+            /* Decode the MP3 frame header */
+            header_list->headers[frame_count]->ver     = swf_MPEG_VerTab[((hdr[1] >> 3) & 3)];
+            header_list->headers[frame_count]->layer   = 3 - ((hdr[1] >> 1) & 3);
+            header_list->headers[frame_count]->pad     = (hdr[2] >>1 ) & 1;
+            header_list->headers[frame_count]->stereo  = ((hdr[3] >> 6) & 3) != 3;
+            header_list->headers[frame_count]->freq    = 0;
+            header_list->headers[frame_count]->rate    = 0;
+
+            if (hdr[0] != 0xFF || hdr[1] < 0xE0 || header_list->headers[frame_count]->ver==3 || header_list->headers[frame_count]->layer != 2)
+            {
+                *error = SWF_EInvalidMP3Header;
+                goto FAIL;
+            }
+            else
+            {
+                header_list->headers[frame_count]->freq = swf_MPEG_FreqTab[(hdr[2] >>2 ) & 3] >> header_list->headers[frame_count]->ver;
+                header_list->headers[frame_count]->rate = swf_MPEG_RateTab[header_list->headers[frame_count]->ver ? 1 : 0][header_list->headers[frame_count]->layer][(hdr[2] >> 4) & 15] * 1000;
+
+                if (!header_list->headers[frame_count]->freq || !header_list->headers[frame_count]->rate)
+                {
+                    *error = SWF_EInvalidMP3Frame;
+                    goto FAIL;
+                }
+            }
+
+            /* Get the size of a decoded MP3 frame */
+            header_list->headers[frame_count]->decoded_frame_size = (576 * (header_list->headers[frame_count]->stereo + 1));
+            if (!header_list->headers[frame_count]->ver) {
+                header_list->headers[frame_count]->decoded_frame_size  *= 2;
+            }
+
+            /* Get the size of this encoded MP3 frame */
+            header_list->headers[frame_count]->encoded_frame_size  = ((header_list->headers[frame_count]->ver ? 72 : 144) * header_list->headers[frame_count]->rate) / header_list->headers[frame_count]->freq + header_list->headers[frame_count]->pad - 4;
+
+            /* Decode the MP3 frame */
+            header_list->headers[frame_count]->data = swf_parse_get_bytes(context, header_list->headers[frame_count]->encoded_frame_size);
+
+            /* Move to the next frame */
+            if (swf_parse_tell (context) >= context->tagend) {
+                break;
+            }
+            frame_count++;
+
+        }
+    }
+
+    header_list->header_count = ++frame_count;
+    return header_list;
+
+ FAIL:
+    swf_destroy_mp3header_list (header_list);
+    return NULL;
+}
+
+void
+swf_destroy_mp3header (swf_mp3header * header)
+{
+    if (header==NULL) {
+        return;
+    }
+    swf_free (header->data);
+    swf_free (header);
+
+    return;
+}
+
+
+swf_adpcm *
+swf_parse_adpcm_decompress (swf_parser * context, int * error, int count, int stereo_mono, int size, int nsamples)
+{
+    // todo Simon
+    return NULL;
+}
+
+
+void
+swf_destroy_adpcm (swf_adpcm * adpcm)
+{
+    if (adpcm==NULL) {
+        return;
+    }
+    swf_free (adpcm);
+    return;
+}
+
+
+void
+swf_destroy_mp3header_list (swf_mp3header_list * list)
+{
+    int i=0;
+
+    if (list==NULL) {
+        return;
+    }
+
+    for (i=0; i<list->header_count; i++) {
+        swf_destroy_mp3header(list->headers[i]);
+    }
+    swf_free (list->headers);
+    swf_free (list);
+
+    return;
+}
+
+
 /* 
 Local Variables:
 mode: C

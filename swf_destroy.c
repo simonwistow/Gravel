@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_destroy.c,v $
+ * Revision 1.26  2001/07/15 15:12:53  clampr
+ * move the mp3 stuff to definesound
+ *
  * Revision 1.25  2001/07/15 14:09:46  clampr
  * slice swf_parse.c and swf_destroy.c into tag/*.c files
  *
@@ -299,45 +302,6 @@ swf_destroy_kerningpair (swf_kerningpair * pair)
     return;
 }
 
-void
-swf_destroy_adpcm (swf_adpcm * adpcm)
-{
-    if (adpcm==NULL) {
-        return;
-    }
-    swf_free (adpcm);
-    return;
-}
-
-void
-swf_destroy_mp3header (swf_mp3header * header)
-{
-    if (header==NULL) {
-        return;
-    }
-    swf_free (header->data);
-    swf_free (header);
-
-    return;
-}
-
-void
-swf_destroy_mp3header_list (swf_mp3header_list * list)
-{
-    int i=0;
-
-    if (list==NULL) {
-        return;
-    }
-
-    for (i=0; i<list->header_count; i++) {
-        swf_destroy_mp3header(list->headers[i]);
-    }
-    swf_free (list->headers);
-    swf_free (list);
-
-    return;
-}
 
 
 void
