@@ -16,6 +16,10 @@
  *
  *
  * $Log: swf_destroy.c,v $
+ * Revision 1.19  2001/07/13 00:57:48  clampr
+ * fixed a memory leak in swf_parser->font_chars deallocation
+ * documented a magic number that needs slaying
+ *
  * Revision 1.18  2001/07/13 00:42:16  clampr
  * more leak plugginng
  *
@@ -77,7 +81,8 @@ swf_destroy_parser (swf_parser * context)
     if (context->name)   free(context->name);
     if (context->header) free(context->header);
 
-    for (i=0; i<context->number_of_fonts; i++) {
+    /* todo: fix this magic number */
+    for (i=0; i<256; i++) {
 	  if (context->font_chars[i]) free (context->font_chars[i]);
     }
     if (context->font_chars) free(context->font_chars);

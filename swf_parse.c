@@ -16,6 +16,10 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.23  2001/07/13 00:57:48  clampr
+ * fixed a memory leak in swf_parser->font_chars deallocation
+ * documented a magic number that needs slaying
+ *
  * Revision 1.22  2001/07/13 00:32:31  clampr
  * juggle to avoid calloc(0, sizeof(SWF_U8))
  *
@@ -110,7 +114,7 @@ swf_parse_create (char * name, int * error)
       context->headers_parsed = 0;
       context->frame  = 0;
 
-
+      /* todo: fix this magic number */
       if ((context->font_chars = (char **) calloc (256, sizeof (char *))) == NULL)
       {
 	    *error = SWF_EMallocFailure;
