@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.28  2001/07/13 14:47:34  clampr
+ * malloc the right type
+ *
  * Revision 1.27  2001/07/13 14:35:18  muttley
  * Fix bug in parsing button2actions
  *
@@ -1782,7 +1785,7 @@ swf_parse_definefont2 (swf_parser * context, int * error)
     SWF_U32 code_offset;
     SWF_U32 * offset_table;
 
-    if ((font = (swf_definefont2 *) calloc (1, sizeof (swf_definefont))) == NULL) {
+    if ((font = (swf_definefont2 *) calloc (1, sizeof (swf_definefont2))) == NULL) {
         *error = SWF_EMallocFailure;
     	return NULL;
     }
