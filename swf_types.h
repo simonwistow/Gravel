@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.21  2001/07/13 13:46:47  clampr
+ * use  swf_memory.h not swf_sizes.h
+ *
  * Revision 1.20  2001/07/13 13:26:55  muttley
  * Added handling for button2actions.
  * We should be able to parse all URLs now
@@ -256,17 +259,14 @@ typedef unsigned char SWF_U8, *P_U8, **PP_U8;
 typedef signed char SWF_S8, *P_S8, **PP_S8;
 */
 
-
 /*
  * Hmm, this trhwos up lots of warnings so revoke to having
  * everything
  */
-#include "swf_sizes.h"
+#include "swf_memory.h"
 
 typedef signed long SFIXED, *P_SFIXED;
 typedef signed long SCOORD, *P_SCOORD;
-
-
 
 
 typedef struct swf_parser swf_parser;

@@ -78,6 +78,6 @@ AC_SUBST(SWF_S32)
 
 dnl What to do with all this information
 
-AC_CONFIG_FILES([Makefile swf_sizes.h])
+AC_CONFIG_FILES([Makefile swf_memory.h])
 AC_OUTPUT
 

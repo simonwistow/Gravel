@@ -2,7 +2,7 @@ SWFS
 config.log
 config.cache
 config.status
-swf_sizes.h
+swf_memory.h
 swf_parse
 swf_parse_debug
 swf_parse_ef

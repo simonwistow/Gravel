@@ -7205,7 +7205,7 @@ echo "$as_me: error: No 32 bit type found on this platform!" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
-ac_config_files="$ac_config_files Makefile swf_sizes.h"
+ac_config_files="$ac_config_files Makefile swf_memory.h"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -7503,7 +7503,7 @@ Try \`$0 --help' for more information." >&2;}
 
   # Handling of arguments.
   'Makefile' ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-  'swf_sizes.h' ) CONFIG_FILES="$CONFIG_FILES swf_sizes.h" ;;
+  'swf_memory.h' ) CONFIG_FILES="$CONFIG_FILES swf_memory.h" ;;
 
   # This is an error.
   -*) { { echo "$as_me:7509: error: unrecognized option: $1
