@@ -36,9 +36,6 @@ sub new {
     my $self = {};
     my %conf = @_;
 
-    $self->{_points} = $conf{_points} || [];
-    $self->{_styles} = $conf{_styles} || {};
-
     bless $self => $class;
 
     return $self;

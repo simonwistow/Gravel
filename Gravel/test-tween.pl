@@ -15,12 +15,18 @@ my $m = Gravel::Movie->new();
 my $g = Gravel::Shape->new();
 $g->poly(400, 400, 400, 800, 800, 800, 800, 400, );
 
-my $s = {start => 0, end => 2000, startpos => 1, endpos => 10};
+my $s = {start => 0, end => 10, startx => 0, starty => 0, endx => 1000, endy => 1000};
 my $e = Gravel::Effect::Tween->new($g, $s);
 
 $m->event($e);
 
+$m->make_timeline();
+
+my $a = $m->bake_movie();
+
 print STDERR DumperX $m;
+
+print STDERR DumperX $a;
 
 
 
