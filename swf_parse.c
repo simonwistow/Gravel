@@ -163,7 +163,7 @@ swf_parse_get_byte(swf_parser * context)
  */
 
 SWF_U8 *
-swf_parse_get_bytes (swf_parser * context, int nbytes)
+swf_parse_get_bytes (swf_parser * context, SWF_U32 nbytes)
 {
     SWF_U8 * bytes;
 
@@ -783,6 +783,9 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
 
 /*
  * $Log: swf_parse.c,v $
+ * Revision 1.53  2002/06/26 21:36:45  kitty_goth
+ * More changes. Still some minor oddnesses with writethrough
+ *
  * Revision 1.52  2002/06/20 17:02:16  kitty_goth
  * Coloured fills work properly. Got rid of the SWF_U32 nasty representation
  * of colours.

@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.33 2002/06/20 17:02:15 kitty_goth Exp $	
+ * 	$Id: swf_movie.c,v 1.34 2002/06/26 21:36:45 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -300,7 +300,7 @@ swf_make_finalise(swf_movie * movie, int * error)
   SWF_U32 tmp_32, tmp_size;
   SWF_U16 tmp_16;
   swf_tagrecord *temp, *node;
-  int i;
+  int i ;
 
   /* allocate a tag buffer */
   if ((file_buf = (SWF_U8 *) calloc (1, SWF_OUT_STREAM)) == NULL) {
@@ -379,7 +379,6 @@ swf_make_finalise(swf_movie * movie, int * error)
   /* Next: Walk the LL of tags...  
    * Build a size as we do this...
    */
-  // LL walk...
 
   node = movie->first;
 
@@ -393,16 +392,19 @@ swf_make_finalise(swf_movie * movie, int * error)
 
     tmp_16 = temp->id << 6;
 
-    /* FIXME: We don't handle long tags yet...*/
-    tmp_16 |= (SWF_U16) temp->buffer->size;
+    if (temp->buffer->size >= 0x3f) {
+      tmp_16 |= 0x3f;
+      swf_movie_put_word(movie, error, tmp_16);
+      swf_movie_put_dword(movie, error, (SWF_U32) temp->buffer->size);
+      tmp_size += 6; /* for the tag header */
+    } else {
+      tmp_16 |= (SWF_U16) temp->buffer->size;
+      swf_movie_put_word(movie, error, tmp_16);
+      tmp_size += 2; /* for the tag header */
+    }
 
-    swf_movie_put_word(movie, error, tmp_16);
-    tmp_size += 2; /* for the tag header */
-
-    /* FIXME: We don't handle tags with content yet... */
     swf_movie_put_bytes(movie, error, temp->buffer->size, temp->buffer->raw);
     tmp_size += temp->buffer->size;
-
   }
 
   printf("File size is: %"pSWF_U16"\n", tmp_size);
