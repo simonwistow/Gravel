@@ -16,6 +16,9 @@
  *
  *
  * $Log: lib_swfextract.c,v $
+ * Revision 1.3  2001/07/12 20:33:05  clampr
+ * tweak around so we don't realloc NULL pointers - some reallocs *really* don't like that
+ *
  * Revision 1.2  2001/07/09 13:51:37  muttley
  * fixed minor bug in text_extract and lib_swfextract where it would try
  * and print out strings instead of urls :(
@@ -63,9 +66,9 @@ load_swf (char * file, int * error)
     /* and set everything to null */
     swf->parser      = NULL;
     swf->num_strings = 0;
-    swf->strings     = NULL;
+    swf->strings     = malloc(0);
     swf->num_urls    = 0;
-    swf->urls        = NULL;
+    swf->urls        = malloc(0);
 
 
     #ifdef DEBUG
@@ -104,12 +107,13 @@ load_swf (char * file, int * error)
     #ifdef DEBUG
     fprintf (stderr, "[load_swf : success! destroying parser]\n");
     #endif
+
     /* everything's gone OK! */
     /* so we kill the parser since we don't need it any more */
     swf_destroy_parser(swf->parser);
     /* and set it to NULL to prevent free-ing errors later */
     swf->parser = NULL;
-
+    
     #ifdef DEBUG
     fprintf (stderr, "[load_swf : number of strings is %d]\n",swf->num_strings);
     for (i=0; i<swf->num_strings; i++)
@@ -117,18 +121,15 @@ load_swf (char * file, int * error)
         fprintf (stderr, "[load_swf : string %d = '%s']\n", i, (swf->strings)[i]);
     }
 
-    fprintf (stderr, "\n\n[load_swf : number of urls is %d]\n",swf->num_urls);
+    fprintf (stderr, "\n[load_swf : number of urls is %d]\n",swf->num_urls);
     for (i=0; i<swf->num_urls; i++)
     {
         fprintf (stderr, "[load_swf : url %d = '%s']\n", i, (swf->urls)[i]);
     }
 
-    #endif
-
-
-    #ifdef DEBUG
     fprintf (stderr, "[load_swf : returning]\n");
     #endif
+
     return swf;
 
 
@@ -237,47 +238,51 @@ get_text (swf_extractor * swf, int * error)
         #endif
 
 
-        switch (next_id)
-        {
-
-            case tagDoAction:
+        switch (next_id) 
+	{
+	case tagDoAction:
                 parse_doaction (swf, error);
                 break;
 
-		    case tagDefineEditText:
-	            parse_defineedittext (swf, error);
-	            break;
-
-            case tagDefineText:
+	case tagDefineEditText:
+		parse_defineedittext (swf, error);
+		break;
+		
+	case tagDefineText:
                 parse_definetext (swf, error);
                 break;
 
-		    case tagDefineText2:
-                parse_definetext2 (swf, error);
+	case tagDefineText2:
+		parse_definetext2 (swf, error);
                 break;
 
-		    case tagDefineButton:
-        	    parse_definebutton (swf, error);
+	case tagDefineButton:
+		parse_definebutton (swf, error);
             	break;
 
-		    case tagDefineButton2:
+	case tagDefineButton2:
             	parse_definebutton2 (swf, error);
             	break;
 
-		    case tagDefineFont:
-	            parse_definefont (swf, error);
-	            break;
+	case tagDefineFont:
+		parse_definefont (swf, error);
+		break;
 
-        	case tagDefineFont2:
-	            parse_definefont2 (swf, error);
-	            break;
+	case tagDefineFont2:
+		parse_definefont2 (swf, error);
+		break;
 
-		    case tagDefineFontInfo:
-	            parse_definefontinfo (swf, error);
-	            break;
-
-
+	case tagDefineFontInfo:
+		parse_definefontinfo (swf, error);
+		break;
         }
+
+        /* if there's been an error, bug out */
+        if (error != SWF_ENoError)
+        {
+	        return;
+        }
+
     }
     while (next_id != 0);
 
@@ -428,11 +433,17 @@ parse_definetext (swf_extractor * swf, int * error)
     }
 
 
-
+    #ifdef DEBUG
+    fprintf (stderr, "[parse_definetext: text record is '%s']\n", string);
+    #endif
     free (string);
+
     FAIL:
     swf_destroy_definetext (text);
 
+    #ifdef DEBUG
+    fprintf (stderr, "[parse_definetext : have destroyed definetext]\n");
+    #endif
 
 
 }
