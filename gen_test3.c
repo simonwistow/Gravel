@@ -147,7 +147,12 @@ int main (int argc, char *argv[]) {
     matrix->tx = 300 * 20;
     matrix->ty = 150 * 20;
 
-    swf_add_placeobject(movie, &error, obj_id, matrix);
+    mycx->rb = 0;
+    mycx->gb = 0;
+    mycx->bb = 20;
+
+    //    swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, NULL);
+    swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, mycx);
     swf_add_showframe(movie, &error);
 
     swf_add_removeobject(movie, &error, obj_id);
@@ -158,9 +163,10 @@ int main (int argc, char *argv[]) {
 
     mycx->rb = 0;
     mycx->gb = 0;
-    mycx->bb = 1;
+    mycx->bb = 40;
 
-    swf_add_placeobject_with_cxform(movie, &error, obj_id, matrix, mycx);
+    //swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, NULL);
+    swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, mycx);
     swf_add_showframe(movie, &error);
 
     swf_add_removeobject(movie, &error, obj_id);
@@ -171,9 +177,10 @@ int main (int argc, char *argv[]) {
 
     mycx->rb = 0;
     mycx->gb = 0;
-    mycx->bb = 1;
+    mycx->bb = 60;
 
-    swf_add_placeobject_with_cxform(movie, &error, obj_id, matrix, mycx);
+    //swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, NULL);
+    swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, mycx);
     swf_add_showframe(movie, &error);
 
     swf_add_removeobject(movie, &error, obj_id);
@@ -184,9 +191,10 @@ int main (int argc, char *argv[]) {
 
     mycx->rb = 0;
     mycx->gb = 0;
-    mycx->bb = 1;
+    mycx->bb = 80;
 
-    swf_add_placeobject_with_cxform(movie, &error, obj_id, matrix, mycx);
+    //swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, NULL);
+    swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, mycx);
     swf_add_showframe(movie, &error);
 
     swf_add_removeobject(movie, &error, obj_id);
@@ -197,9 +205,10 @@ int main (int argc, char *argv[]) {
 
     mycx->rb = 0;
     mycx->gb = 0;
-    mycx->bb = 1;
+    mycx->bb = 100;
 
-    swf_add_placeobject_with_cxform(movie, &error, obj_id, matrix, mycx);
+    //swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, NULL);
+    swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, mycx);
     swf_add_showframe(movie, &error);
 
     swf_add_removeobject(movie, &error, obj_id);
@@ -210,9 +219,10 @@ int main (int argc, char *argv[]) {
 
     mycx->rb = 0;
     mycx->gb = 0;
-    mycx->bb = 1;
+    mycx->bb = 120;
 
-    swf_add_placeobject_with_cxform(movie, &error, obj_id, matrix, mycx);
+    //swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, NULL);
+    swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, mycx);
     swf_add_showframe(movie, &error);
 
     swf_add_removeobject(movie, &error, obj_id);
@@ -223,9 +233,10 @@ int main (int argc, char *argv[]) {
 
     mycx->rb = 0;
     mycx->gb = 0;
-    mycx->bb = 1;
+    mycx->bb = 140;
 
-    swf_add_placeobject_with_cxform(movie, &error, obj_id, matrix, mycx);
+    //swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, NULL);
+    swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, mycx);
     swf_add_showframe(movie, &error);
 
     swf_add_removeobject(movie, &error, obj_id);
@@ -236,9 +247,10 @@ int main (int argc, char *argv[]) {
 
     mycx->rb = 0;
     mycx->gb = 0;
-    mycx->bb = 1;
+    mycx->bb = 160;
 
-    swf_add_placeobject_with_cxform(movie, &error, obj_id, matrix, mycx);
+    //swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, NULL);
+    swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, mycx);
     swf_add_showframe(movie, &error);
 
 

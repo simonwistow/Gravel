@@ -16,6 +16,7 @@
  */
 
 #include "tag_handy.h"
+#define MAX_PLACE2_SIZE 64
 /*
  * This is very similar to swf_parse_placeobject, except that this more
  * complicated type includes ratio, clipdepth, a name and some
@@ -84,12 +85,15 @@ swf_parse_placeobject2 (swf_parser * context, int * error)
 }
 
 
-
+/* We also need 'name' and 'ratio' attributes */
 void
 swf_add_placeobject2_with_cxform (swf_movie * movie, int * error, SWF_U16 char_id, swf_matrix * mym, swf_cxform * mycx)
 {
 	swf_tagrecord * temp;
 	SWF_U16 depth;
+	SWF_U8 hasName, hasRatio, hasColour, hasMatrix, hasChar;
+
+	hasName = hasRatio = hasColour = hasMatrix = hasChar = 0;
 
     temp = swf_make_tagrecord(error);
 
@@ -103,21 +107,44 @@ swf_add_placeobject2_with_cxform (swf_movie * movie, int * error, SWF_U16 char_i
     temp->serialised = 0;
 
 /* Place Object2 specifics */
-    if ((temp->buffer->raw = (SWF_U8 *) calloc (MAX_PLACE_SIZE, sizeof (SWF_U8))) == NULL) {
+    if ((temp->buffer->raw = (SWF_U8 *) calloc (MAX_PLACE2_SIZE, sizeof (SWF_U8))) == NULL) {
 		*error = SWF_EMallocFailure;
 		return;
     }
 
+	hasColour = (mycx != NULL);
+	hasMatrix = (mym  != NULL);
+	hasChar   = (char_id != 0);
+
+	printf("hasName = %i hasRatio = %i hasColour = %i hasMatrix = %i hasChar = %i\n", hasName, hasRatio, hasColour, hasMatrix, hasChar);
+
 	depth = 1;
-	
-	swf_buffer_put_word(temp->buffer, error, char_id);
+
+    swf_buffer_initbits(temp->buffer);
+	swf_buffer_put_bits(temp->buffer, 2, 0); /* Undocument bits, assume 0 */
+	swf_buffer_put_bits(temp->buffer, 1, 0); /* hasName, assume 0 for now */
+	swf_buffer_put_bits(temp->buffer, 1, 0); /* hasRatio, assume 0 for now */
+	swf_buffer_put_bits(temp->buffer, 1, hasColour);
+	swf_buffer_put_bits(temp->buffer, 1, hasMatrix);
+	swf_buffer_put_bits(temp->buffer, 1, hasChar);
+	swf_buffer_put_bits(temp->buffer, 1, 0); /* hasMove, assume 0 for now */
+    swf_buffer_flush_bits(temp->buffer);
+
 	swf_buffer_put_word(temp->buffer, error, depth);
-    temp->buffer->size = 4;
-
-	swf_serialise_matrix(temp->buffer, error, mym);
-
-	if (mycx != NULL) {
+	if (hasChar) {
+		swf_buffer_put_word(temp->buffer, error, char_id);
+	}
+	if (hasMatrix) {
+		swf_serialise_matrix(temp->buffer, error, mym);
+	}
+	if (hasColour) {
 		swf_serialise_cxform(temp->buffer, error, mycx);
+	}
+	if (hasRatio) {
+		/* Not yet */
+	}
+	if (hasName) {
+		/* Not yet */
 	}
 
     temp->serialised = 1;

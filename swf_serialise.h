@@ -9,3 +9,4 @@ extern void swf_add_placeobject (swf_movie * movie, int * error, SWF_U16 char_id
 extern void swf_add_placeobject_with_cxform (swf_movie * movie, int * error, SWF_U16 char_id, swf_matrix * mym, swf_cxform * mycx);
 extern void swf_add_removeobject (swf_movie * movie, int * error, SWF_U16 char_id);
 extern void swf_serialise_cxform (swf_buffer * buffer, int * error, swf_cxform * mycx);
+extern void swf_add_placeobject2_with_cxform (swf_movie * movie, int * error, SWF_U16 char_id, swf_matrix * mym, swf_cxform * mycx);
