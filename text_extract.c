@@ -16,6 +16,9 @@
  *
  *
  * $Log: text_extract.c,v $
+ * Revision 1.5  2001/07/14 02:06:00  clampr
+ * suprious line deltas
+ *
  * Revision 1.4  2001/07/14 00:46:08  clampr
  * file vars
  *
@@ -62,7 +65,6 @@ main (int argc, char *argv[])
         return -1;
     }
 
-
     swf        = load_swf (argv[1], &error);
 
     if (error!=SWF_ENoError)
@@ -71,27 +73,19 @@ main (int argc, char *argv[])
         return error;
     }
 
-
     num_string = get_number_strings (swf);
     num_url    = get_number_urls (swf);
     strings    = get_strings (swf);
     urls       = get_urls (swf);
 
-
     printf ("Number of strings is %d\n", num_string);
-
 
     for (i=0; i<num_string; i++)
     {
 	    printf ("\t ... %s\n",strings[i]);
     }
 
-
     printf ("\n\n");
-
-
-
-
 
     printf ("Number of urls is %d\n", num_url);
     for (i=0; i<num_url; i++)
@@ -99,13 +93,10 @@ main (int argc, char *argv[])
 	    printf ("\t ... %s\n",urls[i]);
     }
 
-
     destroy_swf (swf);
 
     return error;
 }
-
-
 
 /* 
 Local Variables:
