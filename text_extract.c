@@ -16,6 +16,9 @@
  *
  *
  * $Log: text_extract.c,v $
+ * Revision 1.3  2001/07/13 14:35:46  muttley
+ * Check to see if we could actually open the swf for parsing
+ *
  * Revision 1.2  2001/07/09 13:51:37  muttley
  * fixed minor bug in text_extract and lib_swfextract where it would try
  * and print out strings instead of urls :(
@@ -58,6 +61,13 @@ main (int argc, char *argv[])
 
 
     swf        = load_swf (argv[1], &error);
+
+    if (error!=SWF_ENoError)
+    {
+        fprintf (stderr, "Error creating parser : %s\n", swf_error_code_to_string (error));
+        return error;
+    }
+
 
     num_string = get_number_strings (swf);
     num_url    = get_number_urls (swf);
