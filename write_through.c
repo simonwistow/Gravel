@@ -73,8 +73,7 @@ init_parser (void) {
      * just add the ones we actually want...
      */
     for (i=0; i <= SWF_PARSER_MAX_TAG_ID ; i++) {
-      // masked[i] = dummy;
-      masked[i] = extract_tagrecord;
+      masked[i] = (void *) extract_tagrecord;
     }
 
     free(parse);
