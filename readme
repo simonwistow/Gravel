@@ -1,0 +1,65 @@
+INSTRUCTIONS:
+----------------------
+compile using :
+
+make
+
+
+run using :
+% ./swf_parse [filename here]
+
+MANIFEST:
+----------------------
+readme            : this file
+Makefile	  : the makefile for the project
+parser.[ch]       : the test harness, prints out contents of an SWF
+		  : file in a close a manner to the official Macromedia parser.
+swf_parse.[ch]    : the parsing/constructors routines
+swf_destroy.[ch]  : the destructor routines
+swf_error.[ch]    : error codes and code->string routine
+swf_types.h       : the types
+print_utils.[ch]  : utilities for printing our various types
+configure.in      : configure macros
+sizes.h.in        : cope with architecture independant U32 etc
+oldswfparse.cpp   : the official Macromedia code
+gpl.txt           : the Gnu General Public licence
+todo              : stuff left todo
+dos.pl		  : a Perl script which turns DOS into Unix style line
+		  : endings
+
+
+PROBLEMS:
+----------------------
+There are issues, namely ...
+o getting records sucks c.f todo file
+o garbage collection is probably terrible
+o ... this is because I can't program C for toffee and have been learning as I go along. This is why the code is horrible in general.
+o Err, it's not finished
+
+AUTHOR:
+----------------------
+Simon Wistow
+email    : simon@twoshortplanks.com
+homepage : http://www.twoshortplanks.com/simon/,
+           http://www.twoshortplanks.com/flash/
+
+
+
+
+LICENCE:
+----------------------
+Copyright (C) 2001  Simon Wistow <simon@twoshortplanks.com>
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ 
