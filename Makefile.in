@@ -99,7 +99,8 @@ snapshot:
 	rm -rf libswfparse-snapshot-$(DATE)
 
 clean:
-	rm -f *.do *.o *.la *.lo *.tar.gz swf_parse_debug swf_parse text_extract swfparse
+	rm -f *.do *.o *.la *.lo *.tar.gz swf_parse{,_debug,_debauch,_ef,_ktrace} text_extract{,_debug,_debauch,_ef,_ktrace}
+	rm -rf .libs
 
 reallyclean: clean
 	rm -f *~
