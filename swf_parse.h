@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_parse.h,v $
+ * Revision 1.8  2001/06/27 12:42:15  kitty_goth
+ * Debug shaperecord handling --Kitty
+ *
  * Revision 1.7  2001/06/26 13:43:02  muttley
  * Fix text_record and text_record_list parsing
  *
@@ -83,7 +86,7 @@ extern swf_buttonrecord        * swf_parse_get_buttonrecord    (swf_parser * , i
 extern swf_buttonrecord_list   * swf_parse_get_buttonrecords   (swf_parser * , int *, int);
 
 extern swf_shaperecord_list    * swf_parse_get_shaperecords    (swf_parser * , int *);
-extern swf_shaperecord         * swf_parse_get_shaperecord     (swf_parser * , int *, int, int, int, int);
+extern swf_shaperecord         * swf_parse_get_shaperecord     (swf_parser * , int *, int *, int, int, int);
 
 extern swf_doaction_list       * swf_parse_get_doactions       (swf_parser * , int *);
 extern swf_button2action_list  * swf_parse_get_button2actions  (swf_parser * , int *);

@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_destroy.c,v $
+ * Revision 1.10  2001/06/27 12:42:15  kitty_goth
+ * Debug shaperecord handling --Kitty
+ *
  * Revision 1.9  2001/06/26 13:46:54  muttley
  * Changes for new swf_text_records type
  *
@@ -127,6 +130,7 @@ swf_destroy_shaperecord_list (swf_shaperecord_list * list)
         return;
     }
 
+/* FIXME : record_count might not be accurate. check for NULL-ness of list->records[i] */
     for (i=0; i<list->record_count; i++) {
 
         swf_destroy_shaperecord(list->records[i]);
