@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.34  2001/07/14 21:35:02  clampr
+ * swf_parse_definebuttonsound don't free something being returned
+ *
  * Revision 1.33  2001/07/14 00:17:55  clampr
  * added emacs file variables to avoid clashing with existing style (now I know what it is)
  *
@@ -2529,8 +2532,6 @@ swf_parse_definebuttonsound (swf_parser * context, int * error)
 
 
     }
-
-    swf_free (state);
 
     return button;
 
