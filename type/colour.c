@@ -58,6 +58,30 @@ swf_buffer_colour(swf_buffer * buffer, int * error, swf_colour * col, int with_a
 }
 
 
+swf_colour * 
+swf_make_colour(int * error, SWF_U8 red, SWF_U8 green, SWF_U8 blue)
+{
+	swf_colour * col = NULL;
+
+	if (*error) {
+		return NULL;
+	}
+
+	if ((col = (swf_colour *) calloc ( 1, sizeof (swf_colour))) == NULL) {
+		*error = SWF_EMallocFailure;
+		return;
+    }
+
+	col->r = red;
+	col->g = red;
+	col->b = blue;
+	// FIXME: How to handle alphas???
+	col->a = 255;
+
+	return col;
+}
+
+
 
 
 

@@ -57,6 +57,8 @@ void swf_make_header_raw (swf_movie * movie, int * error, swf_rect * rect);
 void swf_make_header (swf_movie * movie, int * error, SCOORD x1, SCOORD x2, SCOORD y1, SCOORD y2);
 
 
+swf_colour * swf_make_colour(int * error, SWF_U8 red, SWF_U8 green, SWF_U8 blue);
+
 void swf_make_finalise(swf_movie * movie, int * error);
 swf_movie * swf_make_movie (int * error);
 void swf_destroy_movie (swf_movie * movie);

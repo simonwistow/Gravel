@@ -1,4 +1,4 @@
-package Gravel::Effect::Tween;
+package Gravel::Effect::Spin;
 
 use strict;
 use warnings;
@@ -35,11 +35,8 @@ sub new {
     $self->{_start} = $conf{start};
     $self->{_end} = $conf{end};
 
-    $self->{_startx} = $conf{startx};
-    $self->{_endx} = $conf{endx};
-
-    $self->{_starty} = $conf{starty};
-    $self->{_endy} = $conf{endy};
+    $self->{_stang} = $conf{start_ang};
+    $self->{_endang} = $conf{end_ang};
 
     return $self;
 }
@@ -53,20 +50,19 @@ sub frames {
 	my $ra_f = [];
 
 	my $numf = $self->{_end} - $self->{_start};
-	my ($x, $y) = ($self->{_startx}, $self->{_starty});
+	my ($theta0, $theta1) = ($self->{_stang}, $self->{_endang});
 
-	my $dx = ( $self->{_endx} - $self->{_startx} ) / $numf;
-	my $dy = ( $self->{_endy} - $self->{_starty} ) / $numf;
+	my $dth = ( $self->{_endang} - $self->{_stang} ) / $numf;
 
 	for (my $i = $self->{_start}; $i < $self->{_end}; ++$i) {
 		my $f = Gravel::Frame->new();
 
+		# This needs much fixing....
 		$f->shape($self->shape);
-		$f->place($x, $y);
+#		$f->place($x, $y);
 
 		$ra_f->[$i] = $f;
-		$x += $dx;
-		$y += $dy;
+
 	}
 
 	return $ra_f;

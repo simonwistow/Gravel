@@ -56,18 +56,18 @@ swf_add_setbackgroundcolour(swf_movie * movie, int * error, SWF_U8 red, SWF_U8 g
     }
 
     if ((col = (swf_setbackgroundcolour *) calloc ( 1, sizeof (swf_setbackgroundcolour))) == NULL) {
-      fprintf(stderr, "alloc fuckup\n");
-      return;
+		*error = SWF_EMallocFailure;
+		return;
     }
 
     if ((col->colour = (swf_colour *) calloc ( 1, sizeof (swf_colour))) == NULL) {
-      fprintf(stderr, "alloc fuckup\n");
-      return;
+		*error = SWF_EMallocFailure;
+		return;
     }
 
     if ((temp->buffer->raw = (SWF_U8 *) calloc ( 4, sizeof (SWF_U8))) == NULL) {
-      fprintf(stderr, "alloc fuckup\n");
-      return;
+		*error = SWF_EMallocFailure;
+		return;
     }
 
     col->colour->r = red;
@@ -89,6 +89,8 @@ swf_add_setbackgroundcolour(swf_movie * movie, int * error, SWF_U8 red, SWF_U8 g
     return;
 }
 
+
+
 void 
 swf_add_setbackgroundcolour_noalpha(swf_movie * movie, int * error, SWF_U8 red, SWF_U8 green, SWF_U8 blue) 
 {
@@ -101,19 +103,19 @@ swf_add_setbackgroundcolour_noalpha(swf_movie * movie, int * error, SWF_U8 red, 
 		return;
     }
 
-    if ((col = (swf_setbackgroundcolour *) calloc ( 1, sizeof (swf_setbackgroundcolour))) == NULL) {
-      fprintf(stderr, "alloc fuckup\n");
-      return;
+    if ((col = (swf_setbackgroundcolour *)calloc (1, sizeof (swf_setbackgroundcolour))) == NULL) {
+		*error = SWF_EMallocFailure;
+		return;
     }
 
-    if ((col->colour = (swf_colour *) calloc ( 1, sizeof (swf_colour))) == NULL) {
-      fprintf(stderr, "alloc fuckup\n");
-      return;
+    if ((col->colour = (swf_colour *)calloc (1, sizeof (swf_colour))) == NULL) {
+		*error = SWF_EMallocFailure;
+		return;
     }
 
-    if ((temp->buffer->raw = (SWF_U8 *) calloc ( 4, sizeof (SWF_U8))) == NULL) {
-      fprintf(stderr, "alloc fuckup\n");
-      return;
+    if ((temp->buffer->raw = (SWF_U8 *)calloc (4, sizeof (SWF_U8))) == NULL) {
+		*error = SWF_EMallocFailure;
+		return;
     }
 
     col->colour->r = red;
@@ -127,6 +129,41 @@ swf_add_setbackgroundcolour_noalpha(swf_movie * movie, int * error, SWF_U8 red, 
     temp->tag = col;
     temp->serialised = 1;
     temp->buffer->size = 3;
+
+    swf_dump_shape(movie, error, temp);
+
+    return;
+}
+
+/* Versions of the above for when we get passed a colour object */
+
+void 
+swf_add_setbgcol(swf_movie * movie, int * error, swf_colour * bgcol) 
+{
+    swf_tagrecord * temp;
+
+    temp = swf_make_tagrecord(error, tagSetBackgroundColour);
+
+    if (*error) {
+		return;
+    }
+
+    if ((temp->buffer->raw = (SWF_U8 *)calloc (4, sizeof (SWF_U8))) == NULL) {
+		*error = SWF_EMallocFailure;
+		return;
+    }
+
+    temp->buffer->raw[0] = bgcol->r;
+	temp->buffer->raw[1] = bgcol->g;
+	temp->buffer->raw[2] = bgcol->b;
+	temp->buffer->raw[3] = bgcol->a;
+
+	/* NOTE: this may cause problems if we ever want to deserialise 
+	 * a serialised shape.
+	 */
+    temp->tag = NULL;
+    temp->serialised = 1;
+    temp->buffer->size = 4;
 
     swf_dump_shape(movie, error, temp);
 

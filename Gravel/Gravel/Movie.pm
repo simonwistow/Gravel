@@ -36,6 +36,7 @@ sub new {
     } else {
 		%conf = @_;
     }
+	$self->{_bgcol} = $conf{bgcol};
 
     $self->{_library} = [];
     $self->{_events} = [];
@@ -246,10 +247,20 @@ void _bake_header(SV* obj, SV* self) {
 void _bake_preamble(SV* obj, SV* self, U32 protect) {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
 	int error = SWF_ENoError;
-	HV* h = (HV *)SvRV(self); 
+	HV*  h = (HV *)SvRV(self); 
+	SV** p_col;
+	swf_colour * col = NULL;
 
-	// FIXME: Get background colour from self
-    swf_add_setbackgroundcolour(m->movie, &error, 0, 255, 255, 255);
+	// FIXME: Need to do with the case of no bgcol better...
+	p_col = hv_fetch(h, "_bgcol", 6, 0);
+
+	if (NULL == p_col) {
+		col = swf_make_colour(&error, 255, 255, 255);
+	} else {
+		col = gravel_parse_colour((char *)(SvPVX(*p_col)));
+	}
+
+    swf_add_setbgcol(m->movie, &error, col);
 	if (SWF_ENoError != error) {
 		fprintf(stderr, "Non-zero error condition 1 detected\n");
 	}
@@ -257,14 +268,18 @@ void _bake_preamble(SV* obj, SV* self, U32 protect) {
 		swf_add_protect(m->movie, &error);
 	}
 
+	/* We have value-copied the contents of col so throw it
+	 * away now.
+	 */
+	swf_free(col);
 }
 
 void _bake_styles(int * error, swf_defineshape * mytag, HV * h_sh) 
 {
 	SV** p_sty;
-	AV* a_sty;
+	AV*  a_sty;
 	SV** ph_sty;
-	HV* h_sty;
+	HV*  h_sty;
 	SV** p_col;
 	SV** p_num;
 	I32  j, num_styles, width;
@@ -344,7 +359,11 @@ void _bake_fills(int * error, swf_defineshape * mytag, HV * h_sh)
 				if (NULL != p_col) {
 					mytag->style->fills[j]->col = gravel_parse_colour((char *)SvPVX(*p_col));
 				}
-			} /* FIXME: Do the other styles */
+			} else if ( (0 == strcmp(fill_type, "solid")) 
+						|| (0 == strcmp(fill_type, "solid")) ) {
+				 /* FIXME: Do the other styles */
+			}
+
 		}			
 	}
 }
@@ -668,12 +687,13 @@ void _bake_place(swf_movie * movie, int * error, HV * h_place) {
 
 	obj_id = 0;
 
+	/* test code */
+
     if ((matrix = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
 		*error = SWF_EMallocFailure;
 		return;
     }
 
-	/* test code */
     matrix->a  = matrix->d  = 512 * 1000;
 	matrix->tx = matrix->ty = 100 * 20;
 

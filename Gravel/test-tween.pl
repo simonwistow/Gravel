@@ -12,6 +12,9 @@ use Gravel::Effect::Tween;
 use Data::Dumper qw/DumperX/;
 
 my $m = Gravel::Movie->new();
+
+print STDERR DumperX $m;
+
 $m->name('foo.swf');
 $m->size(0, 0, 10000, 10000);
 
