@@ -41,6 +41,7 @@ DATE=$(shell date +%Y-%m-%d)
 all: swf_parse text_extract
 
 debug: swf_parse_debug text_extract_debug
+memdebug: debug swf_parse_ef swf_parse_debauch swf_parse_ktrace text_extract_ef text_extract_debauch text_extract_ktrace
 
 libswfparse.la: $(LIB_OBJECTS)
 	$(LIBTOOL) $(CC) $(CFLAGS) -o libswfparse.la $(LIB_OBJECTS) -rpath $(LIB_PATH)
