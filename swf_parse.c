@@ -16,8 +16,8 @@
  *
  *
  * $Log: swf_parse.c,v $
- * Revision 1.9  2001/06/22 17:16:51  muttley
- * Fixed get_textrecords and get_textrecord and associated destructors and printers
+ * Revision 1.10  2001/06/26 13:43:02  muttley
+ * Fix text_record and text_record_list parsing
  *
  */
 
@@ -1242,14 +1242,11 @@ swf_parse_definetext (swf_parser * context, int * error)
 
 
 
-
-
-
     if ((text->records  =  swf_parse_get_textrecords (context, error, FALSE, n_glyph_bits, n_advance_bits)) == NULL) {
             goto FAIL;
     }
 
-    if (0) { goto FAIL; } // remove after bit above is fixed
+
 
     return text;
 
@@ -1293,11 +1290,11 @@ swf_parse_definetext2 (swf_parser * context, int * error)
     n_glyph_bits   = (int)swf_parse_get_byte (context);
     n_advance_bits = (int)swf_parse_get_byte (context);
 
-/*
+
     if ((text->records  =  swf_parse_get_textrecords (context, error, TRUE, n_glyph_bits, n_advance_bits)) == NULL) {
         goto FAIL;
     }
-*/
+
     return text;
 
     FAIL:
@@ -2330,31 +2327,43 @@ swf_parse_get_textrecord (swf_parser * context, int * error, int has_alpha, int 
 
 }
 
-swf_textrecord  *
+swf_textrecord_list  *
 swf_parse_get_textrecords (swf_parser * context, int * error, int has_alpha, int glyph_bits, int advance_bits)
 {
 
-    swf_textrecord * first;
+    swf_textrecord_list * list;
     swf_textrecord * temp;
-    swf_textrecord ** lastp;
 
 
-    first = NULL;
-    lastp = &(first);
+
+    if ((list = (swf_textrecord_list *) calloc (1, sizeof (swf_textrecord_list))) == NULL)
+    {
+        goto FAIL;
+    }
+
+    list->first = NULL;
+    list->lastp = &(list->first);
 
     while (1)
     {
-         if ((temp = swf_parse_get_textrecord(context, error, has_alpha, glyph_bits, advance_bits)) == NULL) { break; }
+         if ((temp = swf_parse_get_textrecord(context, error, has_alpha, glyph_bits, advance_bits)) == NULL)
+         {
+            if (*error!=SWF_ENoError)
+            {
+                goto FAIL;
+            }
+            break;
+        }
 
-         *(lastp) = temp;
-	     lastp = &(temp->next);
+         *(list->lastp) = temp;
+	     list->lastp = &(temp->next);
     }
 
 
-    return first; //todo simon list;
+    return list;
 
     FAIL:
-    swf_destroy_textrecord_list (first);
+    swf_destroy_textrecord_list (list);
     return NULL;
 
 
