@@ -5,6 +5,8 @@ config.status
 swf_sizes.h
 swf_parse
 swf_parse_debug
+swf_parse_ef
+swf_parse_ktrace
 text_extract
 text_extract_debug
 text_extract_ccmalloc

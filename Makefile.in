@@ -53,6 +53,12 @@ text_extract: libswfparse.la $(TEXT_OBJECTS)
 swf_parse_debug: $(D_LIB_OBJECTS) $(D_OBJECTS)
 	$(CC) $(CFLAGS) -I . $(DEBUG) -o swf_parse_debug $(D_LIB_OBJECTS) $(D_OBJECTS)
 
+swf_parse_ef: $(D_LIB_OBJECTS) $(D_OBJECTS)
+	$(CC) $(CFLAGS) -I . $(DEBUG) -o swf_parse_ef $(D_LIB_OBJECTS) $(D_OBJECTS) -lefence
+
+swf_parse_ktrace: $(D_LIB_OBJECTS) $(D_OBJECTS)
+	$(CC) $(CFLAGS) -I . $(DEBUG) -o swf_parse_ktrace $(D_LIB_OBJECTS) $(D_OBJECTS) -lktrace
+
 text_extract_debug: $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS)
 	$(CC) $(CFLAGS) -I . $(DEBUG) -o text_extract_debug $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS)
 
