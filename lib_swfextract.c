@@ -16,6 +16,10 @@
  *
  *
  * $Log: lib_swfextract.c,v $
+ * Revision 1.10  2001/07/14 00:24:33  clampr
+ * add file variables
+ * quell a warning under debug
+ *
  * Revision 1.9  2001/07/13 14:34:37  muttley
  * Fix bug in parsing button2actions
  *
@@ -53,6 +57,7 @@
 #include "lib_swfextract.h"
 #ifdef DEBUG
 #include <stdio.h>
+#include "swf_tags.h"
 #endif
 
 int current_max_strings = 0;
@@ -697,3 +702,12 @@ get_urls (swf_extractor * swf)
 {
     return swf->urls;
 }
+
+
+/* 
+Local Variables:
+mode: C
+c-basic-offset: 4
+tab-width: 4
+End:
+*/
