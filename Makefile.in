@@ -4,7 +4,7 @@
 # external programs
 CC = @CC@
 LIBTOOL = ./libtool
-INSTALL = ./install.sh
+INSTALL = ./install-sh
 
 #flags
 CFLAGS =  -Wall -Wwrite-strings -Wmissing-prototypes  -O3
@@ -67,7 +67,14 @@ text_extract_ktrace: $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS)
 
 
 install: all
-	echo richardc is really slack
+	$(INSTALL) -c swf_types.h   $(INC_PATH)
+	$(INSTALL) -c swf_sizes.h   $(INC_PATH)
+	$(INSTALL) -c swf_parse.h   $(INC_PATH)
+	$(INSTALL) -c swf_error.h   $(INC_PATH)
+	$(INSTALL) -c swf_destroy.h $(INC_PATH)
+	$(LIBTOOL) $(INSTALL) -c libswfparse.la $(LIB_PATH)
+	$(LIBTOOL) $(INSTALL) -c swf_parse $(BIN_PATH)
+	$(LIBTOOL) $(INSTALL) -c text_extract $(BIN_PATH)
 
 snapshot:
 	mkdir libswfparse-snapshot-$(DATE)
