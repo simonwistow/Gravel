@@ -73,8 +73,6 @@ swf_add_matrix (swf_movie * movie, int * error, swf_matrix * mym)
 
     swf_movie_initbits(movie);
 
-	printf("Putting: a = %lu ; c = %lu as bitlength %lu\n", mym->a, mym->c, i);
-
 	/* 'Scale' bits first... */
 	if (mym->a || mym->c) {
 		swf_movie_put_bits(movie, 1, 1);
@@ -93,7 +91,7 @@ swf_add_matrix (swf_movie * movie, int * error, swf_matrix * mym)
 			max = max >> 1;
 		}
 
-		printf("Putting: a = %lu ; c = %lu as bitlength %lu\n", mym->a, mym->c, i);
+		dprintf("Putting: a = %lu ; c = %lu as bitlength %"pSWF_U32"\n", mym->a, mym->c, i);
 
 		swf_movie_put_bits(movie, 5, i);
 		swf_movie_put_sbits(movie, i, mym->a);
@@ -120,7 +118,7 @@ swf_add_matrix (swf_movie * movie, int * error, swf_matrix * mym)
 			max = max >> 1;
 		}
 
-		printf("Putting: b = %lu ; d = %lu as bitlength %lu\n", mym->b, mym->d, i);
+		dprintf("Putting: b = %lu ; d = %lu as bitlength %"pSWF_U32"\n", mym->b, mym->d, i);
 
 		swf_movie_put_bits(movie, 5, i);
 		swf_movie_put_sbits(movie, i, mym->b);
@@ -146,7 +144,7 @@ swf_add_matrix (swf_movie * movie, int * error, swf_matrix * mym)
 		max = max >> 1;
 	}
 
-	printf("Putting: tx = %lu ; ty = %lu as bitlength %lu\n", mym->tx, mym->ty, i);
+	dprintf("Putting: tx = %lu ; ty = %lu as bitlength %"pSWF_U32"\n", mym->tx, mym->ty, i);
 
 	swf_movie_put_bits(movie, 5, i);
 	swf_movie_put_sbits(movie, i, mym->tx);
@@ -167,7 +165,7 @@ swf_serialise_matrix (swf_buffer * buffer, int * error, swf_matrix * mym)
 
     swf_buffer_initbits(buffer);
 
-	printf("a = %lu ; c = %lu ; b = %lu ; d = %lu ; tx = %lu ty = %lu\n", mym->a, mym->c, mym->b, mym->d, mym->tx, mym->ty);
+	dprintf("a = %lu ; c = %lu ; b = %lu ; d = %lu ; tx = %lu ty = %lu\n", mym->a, mym->c, mym->b, mym->d, mym->tx, mym->ty);
 
 	/* 'Scale' bits first... */
 	if (mym->a | mym->c) {
@@ -187,7 +185,7 @@ swf_serialise_matrix (swf_buffer * buffer, int * error, swf_matrix * mym)
 			max = max >> 1;
 		}
 
-		printf("Putting: a = %lu ; c = %lu as bitlength %lu\n", mym->a, mym->c, i);
+		dprintf("Putting: a = %lu ; c = %lu as bitlength %"pSWF_U32"\n", mym->a, mym->c, i);
 		swf_buffer_put_bits(buffer, 5, i);
 		swf_buffer_put_sbits(buffer, i, mym->a);
 		swf_buffer_put_sbits(buffer, i, mym->c);
