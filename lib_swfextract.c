@@ -16,6 +16,9 @@
  *
  *
  * $Log: lib_swfextract.c,v $
+ * Revision 1.20  2001/07/20 01:20:28  clampr
+ * ignore FSCommand: urls (lots in puyopuyo.swf)
+ *
  * Revision 1.19  2001/07/19 23:23:30  clampr
  * last few(?) pointer deference bugs
  *
@@ -365,7 +368,8 @@ examine_doactions (swf_extractor * swf, int * error, swf_doaction_list * list)
 
     while (node != NULL)
     {
-        if (node->code == sactionGetURL)
+		/* take urls that aren't internal FSCommand: calls */
+        if (node->code == sactionGetURL && strncmp("FSCommand:", node->url, 10))
         {
             #ifdef DEBUG
             fprintf (stderr, "[examine_doactions : got a URL '%s']\n", node->url);
