@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.35  2001/07/14 22:14:09  clampr
+ * avoid calloc(0)
+ *
  * Revision 1.34  2001/07/14 21:35:02  clampr
  * swf_parse_definebuttonsound don't free something being returned
  *
@@ -1157,10 +1160,12 @@ swf_parse_startsound (swf_parser * context, int * error)
         if (  sound->code & soundHasEnvelope ) {
             sound->npoints = swf_parse_get_byte (context);
 
-            if ((sound->points = (swf_soundpoint **) calloc (sound->npoints, sizeof (swf_soundpoint *))) == NULL) {
-                *error = SWF_EMallocFailure;
-                goto FAIL;
-            }
+			if (sound->npoints) {
+				if ((sound->points = (swf_soundpoint **) calloc (sound->npoints, sizeof (swf_soundpoint *))) == NULL) {
+					*error = SWF_EMallocFailure;
+					goto FAIL;
+				}
+			}
 
             for (i = 0; i < sound->npoints; i++ ) {
 		sound->points[i] = NULL;
