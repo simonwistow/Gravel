@@ -215,6 +215,10 @@ main (int argc, char *argv[])
     printf("File size \t%"pSWF_U32"\n", header->size);
     printf("Movie width \t%lu\n", (header->bounds->xmax - header->bounds->xmin) / 20);
     printf("Movie height \t%lu\n", (header->bounds->ymax - header->bounds->ymin) / 20);
+    printf("Xmin: \t%lu\n", (header->bounds->xmin / 20));
+    printf("Xmax: \t%lu\n", (header->bounds->xmax / 20));
+    printf("Ymin: \t%lu\n", (header->bounds->ymin / 20));
+    printf("Ymax: \t%lu\n", (header->bounds->ymax / 20));
     printf("Frame rate \t%"pSWF_U32"\n", header->rate);
     printf("Frame count \t%"pSWF_U32"\n", header->count);
 

@@ -364,6 +364,8 @@ void _get_to_start(int * error, swf_defineshape * mytag, HV * h_sh)
 			}
 		}
 	}
+	fprintf(stderr, "rec->x = %i ; rec->y = %i\n", record->x, record->y);
+
 
 	swf_add_shaperecord(mytag->record, error, record);
 	if (SWF_ENoError != *error) {
@@ -518,6 +520,7 @@ void _bake (SV * shape, SV * mov)
 	SV* tag_id;
 	swf_tagrecord * temp;
 	swf_defineshape * mytag;
+	SV* out;
 
 	/* At this point, we have the shape to be turned 
 		into an unserialised defineShape */
@@ -547,8 +550,8 @@ void _bake (SV * shape, SV * mov)
 	}
 	
 	tag_id = newSViv((IV)mytag->tagid);
-	
 	hv_store(h_sh, "_obj_id", 7, tag_id, 0);
+	shape = newRV_inc((SV *) h_sh);
 	
 	_bake_styles(&error, mytag, h_sh);
 	_bake_fills(&error, mytag, h_sh);

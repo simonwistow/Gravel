@@ -26,7 +26,7 @@
 
 #include <stdio.h>
 
-#define NUMFRAMES 60
+#define NUMFRAMES 5
 #define FRAMERATE 15
 
 void usage (char * name);
@@ -86,7 +86,9 @@ int main (int argc, char *argv[]) {
         fprintf (stderr, "Failed to parse headers\n");
         exit(1);
     }
-
+	
+	hdr->version = 5;
+	
     printf("FWS\n");
     printf("File version \t%"pSWF_U32"\n", hdr->version);
     printf("File size \t%"pSWF_U32"\n", hdr->size);
@@ -170,7 +172,7 @@ int main (int argc, char *argv[]) {
     swf_serialise_defineshape(temp->buffer, &error, (swf_defineshape *) temp->tag);
     temp->serialised = 1;
 
-    swf_add_protect(movie, &error);
+	//    swf_add_protect(movie, &error);
     swf_add_setbackgroundcolour(movie, &error, 0, 255, 0, 255);
     swf_dump_tag(movie, &error, temp);
     swf_add_definebutton(movie, &error, 14, obj_id);
@@ -204,22 +206,22 @@ int main (int argc, char *argv[]) {
     m3->ty = 100 * 20;
 
     for (i=1; i<=NUMFRAMES; i++) {
-		swf_add_placeobject2(movie, &error, matrix, obj_id, i, mycx, NULL);
-		swf_add_placeobject2(movie, &error, m2, obj_id, 1, cx2, myname);
+		//		swf_add_placeobject2(movie, &error, matrix, obj_id, i, mycx, NULL);
+		//swf_add_placeobject2(movie, &error, m2, obj_id, 1, cx2, myname);
 		swf_add_placeobject(movie, &error, m3, 14, 2);
 
       if (30 == i) {
 //	swf_add_doaction(movie, &error, sactionGotoFrame);
       }
       if (2 == i) {
-		  swf_add_doaction(movie, &error, sactionPlay);
+		  //		  swf_add_doaction(movie, &error, sactionPlay);
       }
 
       swf_add_showframe(movie, &error);
 
       if (i < NUMFRAMES) {
-		  swf_add_removeobject2(movie, &error, i);
-		  swf_add_removeobject2(movie, &error, 1);
+		  //swf_add_removeobject2(movie, &error, i);
+		  //swf_add_removeobject2(movie, &error, 1);
 		  swf_add_removeobject(movie, &error, 14, 2);
       }
       matrix->tx += 5 * 20;

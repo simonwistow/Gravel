@@ -84,6 +84,7 @@ sub make {
 	my $s = {start => $self->{_start}, end => $self->{_end}, 
 			 startx => $self->{_tx}, endx => $self->{_tx},
 			 starty => $self->{_ty}, endy => $self->{_ty},
+			 depth => $self->{_depth}, 
 		 };
 
 	my $e = Gravel::Effect::Tween->new($s);
@@ -140,8 +141,123 @@ int _check_obj_hash(HV * shape, char ** bst, int * curr)
 }
 
 
-/* We are baking the library in this function */
+
+/* This is test code.... */
+
 void _bake (SV * shape, SV * mov) 
+{
+	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(mov));
+	int error = SWF_ENoError;
+	HV* h = (HV *)SvRV(shape); 
+	SV** p_st;
+	SV** p_state;
+	SV** p_shape;
+	AV* states;
+	SV** p_bstate;
+	HV* bstate;
+	HV* shape;
+	int i, j, num_st, curr, seen;
+	int* p_bst;
+	swf_definebutton * button;
+	SV** p_matrix;
+	swf_matrix * mx;
+	SWF_U32 char_id, depth, hit_test, down, over, up, button_id, layer;
+	SV** p_num;
+	swf_tagrecord * temp;
+	SV* tag_id;
+
+
+/*
+  The logic here is basically:
+
+1) Bake all the shapes we need for the button:
+	foreach (states) {
+		if (state->shape has been seen before) {
+			next;
+		}
+		bake state->shape; (using Gravel::Shape::_bake )
+	} 
+
+*/
+
+	p_st = hv_fetch(h, "_states", 7, 0);
+	if (NULL == p_st) {
+		return;
+	}
+	states = (AV *) SvRV(*p_st);
+
+	curr = 0;
+	num_st = av_len(states);
+	if ((p_bst = (char **) calloc(1 + num_st, sizeof(char *))) == NULL) {
+		return;
+	}
+
+    /* This needs to know how to bake its component shapes */
+	for (i=0; i<=num_st; ++i) {
+		if ((p_bst[i] = (char *) calloc(HASH_LENGTH, sizeof(char))) == NULL) {
+			return;
+		}
+
+		p_state = av_fetch(states, i, 0);
+		if (NULL == p_state) {
+			return;
+		}
+		bstate = (HV *) SvRV(*p_state);
+		p_shape = hv_fetch(bstate, "_shape", 6, 0);
+		if (NULL == p_shape) {
+			return;
+		}
+		/* We havent seen this shape before */
+		if (_check_obj_hash((HV *)SvRV(*p_shape), p_bst, &curr)) {
+			_call_foreign_method(*p_shape, "_bake", mov);			
+		}
+	}
+
+/* FIXME: In this release, the depth attribute is taken from the
+ * Button, not the ButtonState.
+ */
+
+	p_num = hv_fetch(h, "_depth", 6, 0);
+    if (NULL == p_num) {
+	    return;
+    }
+    depth = (SWF_U32)(SvIV(*p_num));
+
+    char_id = m->movie->max_obj_id;
+    button_id = 12 + m->movie->max_obj_id;
+
+    swf_add_definebutton(m->movie, &error, button_id, char_id);
+
+	tag_id = newSViv((IV)button_id);
+	hv_store(h, "_obj_id", 7, tag_id, 0);
+	shape = newRV_inc((SV *) h);
+
+/*
+    temp = swf_make_tagrecord(error, tagDefineButton);
+
+	if ((temp->buffer->raw = (SWF_U8 *) calloc (10240, sizeof (SWF_U8))) == NULL) {
+		fprintf (stderr, "Calloc Fail\n");
+		return;
+	}
+
+	swf_serialise_definebutton(temp->buffer, &error, (swf_definebutton *) button);
+	temp->serialised = 1;
+	swf_dump_tag(m->movie, &error, temp);
+	if (SWF_ENoError != error) {
+		fprintf(stderr, "Non-zero error condition 10 detected\n");
+	}
+*/
+
+
+}
+
+
+
+
+
+
+/* We are baking the library in this function */
+void _bake_old (SV * shape, SV * mov) 
 {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(mov));
 	int error = SWF_ENoError;

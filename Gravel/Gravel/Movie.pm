@@ -156,13 +156,13 @@ sub bake_movie {
 	$b->_bake_header($self);
 	$b->_bake_preamble($self, $self->protect);
 
-	print STDERR DumperX $self;
+#	print STDERR DumperX $self;
 
 	$b->_bake_library($self);
 
-	$b->_bake_frames($self);
+	print STDERR DumperX $self;
 
-#	print STDERR DumperX $self;
+	$b->_bake_frames($self);
 
 	$b->_bake_end($self);
 	$b->_finalise($self);
@@ -187,7 +187,7 @@ __C__
 
 #define swf_free(x)       if( (x) ) free( (x) )
 #define swf_realloc(x, y) ( (x) ? realloc( (x), (y) ) : calloc( 1, (y) ) )
-
+#define RATE 15
 
 U16 _count_frames(SV* obj, SV* self) {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
@@ -239,7 +239,7 @@ void _bake_header(SV* obj, SV* self) {
 	p_name = hv_fetch(h, "_name", 5, 0);
 	if (NULL != p_name) {
 		m->movie->name = (char *)SvPVX(*p_name);
-		m->movie->header->rate = 25 * 256;
+		m->movie->header->rate = RATE * 256;
 	}
 }
 
