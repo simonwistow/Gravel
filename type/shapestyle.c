@@ -181,13 +181,13 @@ swf_buffer_shapestyle(swf_buffer * buffer, int * error, swf_shapestyle * s)
 	for (i=0; i < s->nlines; i++) {
 		printf("putting line %i\n", i);
 		swf_buffer_put_word (buffer, error, s->lines[i]->width);
-			/* Test code */
-			swf_buffer_put_byte(buffer, error, 0);
-			swf_buffer_put_byte(buffer, error, 0);
-			swf_buffer_put_byte(buffer, error, 0);
+		/* Test code */
+		swf_buffer_put_byte(buffer, error, 0);
+		swf_buffer_put_byte(buffer, error, 0);
+		swf_buffer_put_byte(buffer, error, 0);
 
-			/* FIXME: The code uses SWF_U32 instead of a colour type for fillstyle->colour atm */
-			//		swf_serialise_cxform(buffer, error, s->lines[i]->colour);
+		/* FIXME: The code uses SWF_U32 instead of a colour type for fillstyle->colour atm */
+		//		swf_serialise_cxform(buffer, error, s->lines[i]->colour);
 	}
 
 	swf_buffer_put_bits(buffer, 4, s->fillbits);
