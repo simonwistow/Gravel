@@ -124,7 +124,9 @@ int main (int argc, char *argv[]) {
 /* Ensure we steal a good header... */
 
     movie->header = hdr;
-    movie->name = (char *) "ben3.swf";
+    movie->name = (char *) "ben3.swf\0";
+
+    movie->header->rate = 25 * 256;
 
     swf_add_setbackgroundcolour(movie, &error, 0, 255, 0, 255);
     swf_dump_shape(movie, &error, temp);
@@ -138,15 +140,72 @@ int main (int argc, char *argv[]) {
     matrix->ty = 150 * 20;
 
     swf_add_placeobject(movie, &error, obj_id, matrix);
-    printf("foo 6\n");
     swf_add_showframe(movie, &error);
+
+    swf_add_removeobject(movie, &error, obj_id);
     matrix->a  = matrix->c  = 512 * 100;
     matrix->b  = matrix->d  = 0;
-    matrix->tx = 0;
+    matrix->tx = 270 * 20;
     matrix->ty = 150 * 20;
 
     swf_add_placeobject(movie, &error, obj_id, matrix);
     swf_add_showframe(movie, &error);
+
+    swf_add_removeobject(movie, &error, obj_id);
+    matrix->a  = matrix->c  = 512 * 100;
+    matrix->b  = matrix->d  = 0;
+    matrix->tx = 240 * 20;
+    matrix->ty = 150 * 20;
+
+    swf_add_placeobject(movie, &error, obj_id, matrix);
+    swf_add_showframe(movie, &error);
+
+    swf_add_removeobject(movie, &error, obj_id);
+    matrix->a  = matrix->c  = 512 * 100;
+    matrix->b  = matrix->d  = 0;
+    matrix->tx = 210 * 20;
+    matrix->ty = 150 * 20;
+
+    swf_add_placeobject(movie, &error, obj_id, matrix);
+    swf_add_showframe(movie, &error);
+
+    swf_add_removeobject(movie, &error, obj_id);
+    matrix->a  = matrix->c  = 512 * 100;
+    matrix->b  = matrix->d  = 0;
+    matrix->tx = 180 * 20;
+    matrix->ty = 150 * 20;
+
+    swf_add_placeobject(movie, &error, obj_id, matrix);
+    swf_add_showframe(movie, &error);
+
+    swf_add_removeobject(movie, &error, obj_id);
+    matrix->a  = matrix->c  = 512 * 100;
+    matrix->b  = matrix->d  = 0;
+    matrix->tx = 150 * 20;
+    matrix->ty = 150 * 20;
+
+    swf_add_placeobject(movie, &error, obj_id, matrix);
+    swf_add_showframe(movie, &error);
+
+    swf_add_removeobject(movie, &error, obj_id);
+    matrix->a  = matrix->c  = 512 * 100;
+    matrix->b  = matrix->d  = 0;
+    matrix->tx = 120 * 20;
+    matrix->ty = 150 * 20;
+
+    swf_add_placeobject(movie, &error, obj_id, matrix);
+    swf_add_showframe(movie, &error);
+
+    swf_add_removeobject(movie, &error, obj_id);
+    matrix->a  = matrix->c  = 512 * 100;
+    matrix->b  = matrix->d  = 0;
+    matrix->tx =  90 * 20;
+    matrix->ty = 150 * 20;
+
+    swf_add_placeobject(movie, &error, obj_id, matrix);
+    swf_add_showframe(movie, &error);
+
+
     swf_add_end(movie, &error);
 
     swf_make_finalise(movie, &error);
