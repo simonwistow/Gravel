@@ -7,8 +7,9 @@ LIBTOOL = ./libtool
 INSTALL = ./install-sh
 
 #flags
-CFLAGS =  -Wall -Wwrite-strings -Wmissing-prototypes  -O3 -pipe
+CFLAGS =  -Wall -Wwrite-strings -Wmissing-prototypes  -O3 -pipe @GLIB_CFLAGS@
 DEBUG = -DDEBUG -g
+LIBS= @GLIB_LIBS@
 
 #other stuff
 LIB_OBJECTS=swf_parse.o swf_destroy.o swf_error.o swf_tags.o \
@@ -56,10 +57,10 @@ debug: swf_parse_debug text_extract_debug
 memdebug: debug swf_parse_ef swf_parse_debauch swf_parse_ktrace text_extract_ef text_extract_debauch text_extract_ktrace
 
 libswfparse.la: $(DLIB_OBJECTS)
-	$(LIBTOOL) $(CC) $(CFLAGS) -o libswfparse.la $(DLIB_OBJECTS) -rpath $(LIB_PATH)
+	$(LIBTOOL) $(CC) $(CFLAGS) -o libswfparse.la $(DLIB_OBJECTS) -rpath $(LIB_PATH) $(LIBS)
 
 libswfextract.la: $(ELIB_OBJECTS)
-	$(LIBTOOL) $(CC) $(CFLAGS) -o libswfextract.la $(ELIB_OBJECTS) -lswfparse -rpath $(LIB_PATH)
+	$(LIBTOOL) $(CC) $(CFLAGS) -o libswfextract.la $(ELIB_OBJECTS) -lswfparse -rpath $(LIB_PATH) $(LIBS)
 
 swf_parse: libswfparse.la $(OBJECTS)
 	$(LIBTOOL) $(CC) $(CFLAGS) -o swf_parse $(OBJECTS) libswfparse.la
@@ -68,28 +69,28 @@ text_extract: libswfextract.la $(TEXT_OBJECTS)
 	$(LIBTOOL) $(CC) $(CFLAGS) -o text_extract $(TEXT_OBJECTS) libswfextract.la
 
 swf_parse_debug: $(D_LIB_OBJECTS) $(D_OBJECTS)
-	$(CC) $(CFLAGS) -I . $(DEBUG) -o swf_parse_debug $(D_LIB_OBJECTS) $(D_OBJECTS)
+	$(CC) $(CFLAGS) -I . $(DEBUG) -o swf_parse_debug      $(D_LIB_OBJECTS) $(D_OBJECTS) $(LIBS)
 
 swf_parse_ef: $(D_LIB_OBJECTS) $(D_OBJECTS)
-	$(CC) $(CFLAGS) -I . $(DEBUG) -o swf_parse_ef $(D_LIB_OBJECTS) $(D_OBJECTS) -lefence
+	$(CC) $(CFLAGS) -I . $(DEBUG) -o swf_parse_ef         $(D_LIB_OBJECTS) $(D_OBJECTS) $(LIBS) -lefence
 
 swf_parse_debauch: $(D_LIB_OBJECTS) $(D_OBJECTS)
-	$(CC) $(CFLAGS) -I . $(DEBUG) -o swf_parse_debauch $(D_LIB_OBJECTS) $(D_OBJECTS) -ldebauch
+	$(CC) $(CFLAGS) -I . $(DEBUG) -o swf_parse_debauch    $(D_LIB_OBJECTS) $(D_OBJECTS) $(LIBS) -ldebauch
 
 swf_parse_ktrace: $(D_LIB_OBJECTS) $(D_OBJECTS)
-	$(CC) $(CFLAGS) -I . $(DEBUG) -o swf_parse_ktrace $(D_LIB_OBJECTS) $(D_OBJECTS) -lktrace
+	$(CC) $(CFLAGS) -I . $(DEBUG) -o swf_parse_ktrace     $(D_LIB_OBJECTS) $(D_OBJECTS) $(LIBS) -lktrace
 
 text_extract_debug: $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS)
-	$(CC) $(CFLAGS) -I . $(DEBUG) -o text_extract_debug $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS)
+	$(CC) $(CFLAGS) -I . $(DEBUG) -o text_extract_debug   $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS) $(LIBS)
 
 text_extract_debauch: $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS)
-	$(CC) $(CFLAGS) -I . $(DEBUG) -o text_extract_debauch $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS) -ldebauch
+	$(CC) $(CFLAGS) -I . $(DEBUG) -o text_extract_debauch $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS) $(LIBS) -ldebauch
 
 text_extract_ef: $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS)
-	$(CC) $(CFLAGS) -I . $(DEBUG) -o text_extract_ef $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS) -lefence
+	$(CC) $(CFLAGS) -I . $(DEBUG) -o text_extract_ef      $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS) $(LIBS) -lefence
 
 text_extract_ktrace: $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS)
-	$(CC) $(CFLAGS) -I . $(DEBUG) -o text_extract_ktrace $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS) -lktrace
+	$(CC) $(CFLAGS) -I . $(DEBUG) -o text_extract_ktrace  $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS) $(LIBS) -lktrace
 
 
 install: all
