@@ -16,6 +16,9 @@
  *
  *
  * $Log: text_extract.c,v $
+ * Revision 1.4  2001/07/14 00:46:08  clampr
+ * file vars
+ *
  * Revision 1.3  2001/07/13 14:35:46  muttley
  * Check to see if we could actually open the swf for parsing
  *
@@ -101,3 +104,13 @@ main (int argc, char *argv[])
 
     return error;
 }
+
+
+
+/* 
+Local Variables:
+mode: C
+c-basic-offset: 4
+tab-width: 4
+End:
+*/
