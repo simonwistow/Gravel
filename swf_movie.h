@@ -93,6 +93,7 @@ swf_shaperecord_list * swf_make_shaperecords_for_triangle(int * error);
 
 swf_tagrecord * swf_make_triangle_as_tag(swf_movie * movie, int * error);
 
+void swf_movie_make_translation_matrix(swf_movie * movie, int * error, SWF_U8 x, SWF_U8 y);
 
 void swf_get_nth_shape (swf_parser * swf, int * error, int which_shape, swf_tagrecord * mybuffer);
 

@@ -401,6 +401,24 @@ void swf_make_finalise(swf_movie * movie, int * error) {
 
 }
 
+
+void swf_movie_make_translation_matrix(swf_movie * movie, int * error, SWF_U8 x, SWF_U8 y) {
+    SWF_U8 fix, b1, b2, b3;
+    SWF_U32 pad;
+
+    fix = 8; /* Code for a pure translate matrix */
+    pad = fix << 17 | x << 9 | y << 1;
+    b3 = pad & 0xff;
+    b2 = (pad >> 8) & 0xff;
+    b1 = (pad >> 16) & 0xff;
+
+    fprintf(stderr, "b1: %i ; b2: %i ; b3: %i\nx: %i ; y: %i ; pad: %i\n", b1, b2, b3, x, y, pad);
+
+    /* output code goes here */
+
+    return;
+}
+
 void swf_movie_initbits(swf_movie * movie) {
     movie->bitpos = 0;
     movie->bitbuf = 0;

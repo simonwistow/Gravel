@@ -204,12 +204,11 @@ main (int argc, char *argv[])
 
 	/* buffy now has a serialised defineshape tag in it */
 	
-
+	swf_movie_make_translation_matrix(swf, &error, 10, 20);
 
 	swf_free(buffy->buffer);
 	swf_free(buffy);
 	
-
     printf("\n***** Finished Dumping SWF File Information *****\n");
 
     free (tag);
