@@ -1,18 +1,17 @@
 package SWF::ExtractText;
 
 use strict;
-use Tie::Hash;
 
 require Exporter;
 use vars qw(@ISA %EXPORT_TAGS @EXPORT_OK @EXPORT $VERSION);
 
-@ISA = qw(Exporter Tie::Hash);
+@ISA = qw(Exporter);
 
 # Items to export into callers namespace by default. Note: do not export
 # names by default without a very good reason. Use EXPORT_OK instead.
 # Do not simply export all your public functions/methods/constants.
 
-# This allows declaration	use Tie::GHash ':all';
+# This allows declaration	use SWF::ExtractText ':all';
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
 %EXPORT_TAGS = ( 'all' => [ qw(
