@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001  Ben Evans <kitty@fuckedgoths.com>
+ * Copyright (C) 2001-2  Ben Evans <kitty@cpan.org>
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
@@ -16,11 +16,13 @@
  *
  */
 
+#define SWF_OUT_STREAM 10240
 
 #include "swf_types.h"
 #include "swf_parse.h"
 #include "swf_movie.h"
 #include "swf_destroy.h"
+#include "swf_serialise.h"
 
 #include <stdio.h>
 
@@ -115,6 +117,24 @@ swf_movie * swf_make_movie (int * error) {
     movie->lastp = &(movie->first);
 
     return movie;
+}
+
+swf_tagrecord * swf_make_tagrecord (int * error) {
+    swf_tagrecord * tag;
+
+    if ((tag = (swf_tagrecord *) calloc (1, sizeof (swf_tagrecord))) == NULL) {
+	*error = SWF_EMallocFailure;
+	return NULL;
+    }
+
+    /*    movie->header = NULL;
+
+    movie->max_obj_id = 0;
+
+    movie->first = NULL;
+    movie->lastp = &(movie->first); */
+
+    return tag;
 }
 
 
@@ -246,24 +266,17 @@ swf_shaperecord_list * swf_make_shaperecords_for_triangle(int * error) {
 void swf_get_raw_shape (swf_parser * swf, int * error, swf_tagrecord * mybuffer) {
     SWF_U32 startpos;
     int length;    
-    swf_defineshape * my_shape;
 
     startpos = length = 0;
 
     startpos = swf->filepos;
     length = swf->cur_tag_len;
 
-    /* we need to do this to get the shape id out */
-    my_shape = swf_parse_defineshape(swf, error);
-
+/* CHECKME: Do we need this ? */
     swf_parse_seek(swf, startpos);
     
     mybuffer->buffer = swf_parse_get_bytes(swf, length);
     mybuffer->size = length;
-
-    mybuffer->code = my_shape->tagid;
-
-    swf_destroy_defineshape(my_shape);
 }
 
 
@@ -286,7 +299,7 @@ void swf_get_nth_shape (swf_parser * swf, int * error, int which_shape, swf_tagr
 
         /* if there's been an error, bug out */
         if (*error != SWF_ENoError) {
-	    return;
+			return;
 	}
 
         switch (next_id) {
@@ -397,100 +410,147 @@ swf_tagrecord * swf_make_triangle_as_tag(swf_movie * movie, int * error) {
 
 /* Calculate size et all, and stream out */
 
+/* NOTE: We'll need to keep the
+ * size butes at 20, then random seek back to the 8th byte of the file
+ * and overwrite, once we know the real size. */
+
 void swf_make_finalise(swf_movie * movie, int * error) {
+  SWF_U8 * file_buf;
+  SWF_U32 tmp_32, tmp_size;
+  SWF_U16 tmp_16;
+  swf_tagrecord *temp, *node;
+  int i;
 
-/*    file_hdr[0] = 'F';
-    file_hdr[1] = 'W';
-    file_hdr[2] = 'S'; */
-/* Reminder to fix these up in finalise, before write out */
-
-
-
-}
-
-
-SWF_U8 * swf_movie_make_streamed_translation_matrix(swf_movie * movie, int * error, SWF_U8 x, SWF_U8 y) {
-    SWF_U8 fix;
-    SWF_U32 pad;
-    SWF_U8 * b;
-
-    if ((b = (SWF_U8 *) calloc (3, sizeof(SWF_U8))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
-    }
-
-    fix = 8; /* Code for a pure translate matrix */
-    pad = fix << 17 | x << 9 | y << 1;
-
-    b[2] = pad & 0xff;
-    b[1] = (pad >> 8) & 0xff;
-    b[0] = (pad >> 16) & 0xff;
-
-//    fprintf(stderr, "b1: %i ; b2: %i ; b3: %i\nx: %i ; y: %i ; pad: %i\n", b1, b2, b3, x, y, pad);
-
-    /* output code goes here */
-
-    return b;
-}
-
-void add_serialised_showframe(swf_movie * movie, int * error)
-{
-    swf_tagrecord * shf;
-
-    if ((shf = (swf_tagrecord *) calloc (1, sizeof (swf_tagrecord))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return;
-    }
-    
-    if ((shf->buffer = (SWF_U8 *) calloc (2, sizeof (SWF_U8))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return;
-    }	
-    
-    shf->serialised = 1;
-    shf->id = tagShowFrame;
-    shf->size = 2;
-    
-
-    shf->buffer[0] = 0x00;
-    shf->buffer[1] = 0x40;
-    
-    *(movie->lastp) = shf;
-    movie->lastp = &(shf->next);	
-	
+  /* allocate a tag buffer */
+  if ((file_buf = (SWF_U8 *) calloc (1, SWF_OUT_STREAM)) == NULL) {
+    *error = SWF_EMallocFailure;
     return;
-}
+  }
 
-void add_serialised_end(swf_movie * movie, int * error)
-{
-    swf_tagrecord * efr;
-    
-    if ((efr = (swf_tagrecord *) calloc (1, sizeof (swf_tagrecord))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return;
-    }
-    
-    if ((efr->buffer = (SWF_U8 *) calloc (2, sizeof (SWF_U8))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return;
-    }	
-    
-    efr->serialised = 1;
-    efr->id = tagEnd;
-    efr->size = 2;
-
-    efr->buffer[0] = 0x00;
-    efr->buffer[1] = 0x00;
-    
-    *(movie->lastp) = efr;
-    movie->lastp = &(efr->next);	
-    
+  /* Open the file for writing. */
+  movie->file = fopen(movie->name, "wb");
+  
+  /* Did we open the file? */
+  if (movie->file == NULL) {
+    *error = SWF_EFileOpenFailure;
     return;
+  }
+
+  //  fprintf(stderr, "%i\n", (int)file_buf[3]);
+
+  file_buf[0] = 'F';
+  file_buf[1] = 'W';
+  file_buf[2] = 'S';
+  tmp_32 = movie->header->version;
+  file_buf[3] = (SWF_U8)(tmp_32 & 0xff); 
+
+/* let's build up the size. 
+ * start with the header, version and total length bytes.
+ */
+  tmp_size = 8; 
+
+/* Because of the way swf_serialise_rect is, we need to have a 
+ * temp value in length and overseek properly. Oh well...
+ */
+  file_buf[4] = tmp_size >> 24;
+  file_buf[5] = (tmp_size << 8) >> 24;
+  file_buf[6] = (tmp_size << 16) >> 24;
+  file_buf[7] = (tmp_size << 24) >> 24;
+
+  swf_movie_put_bytes(movie, error, 8, file_buf);
+  swf_serialise_rect(movie, error, movie->header->bounds);
+
+/* set the backup byte counter to be the next vacant place. In case we 
+ * need to seek later due to fuckups.
+ */
+  i = movie->filepos; 
+  tmp_size = i;
+
+  printf("File position is: %i\n", i);
+
+  /* Rate and count go next... */
+
+  /* PROTO: Do a tree walk to determine frame count 
+   * consider using a backseek in production code..?
+   */
+  
+  tmp_16 = 0;
+
+  node = movie->first;
+
+  while (node != NULL) {
+    temp = node;
+    node = node->next;
+    
+    printf("Walking waka-waka : id = %i\n", temp->id);
+
+    if (tagShowFrame == temp->id) {
+      tmp_16++;
+    }
+  }
+
+  movie->header->count = tmp_16;
+  printf("Frame count = %i\n", tmp_16);
+
+  /* rate and count....... */
+
+  swf_movie_put_word(movie, error, (SWF_U16) movie->header->rate);
+  swf_movie_put_word(movie, error, (SWF_U16) movie->header->count);
+
+  tmp_size += 4; /* for the rate and count */
+
+  /* Next: Walk the LL of tags...  
+   * Build a size as we do this...
+   */
+  // LL walk...
+
+  node = movie->first;
+
+  while (node != NULL) {
+    temp = node;
+    node = node->next;
+    
+    printf("Walking waka-waka to write this out...: id = %i\n", temp->id);
+    
+    if (0 == temp->serialised) {
+      printf("HELP: This tag isn't serialised...\n");
+    }
+
+    tmp_16 = temp->id << 6;
+
+    /* FIXME: We don't handle long tags yet...*/
+    tmp_16 |= (SWF_U16) temp->size;
+
+    swf_movie_put_word(movie, error, tmp_16);
+    tmp_size += 2; /* for the tag header */
+
+    /* FIXME: We don't handle tags with content yet... */
+    swf_movie_put_bytes(movie, error, temp->size, temp->buffer);
+
+  }
+
+  printf("File size is: %u\n", tmp_size);
+
+  /* Backseek to fix up file size. */
+
+  swf_movie_seek(movie, 4);
+  swf_movie_put_dword(movie, error, tmp_size);
+
+  fclose(movie->file);
+
 }
 
-void swf_movie_initbits(swf_movie * movie) {
+void 
+swf_movie_initbits(swf_movie * movie) {
     movie->bitpos = 0;
     movie->bitbuf = 0;
+}
+
+void 
+swf_movie_seek (swf_movie * context, int pos)
+{
+    fseek(context->file, pos, SEEK_SET);
+    return;
 }
 
 /*
@@ -498,7 +558,9 @@ void swf_movie_initbits(swf_movie * movie) {
  * parse head on by one.
  */
 
-void swf_movie_put_byte(swf_movie * context, int * error, SWF_U8 byte) {
+void 
+swf_movie_put_byte(swf_movie * context, int * error, SWF_U8 byte) 
+{
     swf_movie_initbits(context);
 
 /* FIXME: Need a write error code */
@@ -517,7 +579,9 @@ void swf_movie_put_byte(swf_movie * context, int * error, SWF_U8 byte) {
  * number of bytes from the stream.
  */
 
-void swf_movie_put_bytes (swf_movie * context, int * error, int nbytes, SWF_U8 * bytes) {
+void 
+swf_movie_put_bytes (swf_movie * context, int * error, int nbytes, SWF_U8 * bytes) 
+{
     swf_movie_initbits(context);
 
 /* FIXME: Need a write error code */
@@ -533,41 +597,102 @@ void swf_movie_put_bytes (swf_movie * context, int * error, int nbytes, SWF_U8 *
 
 
 /*
- * Get n bits from the stream.
+ * Put n bits from the stream.
  */
 
-void swf_movie_put_bits (swf_movie * context, SWF_S32 n, SWF_S32 bits)
+
+/* The problem here is... we can't finish our flush until
+ * we're sure we've got all the adjacent bit fields (and we may
+ * have SB's and UB's next to each other, as well....
+ * So, we have to separate out the flush function.
+ */
+
+void 
+swf_movie_flush_bits (swf_movie * context) 
 {
-/*    SWF_U32 v = 0; */
-	
-/*    while (1) {
-        SWF_S32 s = n - context->bitpos;
-        if (s > 0) {
+  SWF_U32 bitbuf;
+  SWF_U8 bitpos, bt;
+  int error=0;
 
-            v |= context->bitbuf << s;
-            n -= context->bitpos;
-			
+  bitbuf = context->bitbuf;
+  bitpos = context->bitpos;
 
-            context->bitbuf = swf_parse_get_byte(context);
-            context->bitpos = 8;
-        } else {
+  swf_movie_initbits(context);
+  
+  /* FIXME: error handling... */
 
-            v |= context->bitbuf >> -s;
-            context->bitpos -= n;
-            context->bitbuf &= 0xff >> (8 - context->bitpos); 
 
-            return v;
-        }
-	} */
+  bt = bitbuf >> 24;
+  swf_movie_put_byte(context, &error, bt);
+  if (bitpos <= 8) { return; }
+
+  bt = (bitbuf << 8) >> 24;
+  swf_movie_put_byte(context, &error, bt);
+  if (bitpos <= 16) { return; }
+
+  bt = (bitbuf << 16) >> 24;
+  swf_movie_put_byte(context, &error, bt);
+  if (bitpos <= 24) { return; }
+
+  bt = (bitbuf << 24) >> 24;
+  swf_movie_put_byte(context, &error, bt);
 }
 
+/* FIXME: error handling... */
+
+void swf_movie_put_bits (swf_movie * context, SWF_U8 n, SWF_U32 bits)
+{
+  SWF_S32 i;
+  SWF_U32 bitbuf;
+  SWF_U8 bt;
+  int error=0;
+
+  /* We take in the bits right-flushed. */
+
+  i = context->bitpos;
+
+  if (i + n > 32) {
+
+    /* We need to flush the buffer and leave the residue */
+    bitbuf = context->bitbuf;
+    bitbuf += bits >> (i + n - 32);
+
+    bt = bitbuf >> 24;
+    swf_movie_put_byte(context, &error, bt);
+    bt = (bitbuf << 8) >> 24;
+    swf_movie_put_byte(context, &error, bt);
+    bt = (bitbuf << 16) >> 24;
+    swf_movie_put_byte(context, &error, bt);
+    bt = (bitbuf << 24) >> 24;
+    swf_movie_put_byte(context, &error, bt);
+    swf_movie_initbits(context);
+
+    context->bitbuf = bits << (64 - (i + n));
+    context->bitpos = i + n - 32;
+
+  } else {
+    /* Can coexist in the same bitbuf */
+    context->bitbuf |= ((bits << (32 - n) ) >> i);
+    context->bitpos = i + n;
+  }
+
+}
 
 /*
- * Get n bits from the stream with sign extension.
+ * Put n bits to the stream with sign extension.
  */
 
-void swf_movie_put_sbits (swf_movie * context, SWF_S32 n, SWF_S32 bits)
+void swf_movie_put_sbits (swf_movie * context, SWF_U8 n, SWF_S32 bits)
 {
+  int i;
+
+  i = context->bitpos;
+
+  if (bits < 0) {
+    bits += (1L << (n));
+  }
+
+  swf_movie_put_bits(context, n, bits);
 }
 
 
@@ -578,7 +703,16 @@ void swf_movie_put_sbits (swf_movie * context, SWF_S32 n, SWF_S32 bits)
 
 void swf_movie_put_word(swf_movie * context, int * error, SWF_U16 word)
 {
-    // wrapper over put_bytes.
+    swf_movie_initbits(context);
+    swf_movie_put_byte(context, error, (SWF_U8)((word << 8) >> 8));
+    swf_movie_put_byte(context, error, (SWF_U8)(word >> 8));
+}
+
+void swf_movie_put_word_dst(swf_movie * context, int * error, SWF_U16 word)
+{
+    swf_movie_initbits(context);
+    swf_movie_put_byte(context, error, (SWF_U8)(word >> 8));
+    swf_movie_put_byte(context, error, (SWF_U8)((word << 8) >> 8));
 }
 
 /*
@@ -591,6 +725,24 @@ void swf_movie_put_dword(swf_movie * context, int * error, SWF_U32 dword)
 {
     swf_movie_initbits(context);
 
-   // wrapper over put_bytes.
+    swf_movie_put_byte(context, error, (SWF_U8)((dword << 24) >> 24));
+    swf_movie_put_byte(context, error, (SWF_U8)((dword << 16) >> 24));
+    swf_movie_put_byte(context, error, (SWF_U8)((dword << 8) >> 24));
+    swf_movie_put_byte(context, error, (SWF_U8)(dword >> 24));
+
+
+
 }
+
+void swf_movie_put_dword_dst(swf_movie * context, int * error, SWF_U32 dword)
+{
+    swf_movie_initbits(context);
+
+    swf_movie_put_byte(context, error, (SWF_U8)(dword >> 24));
+    swf_movie_put_byte(context, error, (SWF_U8)((dword << 8) >> 24));
+    swf_movie_put_byte(context, error, (SWF_U8)((dword << 16) >> 24));
+    swf_movie_put_byte(context, error, (SWF_U8)((dword << 24) >> 24));
+}
+
+
 
