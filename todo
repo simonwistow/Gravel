@@ -1,12 +1,11 @@
 ==============
   MISCELLANY
 ==============
-* convert records (shape, button, text) to being linked lists rather than the kludges they are now
+* convert records (shape, button) to being linked lists rather than the kludges they are now
 * get the records to actually work. At the moment they don't
 * ... then write the stuff to print them out
 * sound viz context stuff
 * ditto linebits and fillbits?
-* take text records and return a string representation
 * finish last few functions that I forgot
 * wrap in XS
 * go through and check for memory leaks and stuff
