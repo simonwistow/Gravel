@@ -16,24 +16,8 @@
  *
  *
  * $Log: swf_parse.c,v $
- * Revision 1.19  2001/07/05 17:14:24  kitty_goth
- * A problem I thought I'd fixed seems to have come back.
- *
- * Backing out my change while I figure it out. Thought I was
- * being over-eager. --Kitty
- *
- * Revision 1.18  2001/07/05 12:06:58  muttley
- * Whoops, I didn't resolve the conflict in last commit.
- *
- * Revision 1.17  2001/07/05 12:02:51  muttley
- * Fixed parsing of ButtonRecords and DoActions
- * Updated the types, destroy and print functions to cope with this
- * Updated the todo, readme and manifest files to reflect this
- *
- * Revision 1.16  2001/07/04 17:03:18  uid56115
- * Minor change to actually parse the glyphs through the
- * shaperecord parser. Might need some cleanup and checking code.
- * Some TODO's removed (Closed) -- Kitty
+ * Revision 1.20  2001/07/09 12:38:57  muttley
+ * A few bug fixes
  *
  * Revision 1.15  2001/06/30 12:33:18  kitty_goth
  * Move to a linked list representation of shaperecords - I was getting
@@ -765,8 +749,7 @@ swf_parse_definefont (swf_parser * context, int * error)
 	goto FAIL;
     }
 
-    for(n=0; n<font->glyph_count; n++) 
-    {
+    for(n=0; n<font->glyph_count; n++) {
         font->shape_records[n] = NULL;
 
         swf_parse_seek(context, offset_table[n] + start);
@@ -780,19 +763,14 @@ swf_parse_definefont (swf_parser * context, int * error)
         ylast = 0;
 
         font->shape_records[n] = NULL;
-//        font->shape_records[n] = swf_parse_get_shaperecords(context, error);
-/*
-  I'm keeping this out of the main development flow until I understand
-  why it occasionally stops parsing here. I suspect memory allocation
-  issues -- Kitty
- */
+/* TODO swf_parse_get_shaperecords(context, error);*/
     }
 
     free (offset_table);
 
     return font;
 
-    FAIL:
+ FAIL:
     swf_destroy_definefont (font);
     return NULL;
 }
@@ -1006,6 +984,7 @@ swf_parse_defineshape_aux (swf_parser * context, int * error, int with_alpha)
     context->fill_bits = (U16) swf_parse_get_bits (context, 4);
     context->line_bits = (U16) swf_parse_get_bits (context, 4);
 
+/* TODO simon */
     if ((shape->record = swf_parse_get_shaperecords (context,error)) == NULL) {
         goto FAIL;
     }
@@ -2057,11 +2036,10 @@ swf_parse_definemorphshape (swf_parser * context, int * error)
 
 
     /* Parse the start shape */
-    if ((shape->records1 = swf_parse_get_shaperecords (context, error)) == NULL) { 
-	goto FAIL; 
-    }
+    if ((shape->records1 = swf_parse_get_shaperecords (context, error)) == NULL) { goto FAIL; }
 
-    if (swf_parse_tell(context) != end_shape_pos) {
+    if (swf_parse_tell(context) != end_shape_pos)
+    {
     	/* todo simon : probably should handle this after I've written get_shaperecords */
     }
 
@@ -2076,6 +2054,7 @@ swf_parse_definemorphshape (swf_parser * context, int * error)
     context->line_bits = swf_parse_get_bits(context, 4); /* there are no styles so none of this make sense. */
 
 
+
     /*
      * Parse the end shape
      */
@@ -2085,7 +2064,7 @@ swf_parse_definemorphshape (swf_parser * context, int * error)
 
     return shape;
 
- FAIL:
+    FAIL:
     swf_destroy_definemorphshape (shape);
     return NULL;
 }
@@ -2523,7 +2502,13 @@ swf_parse_get_textrecord (swf_parser * context, int * error, int has_alpha, int 
     swf_textrecord * record;
     U8 flags = swf_parse_get_byte(context);
 
+
+
     if (flags == 0) { return NULL; }
+
+    #ifdef SWF_PARSE_DEBUG
+    fprintf (stderr, "[get_textrecord : mallocing]\n");
+    #endif
 
     if ((record = (swf_textrecord *) calloc (1, sizeof(swf_textrecord))) == NULL)
     {
@@ -2537,9 +2522,16 @@ swf_parse_get_textrecord (swf_parser * context, int * error, int has_alpha, int 
 
     if (flags & isTextControl)
     {
+        #ifdef SWF_PARSE_DEBUG
+        fprintf (stderr, "[get_textrecord : is text control ");
+        #endif
         if (flags & textHasFont)
         {
+
             record->font_id = swf_parse_get_word(context);
+            #ifdef SWF_PARSE_DEBUG
+            fprintf(stderr,"font id is %ld", record->font_id);
+            #endif
         }
         if (flags & textHasColour)
         {
@@ -2558,9 +2550,16 @@ swf_parse_get_textrecord (swf_parser * context, int * error, int has_alpha, int 
             record->font_height = swf_parse_get_word(context);
 
         }
+        #ifdef SWF_PARSE_DEBUG
+        fprintf(stderr,"]\n");
+        #endif
     }
     else
     {
+        #ifdef SWF_PARSE_DEBUG
+        fprintf (stderr, "[get_textrecord : is glyphs]\n");
+        #endif
+
         record->glyph_count = flags;
         if ((record->glyphs = (int **) calloc (record->glyph_count, sizeof (int *))) == NULL)
         {
@@ -2570,6 +2569,9 @@ swf_parse_get_textrecord (swf_parser * context, int * error, int has_alpha, int 
 
         swf_parse_initbits(context);     // reset bit counter
 
+        #ifdef SWF_PARSE_DEBUG
+        fprintf (stderr, "[get_textrecord : getting %d glyphs]\n", record->glyph_count);
+        #endif
 
         for ( g = 0; g < record->glyph_count; g++)
         {
@@ -2588,9 +2590,13 @@ swf_parse_get_textrecord (swf_parser * context, int * error, int has_alpha, int 
 
     }
 
+    #ifdef SWF_PARSE_DEBUG
+    fprintf (stderr, "[get_textrecord : returning]\n");
+    #endif
+
     return record;
 
- FAIL:
+    FAIL:
     swf_destroy_textrecord (record);
     return NULL;
 
@@ -2602,6 +2608,10 @@ swf_parse_get_textrecords (swf_parser * context, int * error, int has_alpha, int
     swf_textrecord_list * list;
     swf_textrecord * temp;
 
+    #ifdef SWF_PARSE_DEBUG
+    fprintf (stderr, "[get_textrecords : mallocing]\n");
+    #endif
+
     if ((list = (swf_textrecord_list *) calloc (1, sizeof (swf_textrecord_list))) == NULL)
     {
         goto FAIL;
@@ -2612,23 +2622,37 @@ swf_parse_get_textrecords (swf_parser * context, int * error, int has_alpha, int
 
     while (1)
     {
+            #ifdef SWF_PARSE_DEBUG
+            fprintf (stderr, "[get_textrecords : attempting to get  a record]\n");
+            #endif
+
 	        if ((temp = swf_parse_get_textrecord(context, error, has_alpha, glyph_bits, advance_bits)) == NULL)
             {
-                if (*error != SWF_ENoError)
-                {
-                    goto FAIL;
-                }
-                break;
+                //if (error != SWF_ENoError)
+                //{
+                //    goto FAIL;
+                //}
+               break;
 	        }
+
+            #ifdef SWF_PARSE_DEBUG
+            fprintf (stderr, "[get_textrecords : got a record]\n");
+            #endif
 
             *(list->lastp) = temp;
 	        list->lastp = &(temp->next);
     }
 
+    #ifdef SWF_PARSE_DEBUG
+    fprintf (stderr, "[get_textrecords : returning]\n");
+    #endif
 
     return list;
 
     FAIL:
+    #ifdef SWF_PARSE_DEBUG
+    fprintf (stderr, "[get_text_records : FAILED!]\n");
+    #endif
     swf_destroy_textrecord_list (list);
     return NULL;
 }
@@ -2637,12 +2661,15 @@ swf_parse_get_textrecords (swf_parser * context, int * error, int has_alpha, int
 swf_shaperecord_list *
 swf_parse_get_shaperecords (swf_parser * context, int * error)
 {
+    /* TODO */
+
     int xlast = 0;
     int ylast = 0;
     int at_end = FALSE;
 
     swf_shaperecord_list * list;
     swf_shaperecord * temp;
+
 
     if ((list = (swf_shaperecord_list *) calloc (1, sizeof (swf_shaperecord_list))) == NULL) {
         *error = SWF_EMallocFailure;
@@ -2810,8 +2837,9 @@ swf_parse_get_shaperecord (swf_parser * context, int * error, int * at_end, int 
 
         /* Are we at the end? */
         if (record->flags == 0) {
+            #ifdef SWF_PARSE_DEBUG
             fprintf(stderr, "\tEnd of shape.\n\n");
-
+            #endif
             *at_end = TRUE;
             return record;
         }
@@ -2922,18 +2950,47 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
     char * str = NULL;
     swf_textrecord *node, *tmp;
 
+    if (list==NULL)
+    {
+        /* todo simon : should eal with thsi more cleanly */
+        return NULL;
+    }
 
+    #ifdef SWF_PARSE_DEBUG
+    fprintf (stderr, "[textrecords_to_text : list is not null]\n");
+    #endif
     node = list->first;
+
+    #ifdef SWF_PARSE_DEBUG
+    fprintf (stderr, "[textrecords_to_text : node is %s]\n", (node==NULL)?"NULL":"Ok");
+    #endif
+
+    /* todo simon : if node == NULL need to cope */
 
     while (node != NULL)
     {
+        #ifdef SWF_PARSE_DEBUG
+        fprintf (stderr, "[textrecords_to_text : node is not NULL]\n");
+        #endif
+
         if (node->flags & isTextControl)
         {
+            #ifdef SWF_PARSE_DEBUG
+            fprintf (stderr, "[textrecords_to_text : it's a text control]\n");
+            #endif
+
             if ( node->flags & textHasFont)
             {
                 font_id = node->font_id;
+                #ifdef SWF_PARSE_DEBUG
+                fprintf (stderr, "[textrecords_to_text : font_id is %d]\n", font_id);
+                #endif
             }
         }else{
+
+            #ifdef SWF_PARSE_DEBUG
+            fprintf (stderr, "[textrecords_to_text : mallocing string]\n");
+            #endif
 
             /* malloc to the size of the string */
             if ((str = (char *) calloc (node->glyph_count+1, sizeof (char))) == NULL)
@@ -2949,6 +3006,9 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
                 return NULL;
             }
 
+            #ifdef SWF_PARSE_DEBUG
+            fprintf (stderr, "[textrecords_to_text : number of glyphs is  %d]\n", node->glyph_count);
+            #endif
 
             /* ... and then set it */
             for (g=0; g< node->glyph_count; g++)
@@ -2959,7 +3019,11 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
             }
             str[g]='\0';
 
-            /* sometimes there's more than one peice of text ... we shoudl probably cope with that as well */
+            /* todo :sometimes there's more than one peice of text ... we shoudl probably cope with that as well */
+            #ifdef SWF_PARSE_DEBUG
+            fprintf (stderr, "[textrecords_to_text : string is  '%s']\n", str);
+            #endif
+
             return str;
         }
 
@@ -2971,20 +3035,32 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
 
 
 
-
+    #ifdef SWF_PARSE_DEBUG
+    fprintf (stderr, "[textrecords_to_text : attempting to return]\n");
+    #endif
 
     if (font_id == -1) {
         /* somethings gone wrong */
-        *error = SWF_EFontNotSet;
+        #ifdef SWF_PARSE_DEBUG
+        fprintf (stderr, "[textrecords_to_text : EFontNotSet]\n");
+        #endif
+        //todo simon : why is this not working *error = SWF_EFontNotSet;
         return NULL;
     }
 
     if (str == NULL) {
         /* somethings gone wrong */
-        *error = SWF_EFontNotSet;
+        #ifdef SWF_PARSE_DEBUG
+        fprintf (stderr, "[textrecords_to_text : EStringNotSet]\n");
+        #endif
+        *error = SWF_EFontNotSet; /*todo :  need to change error message */
         return NULL;
     }
     /* et voila */
+    #ifdef SWF_PARSE_DEBUG
+    fprintf (stderr, "[textrecords_to_text : returning]\n");
+    #endif
+
     return str;
 
 
