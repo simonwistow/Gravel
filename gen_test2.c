@@ -96,17 +96,11 @@ int main (int argc, char *argv[]) {
 
 /* Right, now we need a tagrecord.. */
 
-    temp = swf_make_tagrecord(&error);
+    temp = swf_make_tagrecord(&error, 0);
 
     if (error) {
 	exit(1);
     }
-
-    temp->next = NULL;
-    temp->id = 0;
-    temp->tag = NULL;
-    temp->serialised = 0;
-
 
     swf_get_nth_shape(parser, &error, shape_num, temp);
     obj_id = swf_get_object_id(temp, &error);

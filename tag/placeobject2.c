@@ -99,17 +99,12 @@ swf_add_placeobject2 (swf_movie * movie, int * error, swf_matrix * mym, SWF_U16 
 
 	hasName = hasRatio = hasColour = hasMatrix = hasChar = 0;
 
-    temp = swf_make_tagrecord(error);
+    temp = swf_make_tagrecord(error, tagPlaceObject2);
 
     if (*error) {
 		return;
     }
    
-    temp->next = NULL;
-    temp->id = tagPlaceObject2;
-    temp->tag = NULL;
-    temp->serialised = 0;
-
 /* Place Object2 specifics */
     if ((temp->buffer->raw = (SWF_U8 *) calloc (MAX_PLACE2_SIZE, sizeof (SWF_U8))) == NULL) {
 		*error = SWF_EMallocFailure;

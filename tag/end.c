@@ -22,15 +22,12 @@ swf_add_end(swf_movie * movie, int * error)
 {
     swf_tagrecord * temp;
 
-    temp = swf_make_tagrecord(error);
+    temp = swf_make_tagrecord(error, tagEnd);
 
     if (*error) {
 	return;
     }
 
-    temp->next = NULL;
-    temp->id = tagEnd;
-    temp->tag = NULL;
     temp->serialised = 1;
 
     *(movie->lastp) = temp;

@@ -63,7 +63,7 @@ int main (int argc, char *argv[]) {
     swf_header * hdr;
     swf_tagrecord * temp;
     SWF_U16 obj_id;
-    swf_matrix *matrix, *m2;
+    swf_matrix *matrix, *m2, *m3;
     swf_cxform *mycx, *cx2;
     int i;
     char * myname;
@@ -105,17 +105,11 @@ int main (int argc, char *argv[]) {
 
 /* Right, now we need a tagrecord.. */
 
-    temp = swf_make_tagrecord(&error);
+    temp = swf_make_tagrecord(&error, 0);
 
     if (error) {
 	exit(1);
     }
-
-    temp->next = NULL;
-    temp->id = 0;
-    temp->tag = NULL;
-    temp->serialised = 0;
-
 
     swf_get_nth_shape(parser, &error, shape_num, temp);
     obj_id = swf_get_object_id(temp, &error);
@@ -129,6 +123,10 @@ int main (int argc, char *argv[]) {
       return 1;
     }
     if ((m2 = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
+      error = SWF_EMallocFailure;
+      return 1;
+    }
+    if ((m3 = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
       error = SWF_EMallocFailure;
       return 1;
     }
@@ -168,13 +166,14 @@ int main (int argc, char *argv[]) {
 
     swf_add_setbackgroundcolour(movie, &error, 0, 255, 0, 255);
     swf_dump_shape(movie, &error, temp);
-
+    swf_add_definebutton(movie, &error, 14, obj_id);
+      
     /* Do the frames */
 
     myname = (char *) "pigdog";
 
-    matrix->a  = matrix->c  = 256 * 256;
-    matrix->b  = matrix->d  = 0;
+    matrix->a  = matrix->d  = 256 * 256;
+    matrix->b  = matrix->c  = 0;
     matrix->tx = 0 * 20;
     matrix->ty = 0 * 20;
 
@@ -182,8 +181,8 @@ int main (int argc, char *argv[]) {
     mycx->gb = 0;
     mycx->bb = 0;
 
-    m2->a  = m2->c  = 2 * 256 * 256;
-    m2->b  = m2->d  = 0;
+    m2->a  = m2->d  = 2 * 256 * 256;
+    m2->b  = m2->c  = 0;
     m2->tx = 100 * 20;
     m2->ty = 0 * 20;
 
@@ -191,17 +190,31 @@ int main (int argc, char *argv[]) {
     mycx->gb = 0;
     mycx->bb = 0;
 
+
+    m3->a  = m3->d  = 1 * 256 * 256;
+    m3->b  = m3->c  = 0;
+    m3->tx = 100 * 20;
+    m3->ty = 100 * 20;
+
+    fprintf(stderr, "foo A\n");
+
     for (i=1; i<=NUMFRAMES; i++) {
+      fprintf(stderr, "foo B\n");
+      fprintf(stderr, "foo C\n");
       swf_add_placeobject2(movie, &error, matrix, obj_id, i, mycx, NULL);
       swf_add_placeobject2(movie, &error, m2, obj_id, 1, cx2, myname);
+      swf_add_placeobject(movie, &error, m3, 14, 2);
+
       swf_add_showframe(movie, &error);
 
       if (i < NUMFRAMES) {
 	swf_add_removeobject2(movie, &error, i);
 	swf_add_removeobject2(movie, &error, 1);
+	swf_add_removeobject(movie, &error, 14, 2);
       }
       matrix->tx += 5 * 20;
       matrix->a += 4 * 256;
+      matrix->d += 4 * 256;
       mycx->bb += 5;
 
       m2->ty += 2 * 20;
@@ -213,6 +226,7 @@ int main (int argc, char *argv[]) {
     swf_make_finalise(movie, &error);
 
     swf_free(cx2);
+    swf_free(m3);
     swf_free(m2);
     swf_free(mycx);
     swf_free(matrix);

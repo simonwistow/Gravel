@@ -16,6 +16,7 @@
  */
 
 #include "tag_handy.h"
+#define MAX_BUTTON_SIZE 128
 
 swf_definebutton *
 swf_parse_definebutton (swf_parser * context, int * error)
@@ -47,6 +48,89 @@ swf_parse_definebutton (swf_parser * context, int * error)
     return NULL;
 
 }
+
+/* FIXME: Test API while I knock this up */
+// For now, just pass in a char_id, and use the same shape twice,
+	// just reduce in size on MouseOver...
+
+void 
+swf_add_definebutton (swf_movie * movie, int * error, SWF_U16 button_id, SWF_U16 char_id)
+{
+	swf_tagrecord * temp;
+	swf_matrix * m1;
+	SWF_U16 depth;
+
+    if ((m1 = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
+      *error = SWF_EMallocFailure;
+      return;
+    }
+
+	depth = 1;
+
+    temp = swf_make_tagrecord(error, tagDefineButton);
+
+/* Define Button specifics */
+    if ((temp->buffer->raw = (SWF_U8 *) calloc (MAX_BUTTON_SIZE, sizeof (SWF_U8))) == NULL) {
+		*error = SWF_EMallocFailure;
+		return;
+    }
+
+    if (*error) {
+		return;
+    }
+
+    swf_buffer_initbits(temp->buffer);
+	swf_buffer_put_word(temp->buffer, error, button_id);
+
+	m1->a  = m1->d  = 256 * 256;
+	m1->b  = m1->c  = 0;
+	m1->tx = m1->ty = 100 * 20;
+
+	swf_buffer_put_bits(temp->buffer, 4, 0); /* Undocumented bits, assume 0 */
+	swf_buffer_put_bits(temp->buffer, 1, 0); /* Used for HitTest? */
+	swf_buffer_put_bits(temp->buffer, 1, 0); /* Used for Down? */
+	swf_buffer_put_bits(temp->buffer, 1, 0); /* Used for Over? */
+	swf_buffer_put_bits(temp->buffer, 1, 1); /* Used for Up? */
+    swf_buffer_flush_bits(temp->buffer);
+	swf_buffer_put_word(temp->buffer, error, char_id);
+	swf_buffer_put_word(temp->buffer, error, depth);
+	swf_serialise_matrix(temp->buffer, error, m1);
+
+	m1->a = m1->d = 128 * 256;
+	m1->b = m1->c = 0;
+	m1->tx = m1->ty = 100 * 20;
+
+	swf_buffer_put_bits(temp->buffer, 4, 0); /* Undocumented bits, assume 0 */
+	swf_buffer_put_bits(temp->buffer, 1, 1); /* Used for HitTest? */
+	swf_buffer_put_bits(temp->buffer, 1, 1); /* Used for Down? */
+	swf_buffer_put_bits(temp->buffer, 1, 1); /* Used for Over? */
+	swf_buffer_put_bits(temp->buffer, 1, 0); /* Used for Up? */
+    swf_buffer_flush_bits(temp->buffer);
+	swf_buffer_put_word(temp->buffer, error, char_id);
+	swf_buffer_put_word(temp->buffer, error, depth);
+	swf_serialise_matrix(temp->buffer, error, m1);
+
+// Button records....
+
+	/* End of button records marker */
+	swf_buffer_put_byte(temp->buffer, error, 0);
+
+// Action records go here... ignore for now.
+
+	/* End of action records marker */
+	swf_buffer_put_byte(temp->buffer, error, 0);
+
+    temp->serialised = 1;
+
+    *(movie->lastp) = temp;
+    movie->lastp = &(temp->next);
+
+	swf_free(m1);
+
+    return;
+}
+
+
 
 void
 swf_destroy_definebutton (swf_definebutton * button)

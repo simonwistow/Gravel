@@ -60,7 +60,7 @@ swf_movie * swf_make_movie (int * error);
 void swf_destroy_movie (swf_movie * movie);
 
 
-swf_tagrecord * swf_make_tagrecord (int * error);
+swf_tagrecord * swf_make_tagrecord (int * error, SWF_U16 myid);
 swf_shaperecord_list * swf_make_shaperecords_for_triangle(int * error);
 swf_tagrecord * swf_make_triangle_as_tag(swf_movie * movie, int * error);
 

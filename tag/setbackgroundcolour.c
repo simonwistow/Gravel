@@ -49,7 +49,7 @@ swf_add_setbackgroundcolour(swf_movie * movie, int * error, SWF_U8 red, SWF_U8 g
     swf_tagrecord * temp;
     swf_setbackgroundcolour * col;
 
-    temp = swf_make_tagrecord(error);
+    temp = swf_make_tagrecord(error, tagSetBackgroundColour);
 
     if (*error) {
 		return;
@@ -80,8 +80,6 @@ swf_add_setbackgroundcolour(swf_movie * movie, int * error, SWF_U8 red, SWF_U8 g
 	temp->buffer->raw[2] = col->colour->b;
 	temp->buffer->raw[3] = col->colour->a;
 
-    temp->next = NULL;
-    temp->id = tagSetBackgroundColour;
     temp->tag = col;
     temp->serialised = 1;
     temp->buffer->size = 4;

@@ -38,15 +38,12 @@ swf_add_removeobject (swf_movie * movie, int * error, SWF_U16 char_id, SWF_U16 d
 {
 	swf_tagrecord * temp;
 
-    temp = swf_make_tagrecord(error);
+    temp = swf_make_tagrecord(error, tagRemoveObject);
 
     if (*error) {
 		return;
     }
    
-    temp->next = NULL;
-    temp->id = tagRemoveObject;
-    temp->tag = NULL;
     temp->serialised = 1;
 
 /* Remove Object specifics */

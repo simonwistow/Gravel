@@ -74,7 +74,7 @@ swf_add_matrix (swf_movie * movie, int * error, swf_matrix * mym)
     swf_movie_initbits(movie);
 
 	/* 'Scale' bits first... */
-	if (mym->a || mym->c) {
+	if (mym->a || mym->d) {
 		swf_movie_put_bits(movie, 1, 1);
 
 		max = 0;
@@ -84,7 +84,7 @@ swf_add_matrix (swf_movie * movie, int * error, swf_matrix * mym)
 			max = abs(mym->a);
 		}
 		if (abs(mym->c) > max) {
-			max = abs(mym->c);
+			max = abs(mym->d);
 		}
 		while (1 < max) {
 			i++;
@@ -95,13 +95,13 @@ swf_add_matrix (swf_movie * movie, int * error, swf_matrix * mym)
 
 		swf_movie_put_bits(movie, 5, i);
 		swf_movie_put_sbits(movie, i, mym->a);
-		swf_movie_put_sbits(movie, i, mym->c);
+		swf_movie_put_sbits(movie, i, mym->d);
 	} else {
 		swf_movie_put_bits(movie, 1, 0);
 	}
 
 	/* 'Rotate' bits next... */
-	if (mym->b | mym->d) {
+	if (mym->b | mym->c) {
 		swf_movie_put_bits(movie, 1, 1);
 
 		max = 0;
@@ -110,7 +110,7 @@ swf_add_matrix (swf_movie * movie, int * error, swf_matrix * mym)
 		if (abs(mym->b) > max) {
 			max = abs(mym->b);
 		}
-		if (abs(mym->d) > max) {
+		if (abs(mym->c) > max) {
 			max = abs(mym->d);
 		}
 		while (1 < max) {
@@ -122,7 +122,7 @@ swf_add_matrix (swf_movie * movie, int * error, swf_matrix * mym)
 
 		swf_movie_put_bits(movie, 5, i);
 		swf_movie_put_sbits(movie, i, mym->b);
-		swf_movie_put_sbits(movie, i, mym->d);
+		swf_movie_put_sbits(movie, i, mym->c);
 	} else {
 		swf_movie_put_bits(movie, 1, 0);
 	}
@@ -168,7 +168,7 @@ swf_serialise_matrix (swf_buffer * buffer, int * error, swf_matrix * mym)
 	dprintf("a = %lu ; c = %lu ; b = %lu ; d = %lu ; tx = %lu ty = %lu\n", mym->a, mym->c, mym->b, mym->d, mym->tx, mym->ty);
 
 	/* 'Scale' bits first... */
-	if (mym->a | mym->c) {
+	if (mym->a | mym->d) {
 		swf_buffer_put_bits(buffer, 1, 1);
 
 		max = 0;
@@ -176,32 +176,6 @@ swf_serialise_matrix (swf_buffer * buffer, int * error, swf_matrix * mym)
 
 		if (abs(mym->a) > max) {
 			max = abs(mym->a);
-		}
-		if (abs(mym->c) > max) {
-			max = abs(mym->c);
-		}
-		while (1 < max) {
-			i++;
-			max = max >> 1;
-		}
-
-		dprintf("Putting: a = %lu ; c = %lu as bitlength %"pSWF_U32"\n", mym->a, mym->c, i);
-		swf_buffer_put_bits(buffer, 5, i);
-		swf_buffer_put_sbits(buffer, i, mym->a);
-		swf_buffer_put_sbits(buffer, i, mym->c);
-	} else {
-		swf_buffer_put_bits(buffer, 1, 0);
-	}
-
-	/* 'Rotate' bits next... */
-	if (mym->b | mym->d) {
-		swf_buffer_put_bits(buffer, 1, 1);
-
-		max = 0;
-		i = 2;
-
-		if (abs(mym->b) > max) {
-			max = abs(mym->b);
 		}
 		if (abs(mym->d) > max) {
 			max = abs(mym->d);
@@ -211,9 +185,35 @@ swf_serialise_matrix (swf_buffer * buffer, int * error, swf_matrix * mym)
 			max = max >> 1;
 		}
 
+		dprintf("Putting: a = %lu ; d = %lu as bitlength %"pSWF_U32"\n", mym->a, mym->c, i);
+		swf_buffer_put_bits(buffer, 5, i);
+		swf_buffer_put_sbits(buffer, i, mym->a);
+		swf_buffer_put_sbits(buffer, i, mym->d);
+	} else {
+		swf_buffer_put_bits(buffer, 1, 0);
+	}
+
+	/* 'Rotate' bits next... */
+	if (mym->b | mym->c) {
+		swf_buffer_put_bits(buffer, 1, 1);
+
+		max = 0;
+		i = 2;
+
+		if (abs(mym->b) > max) {
+			max = abs(mym->b);
+		}
+		if (abs(mym->c) > max) {
+			max = abs(mym->c);
+		}
+		while (1 < max) {
+			i++;
+			max = max >> 1;
+		}
+
 		swf_buffer_put_bits(buffer, 5, i);
 		swf_buffer_put_sbits(buffer, i, mym->b);
-		swf_buffer_put_sbits(buffer, i, mym->d);
+		swf_buffer_put_sbits(buffer, i, mym->c);
 	} else {
 		swf_buffer_put_bits(buffer, 1, 0);
 	}

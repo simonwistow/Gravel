@@ -39,18 +39,15 @@ swf_add_removeobject2 (swf_movie * movie, int * error, SWF_U16 depth)
 {
 	swf_tagrecord * temp;
 
-    temp = swf_make_tagrecord(error);
+    temp = swf_make_tagrecord(error, tagRemoveObject2);
 
     if (*error) {
 		return;
     }
    
-    temp->next = NULL;
-    temp->id = tagRemoveObject2;
-    temp->tag = NULL;
     temp->serialised = 1;
 
-/* Remove Object specifics */
+/* Remove Object2 specifics */
     if ((temp->buffer->raw = (SWF_U8 *) calloc (2, sizeof (SWF_U8))) == NULL) {
 		*error = SWF_EMallocFailure;
 		return;

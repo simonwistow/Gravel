@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.15 2002/05/20 17:05:26 kitty_goth Exp $	
+ * 	$Id: swf_movie.c,v 1.16 2002/05/21 23:20:47 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -137,7 +137,7 @@ swf_make_movie (int * error)
 }
 
 swf_tagrecord * 
-swf_make_tagrecord (int * error) 
+swf_make_tagrecord (int * error, SWF_U16 myid) 
 {
     swf_tagrecord * tag;
 
@@ -152,6 +152,11 @@ swf_make_tagrecord (int * error)
     }
     tag->buffer->raw  = NULL;
     tag->buffer->size = 0;
+
+    tag->next = NULL;
+    tag->id = myid;
+    tag->tag = NULL;
+    tag->serialised = 0;
 
     return tag;
 }
@@ -306,8 +311,6 @@ swf_get_raw_shape (swf_parser * swf, int * error, swf_tagrecord * mytag)
         fprintf(stderr, "alloc fuckup 1\n");
 	return;
     }
-
-    printf("foo a\n");
 
     if ((mytag->buffer = (swf_buffer *) calloc (1, sizeof (swf_buffer))) == NULL) {
 	*error = SWF_EMallocFailure;
@@ -470,8 +473,6 @@ swf_make_finalise(swf_movie * movie, int * error)
     return;
   }
 
-  fprintf(stderr, "foo z\n");
-
   file_buf[0] = 'F';
   file_buf[1] = 'W';
   file_buf[2] = 'S';
@@ -492,7 +493,6 @@ swf_make_finalise(swf_movie * movie, int * error)
   file_buf[7] = (tmp_size << 24) >> 24;
 
   swf_movie_put_bytes(movie, error, 8, file_buf);
-  fprintf(stderr, "foo y\n");
   swf_serialise_rect(movie, error, movie->header->bounds);
 
 /* set the backup byte counter to be the next vacant place. In case we 
@@ -513,7 +513,6 @@ swf_make_finalise(swf_movie * movie, int * error)
 
   node = movie->first;
 
-  fprintf(stderr, "foo x\n");
   while (node != NULL) {
     temp = node;
     node = node->next;
