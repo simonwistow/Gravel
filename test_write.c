@@ -86,11 +86,10 @@ void serialise(swf_movie * movie, int * error);
 void serialise(swf_movie * movie, int * error)
 {
 	SWF_U32 movie_length;
-	SWF_U8 * stream;
 	SWF_U8 * r;
 	char * ch;
 	swf_tagrecord * temp;
-	SWF_U8 bitsize, pad;
+	SWF_U8 bitsize;
 	SWF_U16 big_pad, xmin, ymin, xmax, ymax;
     FILE * myfile;
 
@@ -113,7 +112,7 @@ void serialise(swf_movie * movie, int * error)
 	/* Did we open the file? */
 	if (myfile == NULL) {
 		*error = SWF_EFileOpenFailure;
-		return NULL;
+		return;
 	}
 
 	ch = "FWS5";
@@ -148,10 +147,10 @@ void serialise(swf_movie * movie, int * error)
 	movie_length += 10; /* for the r array */
 	movie_length += 12; /* for the fixed header overhead */
 
-	r[0] = movie_length >> 24; 
-	r[1] = (movie_length << 8) >> 24; 
-	r[2] = (movie_length << 16) >> 24; 
-	r[3] = (movie_length << 24) >> 24; 
+	r[3] = movie_length >> 24; 
+	r[2] = (movie_length << 8) >> 24; 
+	r[1] = (movie_length << 16) >> 24; 
+	r[0] = (movie_length << 24) >> 24; 
 
 	if( fwrite(r, 1, 4, myfile) != 4){
 		*error = SWF_ETooManyFriends;
@@ -212,6 +211,21 @@ void serialise(swf_movie * movie, int * error)
 		return;
     }
 	   
+	/* Main output loop */
+
+	temp = movie->first;
+
+	do {
+		fprintf(stderr, "Id of this tag: %i\n", temp->id);
+
+		if( fwrite(temp->buffer, 1, temp->size, myfile) != temp->size){
+			*error = SWF_ETooManyFriends;
+			return;
+		}
+
+		temp = temp->next;
+
+	} while (NULL != temp);	
 
 	fclose(myfile);
 
@@ -219,6 +233,55 @@ void serialise(swf_movie * movie, int * error)
 
 	swf_free(r);
 	return;
+}
+
+void add_serialised_defineshape(swf_movie * movie, int * error, swf_tagrecord * shape);
+
+void add_serialised_defineshape(swf_movie * movie, int * error, swf_tagrecord * shape)
+{
+	int length, tag, original;
+	SWF_U16 pad;
+	SWF_U32 big_pad = 0;
+
+	if ((movie->first = (swf_tagrecord *) calloc (1, sizeof (swf_tagrecord))) == NULL) {
+		*error = SWF_EMallocFailure;
+		return;
+    }
+
+	length = shape->size;
+	original = shape->size;
+	tag = tagDefineShape;
+
+	pad = tag << 6;
+
+	if (length < 0x3f) {
+		pad |= length;
+	} else {
+		pad |= 0x3f;
+		big_pad = length;
+		length += 4;
+	}
+
+	length += 2;
+
+	if ((movie->first->buffer = (SWF_U8 *) calloc (length, sizeof (SWF_U8))) == NULL) {
+		*error = SWF_EMallocFailure;
+		return;
+    }
+
+	movie->first->buffer[0] = pad >> 8;
+	movie->first->buffer[1] = pad & 0xff;
+
+	if (big_pad) {
+		movie->first->buffer[2] = pad >> 24;
+		movie->first->buffer[3] = (pad << 8) >> 24;
+		movie->first->buffer[4] = (pad << 16) >> 24;
+		movie->first->buffer[5] = (pad << 24) >> 24;
+		memcpy(movie->first->buffer + 6, shape->buffer, original);
+	} else {
+		memcpy(movie->first->buffer + 2, shape->buffer, original);
+	}
+
 }
 
 void add_serialised_placeobject(swf_movie * movie, int * error, SWF_U8 x, SWF_U8 y, SWF_U16 obj_id);
@@ -254,7 +317,7 @@ void add_serialised_placeobject(swf_movie * movie, int * error, SWF_U8 x, SWF_U8
 
 	pad = po->id << 6;
 
-	pad &= length;
+	pad |= length;
 
 	b1 = pad & 0xff;
     b0 = (pad >> 8) & 0xff; 
@@ -381,12 +444,19 @@ main (int argc, char *argv[])
 
 	swf_get_nth_shape(swf, &error, shape_num, buffy);
 
+	if (error) {
+		fprintf(stderr, "Error : %i\n", error);
+	}
 
-	movie->first = buffy;
+	/* buffy now has a headerless serialised defineshape tag in it */
+
+	add_serialised_defineshape(movie, &error, buffy);
+
+	if (error) {
+		fprintf(stderr, "Error : %i\n", error);
+	}
 
 	fprintf(stderr, "Bytes returned: %li\n", movie->first->size);
-	
-	/* buffy now has a serialised defineshape tag in it */
 	
 	/* Now we need a placeobject */
 	add_serialised_placeobject(movie, &error, 10, 20, buffy->code);
@@ -400,7 +470,13 @@ main (int argc, char *argv[])
 
 	/* Now stream it out */
 
+	error = SWF_ENoError;
+
 	serialise(movie, &error);
+
+	if (error) {
+		fprintf(stderr, "Error: %i\n", error);
+	}
 
 	swf_free(buffy->buffer);
 	swf_free(buffy);

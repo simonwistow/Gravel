@@ -45,6 +45,43 @@ swf_parse_get_rect (swf_parser * context, int * error)
 }
 
 
+void swf_serialise_rect(swf_movie * p, int * error, swf_rect * rect) 
+{
+  SWF_U16 max;
+
+  SWF_U8 i=2;
+  int err=0;
+
+  max = 0;
+  if (abs(rect->xmin) > max) {
+    max = abs(rect->xmin);
+  }
+  if (abs(rect->xmax) > max) {
+    max = abs(rect->xmax);
+  }
+  if (abs(rect->ymin) > max) {
+    max = abs(rect->ymin);
+  }
+  if (abs(rect->xmax) > max) {
+    max = abs(rect->ymax);
+  }
+
+  while (1 < max) {
+    fprintf(stderr, "max = %u after shifting %i bits\n", max, i);
+    i++;
+    max = max >> 1;
+  }
+
+  fprintf(stderr, "max = %u after shifting %i bits\n", max, i);
+  swf_movie_put_bits(p, 5, i);
+  swf_movie_put_sbits(p, i, rect->xmin);
+  swf_movie_put_sbits(p, i, rect->xmax);
+  swf_movie_put_sbits(p, i, rect->ymin);
+  swf_movie_put_sbits(p, i, rect->ymax);
+  swf_movie_flush_bits(p);
+
+}
+
 void
 swf_destroy_rect (swf_rect * rect)
 {
