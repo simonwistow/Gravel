@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_destroy.c,v $
+ * Revision 1.23  2001/07/13 16:15:40  clampr
+ * some fonts don't have bounds
+ *
  * Revision 1.22  2001/07/13 13:48:08  clampr
  * doh!
  *
@@ -686,7 +689,7 @@ swf_destroy_definefont2 (swf_definefont2 * font)
 
     for (i=0; i<font->glyph_count; i++) {
         swf_destroy_shaperecord_list (font->glyphs[i]);
-        swf_destroy_rect (font->bounds[i]);
+        if (font->bounds) swf_destroy_rect (font->bounds[i]);
     }
 
     swf_free (font->glyphs);
