@@ -35,7 +35,7 @@ swf_destroy_parser (swf_parser * context)
     if (!context) return;
 
     fclose(context->file);
-    swf_free(context->name);
+//    swf_free(context->name);
     swf_free(context->header);
 
 	extra = context->font_extras;
@@ -47,6 +47,9 @@ swf_destroy_parser (swf_parser * context)
 		swf_free(last);		
 	}
 
+//	swf_free (context->file);
+	swf_free (context->buffer);
+	swf_free (context->src_adpcm);
     swf_free (context);
 }
 

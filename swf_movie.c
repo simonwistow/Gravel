@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.20 2002/05/27 21:58:45 kitty_goth Exp $	
+ * 	$Id: swf_movie.c,v 1.21 2002/05/27 23:35:08 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -191,12 +191,18 @@ swf_destroy_tagrecord (swf_tagrecord * tag)
 {
 	if (tag == NULL)
 	{
-		return;
+	  return;
 	}
-	free (tag->buffer->raw);
-	free (tag->buffer);
-	free (tag->next);
-	free (tag->tag);
+	tag->next = NULL;
+
+	if (tag->buffer != NULL) {
+	  swf_free (tag->buffer->raw);
+	}
+	swf_free (tag->buffer);
+	/* We don't want to free the next tag. It's probably still valid */
+//	swf_free (tag->next);
+	swf_free (tag->tag);
+	swf_free (tag);
 }
 
 
@@ -232,13 +238,17 @@ swf_destroy_movie (swf_movie * movie)
 	  shiva[tagid](tagrec);
 	}
 
-	swf_free(tmp->buffer->raw);
-	swf_free(tmp->buffer);
-	swf_free(tmp);
+	swf_destroy_tagrecord(tmp);
     }
 
+//    swf_destroy_tagrecord(movie->first);
+    swf_destroy_tagrecord(*movie->lastp);
+
+    swf_free(movie->buffer);
+//    swf_free(*movie->lastp);
+    swf_free(movie->first);
     swf_free(movie);
-    free(shiva);
+    swf_free(shiva);
 
     return;
 }
@@ -366,7 +376,6 @@ swf_get_raw_shape (swf_parser * swf, int * error)
     FAIL:
     swf_destroy_tagrecord(mytag);
     return NULL;
-
 }
 
 

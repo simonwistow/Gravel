@@ -101,17 +101,6 @@ int main (int argc, char *argv[]) {
 
 /* Right, now we need a tagrecord.. */
 
-/*
-    error = SWF_ENoError;
-    temp = swf_make_tagrecord(&error, 0);
-
-    if (error != SWF_ENoError) {
-	fprintf(stderr,"Error making tag record : %s\n",  swf_error_code_to_string(error));
-	exit(1);
-    }
-
-    swf_get_nth_shape(parser, &error, shape_num, temp);
-*/
     temp = swf_get_nth_shape(parser, &error, shape_num);
 
  
@@ -245,7 +234,6 @@ int main (int argc, char *argv[]) {
     swf_free(mycx);
     swf_free(matrix);
     swf_destroy_movie(movie);
-
 
     fprintf (stderr, "OK\n");
     return 0;
