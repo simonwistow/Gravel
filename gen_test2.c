@@ -160,7 +160,7 @@ int main (int argc, char *argv[]) {
     mycx->gb = 0;
     mycx->bb = 1;
 
-    swf_add_placeobject_with_cxform(movie, &error, obj_id, matrix, mycx);
+    swf_add_placeobject(movie, &error, obj_id, matrix);
     swf_add_showframe(movie, &error);
 
     swf_add_removeobject(movie, &error, obj_id);
@@ -173,7 +173,7 @@ int main (int argc, char *argv[]) {
     mycx->gb = 0;
     mycx->bb = 1;
 
-    swf_add_placeobject_with_cxform(movie, &error, obj_id, matrix, mycx);
+    swf_add_placeobject(movie, &error, obj_id, matrix);
     swf_add_showframe(movie, &error);
 
     swf_add_removeobject(movie, &error, obj_id);
@@ -186,7 +186,7 @@ int main (int argc, char *argv[]) {
     mycx->gb = 0;
     mycx->bb = 1;
 
-    swf_add_placeobject_with_cxform(movie, &error, obj_id, matrix, mycx);
+    swf_add_placeobject(movie, &error, obj_id, matrix);
     swf_add_showframe(movie, &error);
 
     swf_add_removeobject(movie, &error, obj_id);
@@ -199,7 +199,7 @@ int main (int argc, char *argv[]) {
     mycx->gb = 0;
     mycx->bb = 1;
 
-    swf_add_placeobject_with_cxform(movie, &error, obj_id, matrix, mycx);
+    swf_add_placeobject(movie, &error, obj_id, matrix);
     swf_add_showframe(movie, &error);
 
     swf_add_removeobject(movie, &error, obj_id);
@@ -212,7 +212,7 @@ int main (int argc, char *argv[]) {
     mycx->gb = 0;
     mycx->bb = 1;
 
-    swf_add_placeobject_with_cxform(movie, &error, obj_id, matrix, mycx);
+    swf_add_placeobject(movie, &error, obj_id, matrix);
     swf_add_showframe(movie, &error);
 
     swf_add_removeobject(movie, &error, obj_id);
@@ -225,7 +225,7 @@ int main (int argc, char *argv[]) {
     mycx->gb = 0;
     mycx->bb = 1;
 
-    swf_add_placeobject_with_cxform(movie, &error, obj_id, matrix, mycx);
+    swf_add_placeobject(movie, &error, obj_id, matrix);
     swf_add_showframe(movie, &error);
 
     swf_add_removeobject(movie, &error, obj_id);
@@ -238,9 +238,8 @@ int main (int argc, char *argv[]) {
     mycx->gb = 0;
     mycx->bb = 1;
 
-    swf_add_placeobject_with_cxform(movie, &error, obj_id, matrix, mycx);
+    swf_add_placeobject(movie, &error, obj_id, matrix);
     swf_add_showframe(movie, &error);
-
 
     swf_add_end(movie, &error);
 

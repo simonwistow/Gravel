@@ -26,6 +26,8 @@
 
 #include <stdio.h>
 
+#define NUMFRAMES 20
+
 void usage (char * name);
 
 void 
@@ -62,6 +64,7 @@ int main (int argc, char *argv[]) {
     SWF_U16 obj_id;
     swf_matrix * matrix;
     swf_cxform * mycx;
+    int i;
 
 /* First, get a parser up */
 
@@ -88,6 +91,10 @@ int main (int argc, char *argv[]) {
     printf("File size \t%"pSWF_U32"\n", hdr->size);
     printf("Movie width \t%lu\n", (hdr->bounds->xmax - hdr->bounds->xmin) / 20);
     printf("Movie height \t%lu\n", (hdr->bounds->ymax - hdr->bounds->ymin) / 20);
+    printf("Xmin: \t%lu\n", (hdr->bounds->xmin / 20));
+    printf("Xmax: \t%lu\n", (hdr->bounds->xmax / 20));
+    printf("Ymin: \t%lu\n", (hdr->bounds->ymin / 20));
+    printf("Ymax: \t%lu\n", (hdr->bounds->ymax / 20));
     printf("Frame rate \t%"pSWF_U32"\n", hdr->rate);
     printf("Frame count \t%"pSWF_U32"\n", hdr->count);
 
@@ -119,9 +126,13 @@ int main (int argc, char *argv[]) {
       return 1;
     }
 
-    mycx->ra = 0;
+    mycx->ra = 256;
     mycx->ga = 0;
-    mycx->ba = 1;
+    mycx->ba = 256;
+
+    mycx->aa = 256;
+    mycx->ab = 0;
+
 
 /* Now generate the output movie */
 
@@ -135,124 +146,32 @@ int main (int argc, char *argv[]) {
     movie->header = hdr;
     movie->name = (char *) "ben3.swf";
 
-    movie->header->rate = 25 * 256;
+    movie->header->rate = 20 * 256;
 
     swf_add_setbackgroundcolour(movie, &error, 0, 255, 0, 255);
     swf_dump_shape(movie, &error, temp);
 
-    /* Start doing the frames */
+    /* Do the frames */
 
-    matrix->a  = matrix->c  = 512 * 100;
+    matrix->a  = matrix->c  = 256 * 100;
     matrix->b  = matrix->d  = 0;
-    matrix->tx = 300 * 20;
-    matrix->ty = 150 * 20;
+    matrix->tx = 0 * 20;
+    matrix->ty = 0 * 20;
 
     mycx->rb = 0;
     mycx->gb = 0;
-    mycx->bb = 20;
+    mycx->bb = 0;
 
-    //    swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, NULL);
-    swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, mycx);
-    swf_add_showframe(movie, &error);
+    for (i=1; i<=NUMFRAMES; i++) {
+      swf_add_placeobject2(movie, &error, obj_id, matrix, mycx);
+      swf_add_showframe(movie, &error);
 
-    swf_add_removeobject(movie, &error, obj_id);
-    matrix->a  = matrix->c  = 512 * 100;
-    matrix->b  = matrix->d  = 0;
-    matrix->tx = 270 * 20;
-    matrix->ty = 150 * 20;
-
-    mycx->rb = 0;
-    mycx->gb = 0;
-    mycx->bb = 40;
-
-    //swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, NULL);
-    swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, mycx);
-    swf_add_showframe(movie, &error);
-
-    swf_add_removeobject(movie, &error, obj_id);
-    matrix->a  = matrix->c  = 512 * 100;
-    matrix->b  = matrix->d  = 0;
-    matrix->tx = 240 * 20;
-    matrix->ty = 150 * 20;
-
-    mycx->rb = 0;
-    mycx->gb = 0;
-    mycx->bb = 60;
-
-    //swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, NULL);
-    swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, mycx);
-    swf_add_showframe(movie, &error);
-
-    swf_add_removeobject(movie, &error, obj_id);
-    matrix->a  = matrix->c  = 512 * 100;
-    matrix->b  = matrix->d  = 0;
-    matrix->tx = 210 * 20;
-    matrix->ty = 150 * 20;
-
-    mycx->rb = 0;
-    mycx->gb = 0;
-    mycx->bb = 80;
-
-    //swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, NULL);
-    swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, mycx);
-    swf_add_showframe(movie, &error);
-
-    swf_add_removeobject(movie, &error, obj_id);
-    matrix->a  = matrix->c  = 512 * 100;
-    matrix->b  = matrix->d  = 0;
-    matrix->tx = 180 * 20;
-    matrix->ty = 150 * 20;
-
-    mycx->rb = 0;
-    mycx->gb = 0;
-    mycx->bb = 100;
-
-    //swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, NULL);
-    swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, mycx);
-    swf_add_showframe(movie, &error);
-
-    swf_add_removeobject(movie, &error, obj_id);
-    matrix->a  = matrix->c  = 512 * 100;
-    matrix->b  = matrix->d  = 0;
-    matrix->tx = 150 * 20;
-    matrix->ty = 150 * 20;
-
-    mycx->rb = 0;
-    mycx->gb = 0;
-    mycx->bb = 120;
-
-    //swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, NULL);
-    swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, mycx);
-    swf_add_showframe(movie, &error);
-
-    swf_add_removeobject(movie, &error, obj_id);
-    matrix->a  = matrix->c  = 512 * 100;
-    matrix->b  = matrix->d  = 0;
-    matrix->tx = 120 * 20;
-    matrix->ty = 150 * 20;
-
-    mycx->rb = 0;
-    mycx->gb = 0;
-    mycx->bb = 140;
-
-    //swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, NULL);
-    swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, mycx);
-    swf_add_showframe(movie, &error);
-
-    swf_add_removeobject(movie, &error, obj_id);
-    matrix->a  = matrix->c  = 512 * 100;
-    matrix->b  = matrix->d  = 0;
-    matrix->tx =  90 * 20;
-    matrix->ty = 150 * 20;
-
-    mycx->rb = 0;
-    mycx->gb = 0;
-    mycx->bb = 160;
-
-    //swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, NULL);
-    swf_add_placeobject2_with_cxform(movie, &error, obj_id, matrix, mycx);
-    swf_add_showframe(movie, &error);
-
+      if (i < NUMFRAMES) {
+	swf_add_removeobject(movie, &error, obj_id);
+      }
+      matrix->tx += 20 * 20;
+      mycx->bb += 256;
+    }
 
     swf_add_end(movie, &error);
 
@@ -265,9 +184,6 @@ int main (int argc, char *argv[]) {
     fprintf (stderr, "OK\n");
     return 0;
 }
-
-
-
 
 
 

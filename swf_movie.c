@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.12 2002/05/11 15:01:51 clampr Exp $	
+ * 	$Id: swf_movie.c,v 1.13 2002/05/15 16:45:27 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -172,7 +172,7 @@ void swf_destroy_tagrecord (swf_tagrecord * tagrec) {
 	    break;
 
 	default:
-	    printf ("Ooook!\n");
+	    printf ("Ooook! Un-cleaned up tagrecord detected\n");
 	    break;
     }
 

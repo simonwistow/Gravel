@@ -87,7 +87,7 @@ swf_parse_placeobject2 (swf_parser * context, int * error)
 
 /* We also need 'name' and 'ratio' attributes */
 void
-swf_add_placeobject2_with_cxform (swf_movie * movie, int * error, SWF_U16 char_id, swf_matrix * mym, swf_cxform * mycx)
+swf_add_placeobject2 (swf_movie * movie, int * error, SWF_U16 char_id, swf_matrix * mym, swf_cxform * mycx)
 {
 	swf_tagrecord * temp;
 	SWF_U16 depth;
@@ -138,7 +138,7 @@ swf_add_placeobject2_with_cxform (swf_movie * movie, int * error, SWF_U16 char_i
 		swf_serialise_matrix(temp->buffer, error, mym);
 	}
 	if (hasColour) {
-		swf_serialise_cxform(temp->buffer, error, mycx);
+		swf_serialise_cxform_force_alpha(temp->buffer, error, mycx);
 	}
 	if (hasRatio) {
 		/* Not yet */

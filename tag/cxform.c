@@ -137,6 +137,79 @@ swf_serialise_cxform (swf_buffer * buffer, int * error, swf_cxform * mycx)
     swf_buffer_flush_bits(buffer);
 }
 
+void
+swf_serialise_cxform_force_alpha (swf_buffer * buffer, int * error, swf_cxform * mycx)
+{
+	SWF_U32 max, i;
+    SWF_U8 hasAdd, hasMult;
+
+    swf_buffer_initbits(buffer);
+
+	hasAdd = hasMult =0;
+
+	if (mycx->rb | mycx->gb | mycx->bb | mycx->ab) {
+		hasAdd = 1;
+	}
+	if (mycx->ra | mycx->ga | mycx->ba | mycx->aa) {
+		hasMult = 1;
+	}
+	swf_buffer_put_bits(buffer, 1, hasAdd);
+	swf_buffer_put_bits(buffer, 1, hasMult);
+
+	max = 0;
+	i = 2;
+
+	if (hasAdd) {
+		if (abs(mycx->ab) > max) {
+			max = abs(mycx->ab);
+		}
+		if (abs(mycx->rb) > max) {
+			max = abs(mycx->rb);
+		}
+		if (abs(mycx->gb) > max) {
+			max = abs(mycx->gb);
+		}
+		if (abs(mycx->bb) > max) {
+			max = abs(mycx->bb);
+		}
+	}
+	if (hasMult) {
+		if (abs(mycx->aa) > max) {
+			max = abs(mycx->aa);
+		}
+		if (abs(mycx->ra) > max) {
+			max = abs(mycx->ra);
+		}
+		if (abs(mycx->ga) > max) {
+			max = abs(mycx->ga);
+		}
+		if (abs(mycx->ba) > max) {
+			max = abs(mycx->ba);
+		}
+	}
+	while (1 < max) {
+		i++;
+		max = max >> 1;
+	}
+	swf_buffer_put_bits(buffer, 4, i);
+	if (hasMult) {
+		printf("Putting mult terms (inc alpha)\n");
+		swf_buffer_put_sbits(buffer, i, mycx->ra);
+		swf_buffer_put_sbits(buffer, i, mycx->ga);
+		swf_buffer_put_sbits(buffer, i, mycx->ba);
+		swf_buffer_put_sbits(buffer, i, mycx->aa);
+	}
+	if (hasAdd) {
+		printf("Putting add terms (inc alpha)\n");
+		swf_buffer_put_sbits(buffer, i, mycx->rb);
+		swf_buffer_put_sbits(buffer, i, mycx->gb);
+		swf_buffer_put_sbits(buffer, i, mycx->bb);
+		swf_buffer_put_sbits(buffer, i, mycx->ab);
+	}
+
+    swf_buffer_flush_bits(buffer);
+}
+
 
 void
 swf_destroy_cxform (swf_cxform * cxform)
