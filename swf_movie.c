@@ -246,17 +246,24 @@ swf_shaperecord_list * swf_make_shaperecords_for_triangle(int * error) {
 void swf_get_raw_shape (swf_parser * swf, int * error, swf_tagrecord * mybuffer) {
     SWF_U32 startpos;
     int length;    
+    swf_defineshape * my_shape;
 
     startpos = length = 0;
 
     startpos = swf->filepos;
     length = swf->cur_tag_len;
 
-/* CHECKME: Do we need this ? */
+    /* we need to do this to get the shape id out */
+    my_shape = swf_parse_defineshape(swf, error);
+
     swf_parse_seek(swf, startpos);
     
     mybuffer->buffer = swf_parse_get_bytes(swf, length);
     mybuffer->size = length;
+
+    mybuffer->code = my_shape->tagid;
+
+    swf_destroy_defineshape(my_shape);
 }
 
 
@@ -279,7 +286,7 @@ void swf_get_nth_shape (swf_parser * swf, int * error, int which_shape, swf_tagr
 
         /* if there's been an error, bug out */
         if (*error != SWF_ENoError) {
-			return;
+	    return;
 	}
 
         switch (next_id) {
@@ -402,20 +409,82 @@ void swf_make_finalise(swf_movie * movie, int * error) {
 }
 
 
-void swf_movie_make_translation_matrix(swf_movie * movie, int * error, SWF_U8 x, SWF_U8 y) {
-    SWF_U8 fix, b1, b2, b3;
+SWF_U8 * swf_movie_make_streamed_translation_matrix(swf_movie * movie, int * error, SWF_U8 x, SWF_U8 y) {
+    SWF_U8 fix;
     SWF_U32 pad;
+    SWF_U8 * b;
+
+    if ((b = (SWF_U8 *) calloc (3, sizeof(SWF_U8))) == NULL) {
+	*error = SWF_EMallocFailure;
+	return NULL;
+    }
 
     fix = 8; /* Code for a pure translate matrix */
     pad = fix << 17 | x << 9 | y << 1;
-    b3 = pad & 0xff;
-    b2 = (pad >> 8) & 0xff;
-    b1 = (pad >> 16) & 0xff;
 
-    fprintf(stderr, "b1: %i ; b2: %i ; b3: %i\nx: %i ; y: %i ; pad: %i\n", b1, b2, b3, x, y, pad);
+    b[2] = pad & 0xff;
+    b[1] = (pad >> 8) & 0xff;
+    b[0] = (pad >> 16) & 0xff;
+
+//    fprintf(stderr, "b1: %i ; b2: %i ; b3: %i\nx: %i ; y: %i ; pad: %i\n", b1, b2, b3, x, y, pad);
 
     /* output code goes here */
 
+    return b;
+}
+
+void add_serialised_showframe(swf_movie * movie, int * error)
+{
+    swf_tagrecord * shf;
+
+    if ((shf = (swf_tagrecord *) calloc (1, sizeof (swf_tagrecord))) == NULL) {
+	*error = SWF_EMallocFailure;
+	return;
+    }
+    
+    if ((shf->buffer = (SWF_U8 *) calloc (2, sizeof (SWF_U8))) == NULL) {
+	*error = SWF_EMallocFailure;
+	return;
+    }	
+    
+    shf->serialised = 1;
+    shf->id = tagShowFrame;
+    shf->size = 2;
+    
+
+    shf->buffer[0] = 0x00;
+    shf->buffer[1] = 0x40;
+    
+    *(movie->lastp) = shf;
+    movie->lastp = &(shf->next);	
+	
+    return;
+}
+
+void add_serialised_end(swf_movie * movie, int * error)
+{
+    swf_tagrecord * efr;
+    
+    if ((efr = (swf_tagrecord *) calloc (1, sizeof (swf_tagrecord))) == NULL) {
+	*error = SWF_EMallocFailure;
+	return;
+    }
+    
+    if ((efr->buffer = (SWF_U8 *) calloc (2, sizeof (SWF_U8))) == NULL) {
+	*error = SWF_EMallocFailure;
+	return;
+    }	
+    
+    efr->serialised = 1;
+    efr->id = tagEnd;
+    efr->size = 2;
+
+    efr->buffer[0] = 0x00;
+    efr->buffer[1] = 0x00;
+    
+    *(movie->lastp) = efr;
+    movie->lastp = &(efr->next);	
+    
     return;
 }
 

@@ -74,24 +74,9 @@ init_tags (void)
     return tag;
 }
 
+void usage (void);
 
-
-void
-parse_frame (swf_parser * context, const char * str)
-{
-    context->frame++;
-    printf("%stagShowFrame\n", str);
-    printf("\n<----- dumping frame %ld file offset 0x%04x ----->\n", context->frame, swf_parse_tell(context));
-}
-
-void
-parse_end (swf_parser * context, const char * str)
-{
-	printf("%stagEnd\n", str);
-}
-
-void
-usage (void)
+void usage (void)
 {
     fprintf (stderr, "You fucked up\n");
 }
@@ -100,6 +85,204 @@ void serialise(swf_movie * movie, int * error);
 
 void serialise(swf_movie * movie, int * error)
 {
+	SWF_U32 movie_length;
+	SWF_U8 * stream;
+	SWF_U8 * r;
+	char * ch;
+	swf_tagrecord * temp;
+	SWF_U8 bitsize, pad;
+	SWF_U16 big_pad, xmin, ymin, xmax, ymax;
+    FILE * myfile;
+
+	fprintf(stderr, "Ready to serialise\n");
+
+
+	if ((r = (SWF_U8 *) calloc (10, sizeof (SWF_U8))) == NULL) {
+		*error = SWF_EMallocFailure;
+		return;
+    }
+
+	if ((ch = (char *) calloc (4, sizeof (char))) == NULL) {
+		*error = SWF_EMallocFailure;
+		return;
+    }
+
+
+	myfile = fopen("kitty_out.swf", "wb+");
+
+	/* Did we open the file? */
+	if (myfile == NULL) {
+		*error = SWF_EFileOpenFailure;
+		return NULL;
+	}
+
+	ch = "FWS5";
+
+	if( fwrite(ch, 1, 4, myfile) != 4){
+		*error = SWF_ETooManyFriends;
+		return;
+    }
+
+	/* calculate movie length */
+	movie_length = 0;
+
+/* Just do the case where everything is pre-serialised */
+
+	temp = movie->first;
+
+	do {
+		if (temp->serialised != 1) {
+			*error = SWF_EFileOpenFailure; /* Use this error code for now */
+			return;
+		}
+
+		movie_length += temp->size;
+		temp = temp->next;
+
+	} while (NULL != temp);
+
+	fprintf(stderr, "Body length = %li\n", movie_length);
+
+	/* Now, serialise the movie length, using r */
+
+	movie_length += 10; /* for the r array */
+	movie_length += 12; /* for the fixed header overhead */
+
+	r[0] = movie_length >> 24; 
+	r[1] = (movie_length << 8) >> 24; 
+	r[2] = (movie_length << 16) >> 24; 
+	r[3] = (movie_length << 24) >> 24; 
+
+	if( fwrite(r, 1, 4, myfile) != 4){
+		*error = SWF_ETooManyFriends;
+		return;
+    }
+
+
+	/* Now, get the header set */
+
+	bitsize = 0x0f; /* 15 bits wide for up to 1024 x 1024 movies */
+
+	xmin = movie->header->bounds->xmin;
+	ymin = movie->header->bounds->ymin;
+	xmax = movie->header->bounds->xmax;
+	ymax = movie->header->bounds->ymax;
+
+	big_pad = (bitsize << 11) | (xmin >> 4); 
+/* shift by 4 instead of 5 because we have a spurious bit induced by using a U16 to represent a 15-bit wide quantity */
+
+	r[1] = big_pad & 0xff;
+	r[0] = (big_pad >> 8) & 0xff;
+
+	big_pad = (xmin << 12) | (xmax >> 3); /* This is the last four bits of xmin now bitshifted correctly */
+
+	r[3] = big_pad & 0xff;
+	r[2] = (big_pad >> 8) & 0xff;
+
+	big_pad = (xmax << 13) | (ymin >> 2); 
+
+	r[5] = big_pad & 0xff;
+	r[4] = (big_pad >> 8) & 0xff;
+
+	big_pad = (ymin << 14) | (ymax >> 1); 
+
+	r[7] = big_pad & 0xff;
+	r[6] = (big_pad >> 8) & 0xff;
+
+	big_pad = (ymax << 15);
+
+/* should this be word or byte aligned ? */
+
+	r[9] = big_pad & 0xff;
+	r[8] = (big_pad >> 8) & 0xff;
+
+	if( fwrite(r, 1, 10, myfile) != 10){
+		*error = SWF_ETooManyFriends;
+		return;
+    }
+
+	r[0] = movie->header->rate;
+	r[1] = 0;
+
+	r[2] = (movie->header->count >> 8);
+	r[3] = movie->header->count & 0xff;
+
+	if( fwrite(r, 1, 4, myfile) != 4){
+		*error = SWF_ETooManyFriends;
+		return;
+    }
+	   
+
+	fclose(myfile);
+
+	free(ch);
+
+	swf_free(r);
+	return;
+}
+
+void add_serialised_placeobject(swf_movie * movie, int * error, SWF_U8 x, SWF_U8 y, SWF_U16 obj_id);
+
+void add_serialised_placeobject(swf_movie * movie, int * error, SWF_U8 x, SWF_U8 y, SWF_U16 obj_id)
+{
+	swf_tagrecord * po;
+	SWF_U16 depth = 1; /* Hardcoded depth */
+	SWF_U8 * tfmn;
+	SWF_U8 b0, b1, length, d0, d1, o1, o0;
+	SWF_U16 pad;
+
+	if ((po = (swf_tagrecord *) calloc (1, sizeof (swf_tagrecord))) == NULL) {
+		*error = SWF_EMallocFailure;
+		return;
+    }
+
+	if ((po->buffer = (SWF_U8 *) calloc (9, sizeof (SWF_U8))) == NULL) {
+		*error = SWF_EMallocFailure;
+		return;
+    }
+
+
+	po->size = 9;
+	po->serialised = 1;
+	po->id = tagPlaceObject;
+
+
+/* As we know the matrix is of size 3, we can put the taglength in now, otherwise, we'd have to calculate it at the end */
+	length = 9;
+
+
+
+	pad = po->id << 6;
+
+	pad &= length;
+
+	b1 = pad & 0xff;
+    b0 = (pad >> 8) & 0xff; 
+
+	o1 = obj_id & 0xff;
+    o0 = (obj_id >> 8) & 0xff; 
+
+	d1 = depth & 0xff;
+    d0 = (depth >> 8) & 0xff; 
+
+	tfmn = swf_movie_make_streamed_translation_matrix(movie, error, x, y);
+
+	po->buffer[0] = b0;
+	po->buffer[1] = b1;
+	po->buffer[2] = o0;
+	po->buffer[3] = o1;
+	po->buffer[4] = d0;
+	po->buffer[5] = d1;
+	po->buffer[6] = tfmn[0];
+	po->buffer[7] = tfmn[1];
+	po->buffer[8] = tfmn[2];
+
+	swf_free(tfmn);
+
+	movie->first->next = po;
+
+	movie->lastp = &(po->next);	
+	
 	return;
 }
 
@@ -150,7 +333,7 @@ main (int argc, char *argv[])
 	movie->first = NULL;
 	movie->lastp = &movie->first;
 
-    printf("----- Reading the file header -----\n");
+    fprintf(stderr, "----- Stealing the file header -----\n");
     header = swf_parse_header(swf, &error);
 
     if (header == NULL) {
@@ -158,22 +341,30 @@ main (int argc, char *argv[])
         goto FAIL;
     }
 
-    printf("FWS\n");
-    printf("File version \t%lu\n", header->version);
-    printf("File size \t%lu\n", header->size);
-    printf("Movie width \t%lu\n", (header->bounds->xmax - header->bounds->xmin) / 20);
-    printf("Movie height \t%lu\n", (header->bounds->ymax - header->bounds->ymin) / 20);
-    printf("Frame rate \t%lu\n", header->rate);
-    printf("Frame count \t%lu\n", header->count);
+/*
+    fprintf(stderr, "FWS\n");
+    fprintf(stderr, "File version \t%lu\n", header->version);
+    fprintf(stderr, "File size \t%lu\n", header->size);
+    fprintf(stderr, "Movie width \t%lu\n", (header->bounds->xmax - header->bounds->xmin) / 20);
+    fprintf(stderr, "Movie height \t%lu\n", (header->bounds->ymax - header->bounds->ymin) / 20);
+    fprintf(stderr, "Frame rate \t%lu\n", header->rate);
+    fprintf(stderr, "Frame count \t%lu\n", header->count);
 
-    printf("\n----- Reading movie details -----\n");
+    fprintf(stderr, "\n----- Reading movie details -----\n");
 
-    printf("\n<----- dumping frame %d file offset 0x%04x ----->\n", 0, swf_parse_tell(swf));
+    fprintf(stderr, "\n<----- dumping frame %d file offset 0x%04x ----->\n", 0, swf_parse_tell(swf));
+*/
+
 
 	movie->header = header;
     movie->header->size = 20; /* Set illegal size for serialisastion check */ 
 
-	/* Go get a defineshape */
+
+	/* Make a body */
+
+	/* Steal a defineshape */
+
+    fprintf(stderr, "----- Stealing the shape -----\n");
 
 	/* start with a 10K buffer */
 	if ((buffy = (swf_tagrecord *) calloc (1, sizeof (swf_tagrecord))) == NULL) {
@@ -190,26 +381,31 @@ main (int argc, char *argv[])
 
 	swf_get_nth_shape(swf, &error, shape_num, buffy);
 
+
 	movie->first = buffy;
-	
-//        *(list->lastp) = temp;
-//	     list->lastp = &(temp->next);
 
-/* print out stuff */
-	printf("Bytes returned: %li\n", buffy->size);
+	fprintf(stderr, "Bytes returned: %li\n", movie->first->size);
 	
-/*	for(i=0; i<buffy->size; i++) {
-		printf("%i th byte: %i\n", i, buffy->buffer[i]);
-		} */
-
 	/* buffy now has a serialised defineshape tag in it */
 	
-	swf_movie_make_translation_matrix(swf, &error, 10, 20);
+	/* Now we need a placeobject */
+	add_serialised_placeobject(movie, &error, 10, 20, buffy->code);
+
+	fprintf(stderr, "Shape size check: %li\n", movie->first->size);
+
+	/* End section */
+
+	add_serialised_showframe(movie, &error);
+	add_serialised_end(movie, &error);
+
+	/* Now stream it out */
+
+	serialise(movie, &error);
 
 	swf_free(buffy->buffer);
 	swf_free(buffy);
 	
-    printf("\n***** Finished Dumping SWF File Information *****\n");
+    fprintf(stderr, "\n***** Finished Dumping New SWF File *****\n");
 
     free (tag);
     swf_destroy_header(header);

@@ -36,9 +36,7 @@ typedef struct swf_tagrecord swf_tagrecord;
 typedef struct swf_triangle swf_triangle;
 
 /* 
- * NOTE: There's a lot of stream/file-orientated duplication here.
- * Perhaps we should refactor into a stream adaptor shared by the
- * generator and parser? --Kitty
+ * NOTE: There's a lot of potential stream/file-orientated duplication here.
  */
 
 struct swf_movie {
@@ -61,6 +59,8 @@ struct swf_movie {
 struct swf_tagrecord {
     int id; /* ID of tag */
     void * tag; /* This is a pointer to the tag structure */
+
+    int code; /* we may want to look this one up in a library sometime */
 
     int serialised;
     long size;
@@ -93,7 +93,13 @@ swf_shaperecord_list * swf_make_shaperecords_for_triangle(int * error);
 
 swf_tagrecord * swf_make_triangle_as_tag(swf_movie * movie, int * error);
 
-void swf_movie_make_translation_matrix(swf_movie * movie, int * error, SWF_U8 x, SWF_U8 y);
+
+SWF_U8 * swf_movie_make_streamed_translation_matrix(swf_movie * movie, int * error, SWF_U8 x, SWF_U8 y);
+
+
+void add_serialised_showframe(swf_movie * movie, int * error);
+void add_serialised_end(swf_movie * movie, int * error);
+
 
 void swf_get_nth_shape (swf_parser * swf, int * error, int which_shape, swf_tagrecord * mybuffer);
 
