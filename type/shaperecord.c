@@ -314,6 +314,46 @@ swf_buffer_shaperecord(swf_buffer * buffer, int * error, swf_shaperecord * s, sw
 			swf_buffer_put_bits(buffer, 1, 0);
 			printf("Putting curve..\n");
 
+			max = 0;
+			if (abs(s->cy) > max) {
+				max = abs(s->cy);
+			}
+			if (abs(s->cx) > max) {
+				max = abs(s->cx);
+			}
+			if (abs(s->ay) > max) {
+				max = abs(s->ay);
+			}
+			if (abs(s->ax) > max) {
+				max = abs(s->ax);
+			}
+			
+			i = 0; /* 2 for sbits, -2 from spec */
+			while (1 < max) {
+				i++;
+				max = max >> 1;
+			}
+			swf_buffer_put_bits(buffer, 4, i);
+			i += 2;
+
+			swf_buffer_put_sbits(buffer, i, s->cx);
+			swf_buffer_put_sbits(buffer, i, s->cy);
+
+			swf_buffer_put_sbits(buffer, i, s->ax);
+			swf_buffer_put_sbits(buffer, i, s->ay);
+
+			/*            nbits = (SWF_U16) swf_parse_get_bits(context, 4) + 2;
+
+            record->cx = swf_parse_get_sbits(context, nbits);
+            record->cy = swf_parse_get_sbits(context, nbits);
+            xlast += record->cx;
+            ylast += record->cy;
+
+            record->ax = swf_parse_get_sbits(context, nbits);
+            record->ay = swf_parse_get_sbits(context, nbits);
+            xlast += record->ax;
+            ylast += record->ay; */
+
 		}
 		
 	}

@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: triangle.c,v 1.3 2002/06/19 21:51:26 kitty_goth Exp $	
+ * 	$Id: triangle.c,v 1.4 2002/06/25 11:26:53 kitty_goth Exp $	
  */
 
 #include "swf_types.h"
@@ -88,7 +88,15 @@ swf_make_shaperecords_for_triangle(int * error)
     record->x = -25 * 20;
     record->y = -25 * 20;
     swf_add_shaperecord(list, error, record);
-    list->record_count++; 
+    list->record_count++;
+
+    /*    record = swf_make_shaperecord(error, 1);
+    record->ax = -25 * 20;
+    record->ay = -25 * 20;
+    record->cx = -25 * 20;
+    record->cy = -25 * 20;
+    swf_add_shaperecord(list, error, record);
+    list->record_count++; */
 
 
 /* Then we need an end-of-shape edge */
