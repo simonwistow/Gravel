@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.32  2001/07/13 15:58:08  muttley
+ * Bad Simon! Don't turn on DEBUG in a file, use make
+ *
  * Revision 1.31  2001/07/13 15:22:07  clampr
  * another realloc of NULL
  *
@@ -80,6 +83,7 @@
 
 #include "swf_parse.h"
 #include "swf_destroy.h"
+//#define DEBUG
 
 /* MPEG tables */
 const int swf_MPEG_VerTab[4]={2,3,1,0};
