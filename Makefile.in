@@ -20,7 +20,6 @@ LIB_OBJECTS=	\
 	swf_destroy.o 			\
 	swf_error.o 			\
 	swf_tags.o 			\
-	tag/cxform.o			\
 	tag/definebits.o		\
 	tag/definebitsjpeg2.o		\
 	tag/definebitsjpeg3.o 		\
@@ -45,12 +44,10 @@ LIB_OBJECTS=	\
 	tag/freecharacter.o		\
 	tag/imageguts.o			\
 	tag/jpegtables.o		\
-	tag/matrix.o			\
 	tag/namecharacter.o		\
 	tag/placeobject.o		\
 	tag/placeobject2.o		\
 	tag/protect.o			\
-	tag/rect.o			\
 	tag/removeobject.o		\
 	tag/removeobject2.o		\
 	tag/setbackgroundcolour.o	\
@@ -60,6 +57,9 @@ LIB_OBJECTS=	\
 	tag/soundstreamhead2.o		\
 	tag/startsound.o		\
 	tag/textrecord.o 		\
+	type/cxform.o			\
+	type/matrix.o			\
+	type/rect.o			\
 	type/shapestyle.o
 
 DLIB_OBJECTS=$(LIB_OBJECTS:.o=.lo)
