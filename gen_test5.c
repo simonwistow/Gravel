@@ -39,6 +39,7 @@
 #define FRAMERATE 15
 
 #define SWF_PNG_SIG_SIZE 8
+#define STD_8_BIT_FORMAT 3
 
 void usage (char * name);
 
@@ -72,10 +73,11 @@ swf_read_png(char * filename, int * error)
 	
 	fread(png_header, 1, SWF_PNG_SIG_SIZE, fp);
 	
-	if(png_check_sig(png_header, SWF_PNG_SIG_SIZE)) {
+	/*	if(png_check_sig(png_header, SWF_PNG_SIG_SIZE)) {
 		*error = SWF_EFileOpenFailure;
 		return NULL;
 	}
+	*/
 	
 	/* Make png_ptr */
 	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -144,79 +146,154 @@ swf_read_png(char * filename, int * error)
 		png_set_filler(png_ptr, 0xff, PNG_FILLER_AFTER);
 	}
 	
-  /* update info w/ the set transformations */
-  png_read_update_info(png_ptr, info_ptr);
+	/* update info w/ the set transformations */
+	png_read_update_info(png_ptr, info_ptr);
+	
+	swf_png_get_IHDR(png, error, png_ptr, info_ptr);
 
-  swf_png_get_IHDR(png, error, png_ptr, info_ptr);
+	png->channels = png_get_channels(png_ptr, info_ptr);
+	
+	
+	if(png->color_type == PNG_COLOR_TYPE_GRAY) {
+		/* turn it into a palettized image, use the gray 
+		   values as indices to an rgb color table */
 
-  png->channels = png_get_channels(png_ptr, info_ptr);
+		int i;
+		
+		png->color_type = PNG_COLOR_TYPE_PALETTE;
+		png->num_palette = 1 << depth;
+		
+		//    if ((m3 = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
+		//    }
+
+		//    png->palette = malloc(sizeof(png_color) * png->num_palette);
+		png->palette = calloc(png->num_palette, sizeof(png_color));
+
+		for(i=0; i<(int)png->num_palette; ++i) {
+			png->palette[i].red = png->palette[i].green = 
+				png->palette[i].blue =  (i*255)/(png->num_palette - 1);
+		}
+	}
 
 
-  if(png->color_type == PNG_COLOR_TYPE_GRAY) {
-    /* turn it into a palettized image, use the gray values as indices to
-       an rgb color table */
+	/* malloc stuff */
+	row_pointers = malloc(png->height*sizeof(png_bytep));
+	rowbytes = png_get_rowbytes(png_ptr, info_ptr);
+	
+	png->data = malloc(png->height * rowbytes);
 
-    int i;
+	for(i=0; i<png->height; ++i)
+		row_pointers[i] = png->data + rowbytes*i;
+	
+	png_read_image(png_ptr, row_pointers);
+	
+	if(png->color_type == PNG_COLOR_TYPE_RGB_ALPHA
+	   || png->color_type == PNG_COLOR_TYPE_RGB) {
+		/* alpha has to be pre-applied, bytes shifted */
+		
+		int x, y;
+		unsigned char *p;
+		int alpha;
+		unsigned char r, g, b;
+		
+		for(y=0; y<png->height; ++y) {
+			for(x=0; x<png->width; ++x) {
+				p = png->data + rowbytes*y + 4*x;
+				
+				r = p[0];
+				g = p[1];
+				b = p[2];
+				
+				alpha = p[3];
+				
+				p[0] = alpha;
+				p[1] = (char)((int)(r*alpha)>>8);
+				p[2] = (char)((int)(g*alpha)>>8);
+				p[3] = (char)((int)(b*alpha)>>8);
+			}
+		}
+	}
+	
+	/* Got the PNG data. Now spin up a swf_tagrecord */
+	
+	self = swf_make_tagrecord(error, tagDefineBitsLossless);
+	self->buffer = swf_write_dbl(error, png, 1);
 
-    png->color_type = PNG_COLOR_TYPE_PALETTE;
-    png->num_palette = 1 << depth;
+	// FIXME: Expose the bitmap_id properly
+	if (NULL == self->buffer) {
+		*error = SWF_EFileWriteError;
+		return NULL;
+	}
 
-    //    if ((m3 = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
-    //    }
-
-	//    png->palette = malloc(sizeof(png_color) * png->num_palette);
-    png->palette = calloc(png->num_palette, sizeof(png_color));
-
-    for(i=0; i<(int)png->num_palette; ++i)
-      png->palette[i].red = png->palette[i].green = png->palette[i].blue = 
-	(i*255)/(png->num_palette - 1);
-  }
+	return self;
+}
 
 
-  /* malloc stuff */
-  row_pointers = malloc(png->height*sizeof(png_bytep));
-  rowbytes = png_get_rowbytes(png_ptr, info_ptr);
+swf_buffer *
+swf_write_dbl(int * error, swf_png_data * png, SWF_U16 bitmap_id)
+{
+	SWF_U8 *data, *outdata;
+	int size;
+	long outsize;
+	int tablesize;
+	swf_buffer * self;
+	
+    if ((self = (swf_buffer *) calloc (1, sizeof (swf_buffer)) ) == NULL) {
+      *error = SWF_EMallocFailure;
+      return NULL;
+    }	
 
-  png->data = malloc(png->height * rowbytes);
+	if(png->bit_depth != 8) {
+		*error = SWF_ENotValidSWF;
+		return NULL;
+	}
 
-  for(i=0; i<png->height; ++i)
-    row_pointers[i] = png->data + rowbytes*i;
+	size = png->width * png->height * png->channels;
 
-  png_read_image(png_ptr, row_pointers);
+	if(png->color_type == PNG_COLOR_TYPE_PALETTE) {
+		tablesize = png->num_palette * sizeof(png_color);
+		
+		data = realloc(png->palette, tablesize + size);
+		
+		memcpy(data + tablesize, png->data, size);
+		size += tablesize;
+	} else {
+		data = png->data;
+	}
 
-  if(png->color_type == PNG_COLOR_TYPE_RGB_ALPHA
-  || png->color_type == PNG_COLOR_TYPE_RGB) {
-    /* alpha has to be pre-applied, bytes shifted */
-
-    int x, y;
-    unsigned char *p;
-    int alpha;
-    unsigned char r, g, b;
-
-    for(y=0; y<png->height; ++y) {
-      for(x=0; x<png->width; ++x) {
-	p = png->data + rowbytes*y + 4*x;
-
-        r = p[0];
-        g = p[1];
-        b = p[2];
-
-	alpha = p[3];
-
-	p[0] = alpha;
-	p[1] = (char)((int)(r*alpha)>>8);
-	p[2] = (char)((int)(g*alpha)>>8);
-	p[3] = (char)((int)(b*alpha)>>8);
-      }
+	outsize = (int)floor(size*1.01+12);
+    if ((outdata = (SWF_U8 *) calloc(1, outsize)) == NULL) {
+		*error = SWF_EMallocFailure;
+		return NULL;
     }
-  }
 
-  /* Got the PNG data. Now spin up a swf_tagrecord */
+	/* compress the RGB color table (if present) and image data one block */
 
-  self = swf_make_tagrecord(error, tagDefineBitsLossless);
+	compress2(outdata, &outsize, data, size, 9);
 
+    if ((self->raw = (SWF_U8 *) calloc (1, 100 + outsize) ) == NULL) {
+      *error = SWF_EMallocFailure;
+      return NULL;
+    }	
+	
+	/* The size of the block's in outsize now...*/
 
-  return NULL;
+	swf_buffer_put_word(self, error, bitmap_id);
+	swf_buffer_put_byte(self, error, STD_8_BIT_FORMAT);
+	swf_buffer_put_word(self, error, png->width);
+	swf_buffer_put_word(self, error, png->height);
+	
+	swf_buffer_put_byte(self, error, png->num_palette-1);
+
+	
+	/*
+	if(fwrite(outdata, sizeof(char), outsize, f) != outsize) {
+		*error = SWF_EFileWriteError;
+		return NULL;
+	}
+	*/
+
+	return self;
 }
 
 
@@ -256,13 +333,17 @@ int main (int argc, char *argv[]) {
 
     printf("\n----- Reading PNG file -----\n");
 
-    temp = swf_read_png("test1.png", &error);
+    temp = swf_read_png("pngs/apache_pb.png", &error);
+
+	if (temp == NULL) {
+		fprintf(stderr, "Failed to read PNG: %i\n", error);
+	}
 
 /* Now generate the output movie */
 
     if ((movie = swf_make_movie(&error)) == NULL) {
-	fprintf (stderr, "Fail\n");
-	return 1;
+		fprintf (stderr, "Fail\n");
+		return 1;
     }
 
 /* Ensure we import a good header... */

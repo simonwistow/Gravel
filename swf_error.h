@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_error.h,v $
+ * Revision 1.11  2002/07/09 15:26:29  kitty_goth
+ * some more PNG stuff. Starting to get somewhere, but more needed
+ *
  * Revision 1.10  2002/07/06 08:45:28  kitty_goth
  * Fix fills stuff, move test code out of the lower level functions.
  *
@@ -46,8 +49,8 @@
 #define SWF_EEeeeeEeeeeEeeeeDolphinNoises   (4)
 #define SWF_EFileOpenFailure                (5)
 #define SWF_EFileReadError                  (6)
-#define SWF_ENotValidSWF                    (7)
-#define SWF_EDoNotLeaveNotItIsReal          (8)
+#define SWF_EFileWriteError                 (7)
+#define SWF_ENotValidSWF                    (8)
 #define SWF_EFileTooSmall                   (9)
 #define SWF_ENoBassInMyHeadMan              (10)
 #define SWF_EInvalidMP3Frame                (11)
