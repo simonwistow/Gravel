@@ -230,6 +230,106 @@ void _bake_preamble(SV* obj, SV* self, U32 protect) {
 
 }
 
+void _bake_styles(int * error, swf_defineshape * mytag, HV * h_sh) 
+{
+	SV** p_sty;
+	AV* a_sty;
+	SV** ph_sty;
+	HV* h_sty;
+	SV** p_col;
+	SV** p_num;
+	I32  j, num_styles, width;
+
+	/* Now populate the line styles */
+	p_sty = hv_fetch(h_sh, "_styles", 7, 0);
+	if (NULL != p_sty) {
+		a_sty = (AV *)SvRV(*p_sty); 
+		
+		num_styles = av_len(a_sty);
+		mytag->style->nlines = 1 + num_styles;
+		
+		for (j=0; j<=num_styles; ++j) {
+			mytag->style->lines[j] = swf_make_linestyle(error);
+			
+			ph_sty = av_fetch(a_sty, j, 0);
+			if (NULL != ph_sty) {
+				h_sty = (HV *)SvRV(*ph_sty); 
+				p_num = hv_fetch(h_sty, "width", 5, 0);
+				if (NULL != p_num) {
+					mytag->style->lines[j]->width = (U16)(SvIV(*p_num));
+				}
+
+				p_col = hv_fetch(h_sty, "colour", 6, 0);
+				if (NULL != p_col) {
+					mytag->style->lines[j]->col = gravel_parse_colour((char *)(SvPVX(*p_col)));
+				}
+			}
+		}
+	}
+
+}
+
+
+void _bake_fills(int * error, swf_defineshape * mytag, HV * h_sh) 
+{
+	SV** p_sty;
+	AV* a_sty;
+	I32  j, num_styles;
+	SV** p_fill;
+	SV** ph_fill;
+	HV* h_fill;
+	const char * fill_type;
+	SV** p_col;
+
+	/* Now populate the fill styles */
+    p_sty = hv_fetch(h_sh, "_fills", 6, 0);
+	if (NULL != p_sty) {
+		a_sty = (AV *)SvRV(*p_sty); 
+		
+		num_styles = av_len(a_sty);
+		mytag->style->nfills = 1 + num_styles;
+		for (j=0; j<=num_styles; ++j) {
+			ph_fill = av_fetch(a_sty, j, 0);
+			if (NULL != ph_fill) {
+				h_fill = (HV *)SvRV(*ph_fill);
+			}
+			p_fill = hv_fetch(h_fill, "type", 4, 0);
+			if (NULL != p_fill) {
+				fill_type = (const char *) SvPVX(*p_fill);
+			}	
+			if ( (0 == strcmp(fill_type, "solid")) 
+				 || (0 == strcmp(fill_type, "SOLID")) ){
+				mytag->style->fills[j] = swf_make_solid_fillstyle(error);
+				p_col = hv_fetch(h_fill, "colour", 6, 0);
+				if (NULL != p_col) {
+					mytag->style->fills[j]->col = gravel_parse_colour((char *)(SvPVX(*p_col)));
+				}
+			} /* FIXME: Do the other styles */
+		}			
+	}
+}
+
+
+void _get_to_start(int * error, swf_defineshape * mytag, HV * h_sh) 
+{
+	SV** p_vert;	
+	swf_shaperecord * record;
+
+	/* First, we need a non-edge, change of style record */ 
+	record = swf_make_shaperecord(error, 0);
+	record->flags = eflagsFill1 | eflagsMoveTo;
+
+	record->fillstyle0 = 0;
+	record->fillstyle1 = 1;
+	record->linestyle = 1;
+
+	/* FIXME: initial determined by first vertex */
+	record->x = 0;
+	record->y = 0;
+
+	swf_add_shaperecord(mytag->record, error, record);
+	++mytag->record->record_count;
+}
 
 void _bake_library(SV* obj, SV* self) {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
@@ -240,20 +340,11 @@ void _bake_library(SV* obj, SV* self) {
 	AV* lib;
 	SV* shape;
 	HV* h_sh;
-	I32 lib_size, i, j, num_styles, width;
+	I32 lib_size, i;
 	SCOORD x1, x2, y1, y2;
 	SV** p_num;
-	SV** p_sty;
-	SV** ph_sty;
-	SV** p_fill;
-	SV** ph_fill;
-	SV** p_col;
-	AV* a_sty;
-	HV* h_sty;
-	HV* h_fill;
 	swf_tagrecord * temp;
 	swf_defineshape * mytag;
-	const char * fill_type;
 
 	p_lib = hv_fetch(h, "_library", 8, 0);
 	if (NULL != p_lib) {
@@ -290,62 +381,12 @@ void _bake_library(SV* obj, SV* self) {
 	    temp = gravel_create_shape(m->movie, &error, x1, x2, y1, y2);
 		mytag = (swf_defineshape *) temp->tag;
 
-		/* Now populate the line styles */
-		p_sty = hv_fetch(h_sh, "_styles", 7, 0);
-		if (NULL != p_sty) {
-			a_sty = (AV *)SvRV(*p_sty); 
+		_bake_styles(&error, mytag, h_sh);
+		_bake_fills(&error, mytag, h_sh);
+
+		_get_to_start(&error, mytag, h_sh);
 		
-			num_styles = av_len(a_sty);
-			mytag->style->nlines = 1 + num_styles;
-
-			for (j=0; j<=num_styles; ++j) {
-				mytag->style->lines[j] = swf_make_linestyle(&error);
-			
-				ph_sty = av_fetch(a_sty, j, 0);
-				if (NULL != ph_sty) {
-					h_sty = (HV *)SvRV(*ph_sty); 
-					p_num = hv_fetch(h_sty, "width", 5, 0);
-					if (NULL != p_num) {
-						mytag->style->lines[j]->width = (U16)(SvIV(*p_num));
-//						fprintf(stderr, "line width should be: %i\n", mytag->style->lines[j]->width);
-					}
-
-					p_col = hv_fetch(h_sty, "colour", 6, 0);
-					if (NULL != p_col) {
-						mytag->style->lines[j]->col = gravel_parse_colour((char *)(SvPVX(*p_col)));
-//						fprintf(stderr, "line colour be: %s\n", (char *)(SvPVX(*p_col)));
-					}
-				}
-			}
-		}
-
-
-		/* Now populate the fill styles */
-		p_sty = hv_fetch(h_sh, "_fills", 6, 0);
-		if (NULL != p_sty) {
-			a_sty = (AV *)SvRV(*p_sty); 
-
-			num_styles = av_len(a_sty);
-			mytag->style->nfills = 1 + num_styles;
-			for (j=0; j<=num_styles; ++j) {
-				ph_fill = av_fetch(a_sty, j, 0);
-				if (NULL != ph_fill) {
-					h_fill = (HV *)SvRV(*ph_fill);
-				}
-				p_fill = hv_fetch(h_fill, "type", 4, 0);
-				if (NULL != p_fill) {
-					fill_type = (const char *) SvPVX(*p_fill);
-				}
-				if ( (0 == strcmp(fill_type, "solid")) 
-					 || (0 == strcmp(fill_type, "SOLID")) ){
-					mytag->style->fills[j] = swf_make_solid_fillstyle(&error);
-					p_col = hv_fetch(h_fill, "colour", 6, 0);
-					if (NULL != p_col) {
-						mytag->style->fills[j]->col = gravel_parse_colour((char *)(SvPVX(*p_col)));
-					}
-				} /* FIXME: Do the other styles */
-			}			
-		}
+		/* Now do the edge records */
 
 
 		/* Need to calloc a (raw) buffer for temp... */
