@@ -14,7 +14,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-
 #include "tag_handy.h"
 
 swf_setbackgroundcolour *
@@ -45,7 +44,7 @@ swf_parse_setbackgroundcolour (swf_parser * context, int * error)
 
 
 void 
-swf_add_setbackgroundcolor(swf_movie * movie, int * error) 
+swf_add_setbackgroundcolour(swf_movie * movie, int * error, SWF_U8 red, SWF_U8 green, SWF_U8 blue, SWF_U8 alpha) 
 {
     swf_tagrecord * temp;
     swf_setbackgroundcolour * col;
@@ -67,15 +66,15 @@ swf_add_setbackgroundcolor(swf_movie * movie, int * error)
       return;
     }
 
-    if ((buffy = (SWF_U8 *) calloc ( 10, sizeof (SWF_U8))) == NULL) {
+    if ((buffy = (SWF_U8 *) calloc ( 4, sizeof (SWF_U8))) == NULL) {
       fprintf(stderr, "alloc fuckup\n");
       return;
     }
 
-    col->colour->r = 0;
-    col->colour->g = 255;
-    col->colour->b = 128;
-    col->colour->a = 0;
+    col->colour->r = red;
+    col->colour->g = green;
+    col->colour->b = blue;
+    col->colour->a = alpha;
 
     buffy[0] = col->colour->r;
     buffy[1] = col->colour->g;
@@ -83,7 +82,7 @@ swf_add_setbackgroundcolor(swf_movie * movie, int * error)
     buffy[3] = col->colour->a;
 
     temp->next = NULL;
-    temp->id = 9;
+    temp->id = tagSetBackgroundColour;
     temp->tag = col;
     temp->serialised = 1;
     temp->size = 4;

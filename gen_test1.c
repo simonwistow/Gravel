@@ -44,6 +44,7 @@ int main (int argc, char *argv[]) {
     swf_make_header(movie, &error, -4000, 4000, -4000, 4000);
     movie->name = "ben1.swf\0";
 
+    swf_add_setbackgroundcolour(movie, &error);
     swf_add_showframe(movie, &error);
     swf_add_showframe(movie, &error);
     swf_add_showframe(movie, &error);

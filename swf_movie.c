@@ -52,6 +52,7 @@ void swf_make_header_blank (swf_movie * movie, int * error, int ver, int speed) 
     header->size = 20; 
 
 
+
     header->version = ver; 
     header->rate = speed; 
     header->count = 1;
@@ -510,10 +511,8 @@ void swf_make_finalise(swf_movie * movie, int * error) {
     temp = node;
     node = node->next;
     
-    printf("Walking waka-waka to write this out...: id = %i\n", temp->id);
-    
     if (0 == temp->serialised) {
-      printf("HELP: This tag isn't serialised...\n");
+      fprintf(stderr, "HELP: This tag isn't serialised...\n");
     }
 
     tmp_16 = temp->id << 6;
@@ -526,10 +525,12 @@ void swf_make_finalise(swf_movie * movie, int * error) {
 
     /* FIXME: We don't handle tags with content yet... */
     swf_movie_put_bytes(movie, error, temp->size, temp->buffer);
+    tmp_size += temp->size;
 
   }
 
-  printf("File size is: %u\n", tmp_size);
+
+  printf("File size is: %lu\n", tmp_size);
 
   /* Backseek to fix up file size. */
 
@@ -537,7 +538,6 @@ void swf_make_finalise(swf_movie * movie, int * error) {
   swf_movie_put_dword(movie, error, tmp_size);
 
   fclose(movie->file);
-
 }
 
 void 
@@ -701,6 +701,8 @@ void swf_movie_put_sbits (swf_movie * context, SWF_U8 n, SWF_S32 bits)
  * parse head on by two.
  */
 
+/* FIXME: Endian-ness */
+
 void swf_movie_put_word(swf_movie * context, int * error, SWF_U16 word)
 {
     swf_movie_initbits(context);
@@ -708,18 +710,12 @@ void swf_movie_put_word(swf_movie * context, int * error, SWF_U16 word)
     swf_movie_put_byte(context, error, (SWF_U8)(word >> 8));
 }
 
-void swf_movie_put_word_dst(swf_movie * context, int * error, SWF_U16 word)
-{
-    swf_movie_initbits(context);
-    swf_movie_put_byte(context, error, (SWF_U8)(word >> 8));
-    swf_movie_put_byte(context, error, (SWF_U8)((word << 8) >> 8));
-}
-
 /*
  * Put a 32-bit dword to the stream, and move the
  * parse head on by four.
  */
 
+/* FIXME: Endian-ness */
 
 void swf_movie_put_dword(swf_movie * context, int * error, SWF_U32 dword)
 {
@@ -729,20 +725,8 @@ void swf_movie_put_dword(swf_movie * context, int * error, SWF_U32 dword)
     swf_movie_put_byte(context, error, (SWF_U8)((dword << 16) >> 24));
     swf_movie_put_byte(context, error, (SWF_U8)((dword << 8) >> 24));
     swf_movie_put_byte(context, error, (SWF_U8)(dword >> 24));
-
-
-
 }
 
-void swf_movie_put_dword_dst(swf_movie * context, int * error, SWF_U32 dword)
-{
-    swf_movie_initbits(context);
-
-    swf_movie_put_byte(context, error, (SWF_U8)(dword >> 24));
-    swf_movie_put_byte(context, error, (SWF_U8)((dword << 8) >> 24));
-    swf_movie_put_byte(context, error, (SWF_U8)((dword << 16) >> 24));
-    swf_movie_put_byte(context, error, (SWF_U8)((dword << 24) >> 24));
-}
 
 
 
