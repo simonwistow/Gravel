@@ -1,0 +1,25 @@
+NAME
+    SWF::ExtractText - Extract text and URLs from SWF files
+
+SYNOPSIS
+      my $swf = SWF::ExtractText->new("turkstud.swf");
+      my @strings = $swf->strings;
+      my @urls = $swf->urls;
+
+DESCRIPTION
+    This module extracts the strings and URLs from a SWF flash file. It uses
+    the lib_swfextract library from the gravel libswfparse project
+    (available from http://sourceforge.net/projects/gravel/).
+
+BUGS
+    It does not quite work yet.
+
+AUTHOR
+    Leon Brocard <acme@astray.com>
+
+COPYRIGHT
+    Copyright (C) 2001, Leon Brocard
+
+    This module is free software; you can redistribute it or modify it under
+    the same terms as Perl itself.
+
