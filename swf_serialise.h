@@ -21,6 +21,7 @@ extern void swf_add_doaction (swf_movie * movie, int * error, SWF_U8 saction);
 /* Serialisation API */
 
 extern void swf_serialise_rect(swf_movie * p, int * error, swf_rect * rect);
+extern void swf_buffer_rect(swf_buffer * p, int * error, swf_rect * rect);
 
 extern void swf_serialise_matrix (swf_buffer * buffer, int * error, swf_matrix * mym);
 
