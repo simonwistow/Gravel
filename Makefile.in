@@ -84,6 +84,7 @@ DATE=$(shell date +%Y-%m-%d)
 ## Targets
 all: swf_parse text_extract
 
+static: swf_parse_static text_extract_static
 debug: swf_parse_debug text_extract_debug
 memdebug: debug swf_parse_ef swf_parse_debauch swf_parse_ktrace text_extract_ef text_extract_debauch text_extract_ktrace
 
@@ -98,6 +99,18 @@ swf_parse: libswfparse.la $(OBJECTS)
 
 text_extract: libswfextract.la $(TEXT_OBJECTS)
 	$(LIBTOOL) $(CC) $(CFLAGS) -o text_extract $(TEXT_OBJECTS) libswfextract.la $(LIBS)
+
+
+## static, but quiet
+
+swf_parse_static: libswfparse.la $(OBJECTS)
+	$(LIBTOOL) $(CC) $(CFLAGS) -o swf_parse_static $(OBJECTS) libswfparse.la $(LIBS) -static
+
+text_extract_static: libswfextract.la $(TEXT_OBJECTS)
+	$(LIBTOOL) $(CC) $(CFLAGS) -o text_extract_static $(TEXT_OBJECTS) libswfextract.la $(LIBS) -static
+
+
+## -DDEBUG builds are all static, and noisy
 
 swf_parse_debug: $(D_LIB_OBJECTS) $(D_OBJECTS)
 	$(CC) $(CFLAGS) -I . $(DEBUG) -o swf_parse_debug      $(D_LIB_OBJECTS) $(D_OBJECTS) $(LIBS)
