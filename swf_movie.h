@@ -86,3 +86,4 @@ void swf_movie_put_sbits (swf_movie * context, SWF_U8 n, SWF_S32 bits);
 void swf_movie_put_word(swf_movie * context, int * error, SWF_U16 word);
 void swf_movie_put_dword(swf_movie * context, int * error, SWF_U32 dword);
 
+void swf_movie_put_string(swf_movie * context, int * error, char * mystring);

@@ -164,7 +164,7 @@ int main (int argc, char *argv[]) {
     mycx->bb = 0;
 
     for (i=1; i<=NUMFRAMES; i++) {
-      swf_add_placeobject2(movie, &error, obj_id, matrix, mycx);
+      swf_add_placeobject2(movie, &error, obj_id, matrix, mycx, NULL);
       swf_add_showframe(movie, &error);
 
       if (i < NUMFRAMES) {

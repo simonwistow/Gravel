@@ -393,12 +393,12 @@ swf_parse_get_string (swf_parser * context, int * error)
 
     while (sp < 255 ) {
 	/** string++ = byte; */
-	byte = (char) swf_parse_get_byte(context);
-	if (byte == (char) NULL) {
-	    break;
-	}
-	string[sp++] = byte;
-	byte = (char) NULL;
+		byte = (char) swf_parse_get_byte(context);
+		if (byte == (char) NULL) {
+			break;
+		}
+		string[sp++] = byte;
+		byte = (char) NULL;
     }
 
     string[sp]  = '\0';
@@ -951,6 +951,9 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
 
 /*
  * $Log: swf_parse.c,v $
+ * Revision 1.49  2002/05/20 17:05:26  kitty_goth
+ * Minor nits. sync to carry on at home.
+ *
  * Revision 1.48  2002/05/10 17:07:51  kitty_goth
  * Right, this leaks like a son of a bitch, and I've only tested it against
  * gen_test1, but the buffer delta should work now.

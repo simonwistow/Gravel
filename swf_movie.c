@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.14 2002/05/19 09:46:21 kitty_goth Exp $	
+ * 	$Id: swf_movie.c,v 1.15 2002/05/20 17:05:26 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -198,9 +198,9 @@ swf_destroy_tagrecord (swf_tagrecord * tagrec)
 }
 
 
-
-
-void swf_destroy_movie (swf_movie * movie) {
+void 
+swf_destroy_movie (swf_movie * movie) 
+{
     swf_header * header;
     swf_tagrecord *tmp, *node;
 
@@ -222,7 +222,9 @@ void swf_destroy_movie (swf_movie * movie) {
     return;
 }
 
-swf_fillstyle * swf_make_fillstyle(int * error) {
+swf_fillstyle * 
+swf_make_fillstyle(int * error) 
+{
     swf_fillstyle * mystyle;
 
     if ((mystyle = (swf_fillstyle *) calloc (1, sizeof (swf_fillstyle))) == NULL) {
@@ -256,7 +258,9 @@ swf_linestyle * swf_make_linestyle(int * error) {
 }
 
 
-swf_shaperecord_list * swf_make_shaperecords_for_triangle(int * error) {
+swf_shaperecord_list * 
+swf_make_shaperecords_for_triangle(int * error) 
+{
     swf_shaperecord_list * list;
 
     if ((list = (swf_shaperecord_list *) calloc (1, sizeof (swf_shaperecord_list))) == NULL) {
@@ -285,8 +289,9 @@ swf_shaperecord_list * swf_make_shaperecords_for_triangle(int * error) {
     return list;
 }
 
-
-void swf_get_raw_shape (swf_parser * swf, int * error, swf_tagrecord * mytag) {
+void 
+swf_get_raw_shape (swf_parser * swf, int * error, swf_tagrecord * mytag) 
+{
     SWF_U32 startpos;
     int length;    
 
@@ -441,7 +446,9 @@ swf_tagrecord * swf_make_triangle_as_tag(swf_movie * movie, int * error) {
  * size butes at 20, then random seek back to the 8th byte of the file
  * and overwrite, once we know the real size. */
 
-void swf_make_finalise(swf_movie * movie, int * error) {
+void 
+swf_make_finalise(swf_movie * movie, int * error) 
+{
   SWF_U8 * file_buf;
   SWF_U32 tmp_32, tmp_size;
   SWF_U16 tmp_16;
@@ -666,7 +673,8 @@ swf_movie_flush_bits (swf_movie * context)
 
 /* FIXME: error handling... */
 
-void swf_movie_put_bits (swf_movie * context, SWF_U8 n, SWF_U32 bits)
+void 
+swf_movie_put_bits (swf_movie * context, SWF_U8 n, SWF_U32 bits)
 {
   SWF_S32 i;
   SWF_U32 bitbuf;
@@ -708,7 +716,8 @@ void swf_movie_put_bits (swf_movie * context, SWF_U8 n, SWF_U32 bits)
  * Put n bits to the stream with sign extension.
  */
 
-void swf_movie_put_sbits (swf_movie * context, SWF_U8 n, SWF_S32 bits)
+void 
+swf_movie_put_sbits (swf_movie * context, SWF_U8 n, SWF_S32 bits)
 {
   int i;
 
@@ -727,9 +736,8 @@ void swf_movie_put_sbits (swf_movie * context, SWF_U8 n, SWF_S32 bits)
  * parse head on by two.
  */
 
-/* FIXME: Endian-ness */
-
-void swf_movie_put_word(swf_movie * context, int * error, SWF_U16 word)
+void 
+swf_movie_put_word(swf_movie * context, int * error, SWF_U16 word)
 {
     swf_movie_initbits(context);
     swf_movie_put_byte(context, error, (SWF_U8)((word << 8) >> 8));
@@ -743,7 +751,8 @@ void swf_movie_put_word(swf_movie * context, int * error, SWF_U16 word)
 
 /* FIXME: Endian-ness */
 
-void swf_movie_put_dword(swf_movie * context, int * error, SWF_U32 dword)
+void 
+swf_movie_put_dword(swf_movie * context, int * error, SWF_U32 dword)
 {
     swf_movie_initbits(context);
 
@@ -753,6 +762,8 @@ void swf_movie_put_dword(swf_movie * context, int * error, SWF_U32 dword)
     swf_movie_put_byte(context, error, (SWF_U8)(dword >> 24));
 }
 
-
-
+void 
+swf_movie_put_string(swf_movie * context, int * error, char * mystring)
+{
+}
 
