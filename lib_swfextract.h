@@ -16,6 +16,9 @@
  *
  *
  * $Log: lib_swfextract.h,v $
+ * Revision 1.3  2001/07/09 14:22:57  acme
+ * Added newline to end of file
+ *
  * Revision 1.2  2001/07/09 13:51:37  muttley
  * fixed minor bug in text_extract and lib_swfextract where it would try
  * and print out strings instead of urls :(
