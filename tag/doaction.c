@@ -17,6 +17,8 @@
 
 #include "tag_handy.h"
 
+#define MAX_ACTION_SIZE 8
+
 swf_doaction *
 swf_parse_get_doaction (swf_parser * context, int * error)
 {
@@ -119,10 +121,46 @@ swf_parse_get_doaction (swf_parser * context, int * error)
 
 
 void
+swf_add_doaction (swf_movie * movie, int * error)
+{
+	swf_tagrecord * temp;
+	SWF_U8 saction;
+	SWF_U16 frame;
+
+    temp = swf_make_tagrecord(error, tagDoAction);
+
+    if (*error) {
+		return;
+    }
+	/* */
+
+    if ((temp->buffer->raw = (SWF_U8 *) calloc (MAX_ACTION_SIZE, sizeof (SWF_U8))) == NULL) {
+		*error = SWF_EMallocFailure;
+		return;
+    }
+
+	// FIXME: Test code
+	saction = sactionGotoFrame;
+	frame = 1;
+
+	swf_buffer_put_byte(temp->buffer, error, saction);
+	swf_buffer_put_word(temp->buffer, error, 2);
+	swf_buffer_put_word(temp->buffer, error, frame);
+
+	/* End of action records marker */
+	swf_buffer_put_byte(temp->buffer, error, 0);
+    temp->serialised = 1;
+
+    *(movie->lastp) = temp;
+    movie->lastp = &(temp->next);
+
+    return;
+}   
+
+void
 swf_destroy_doaction (swf_doaction * action)
 {
-    if (action==NULL)
-    {
+    if (action==NULL) {
         return;
     }
 

@@ -205,6 +205,10 @@ int main (int argc, char *argv[]) {
       swf_add_placeobject2(movie, &error, m2, obj_id, 1, cx2, myname);
       swf_add_placeobject(movie, &error, m3, 14, 2);
 
+      if (30 == i) {
+	swf_add_doaction(movie, &error);
+      }
+
       swf_add_showframe(movie, &error);
 
       if (i < NUMFRAMES) {
