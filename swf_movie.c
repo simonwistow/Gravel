@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.16 2002/05/21 23:20:47 kitty_goth Exp $	
+ * 	$Id: swf_movie.c,v 1.17 2002/05/22 11:49:31 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -25,9 +25,22 @@
 #include "swf_destroy.h"
 #include "swf_serialise.h"
 
-#define MAX_TAG_ID 26
+#define SWF_DESTROY_MAX_TAG_ID 48
 
 #include <stdio.h>
+
+
+void
+init_destructors(void (**shiva)(), int * error) 
+{
+
+  shiva[tagDefineShape]         = swf_destroy_defineshape;
+  shiva[tagSetBackgroundColour] = swf_destroy_setbackgroundcolour;
+  shiva[tagDefineButton]        = swf_destroy_definebutton;
+  shiva[tagPlaceObject]         = swf_destroy_placeobject;
+  shiva[tagPlaceObject2]        = swf_destroy_placeobject2;
+
+}
 
 void 
 swf_make_header_blank (swf_movie * movie, int * error, int ver, int speed) 
@@ -165,49 +178,17 @@ swf_make_tagrecord (int * error, SWF_U16 myid)
 /* Replace with an array of function pointers */
 
 void 
-swf_destroy_tagrecord (swf_tagrecord * tagrec) 
-{
-    void * tmp;
-    int tagid;
-    void (*destroy[1 + MAX_TAG_ID])();
-
-    tagid = tagrec->id;
-    tmp = tagrec->tag;
-
-    switch (tagid) {
-	case tagEnd :
-//	    swf_destroy_tag_end((swf_tag_end *) tmp);
-	    break;
-	    
-	case tagShowFrame:
-//	    swf_destroy_tag_showframe((swf_tag_showframe *) tmp);
-	    break;
-
-	case tagDefineShape:
-	    swf_destroy_defineshape((swf_defineshape *) tmp);
-	    break;
-
-	    
-	case tagSetBackgroundColour:
-//	    swf_destroy_tag_setbackgroundcolour((swf_tag_setbackgroundcolour *) tmp);
-	    break;
-
-	default:
-	    printf ("Ooook! Un-cleaned up tagrecord detected\n");
-	    break;
-    }
-
-    swf_free(tagrec);
-
-    return;
-}
-
-
-void 
 swf_destroy_movie (swf_movie * movie) 
 {
     swf_header * header;
     swf_tagrecord *tmp, *node;
+    void * tagrec;
+    void (**shiva)();
+    int tagid;
+    int error = 0;
+
+    shiva = calloc((1 + SWF_DESTROY_MAX_TAG_ID), sizeof(void * ));
+    init_destructors(shiva, &error);
 
     header = movie->header;
     swf_destroy_header(header);
@@ -219,10 +200,20 @@ swf_destroy_movie (swf_movie * movie)
         tmp = node;
         node = node->next;
 
-	swf_destroy_tagrecord(tmp);
+	tagid  = tmp->id;
+	tagrec = tmp->tag;
+
+	if (shiva[tagid]) {
+	  shiva[tagid](tagrec);
+	}
+
+	swf_free(tmp->buffer->raw);
+	swf_free(tmp->buffer);
+	swf_free(tmp);
     }
 
     swf_free(movie);
+    free(shiva);
 
     return;
 }
@@ -438,7 +429,7 @@ swf_tagrecord * swf_make_triangle_as_tag(swf_movie * movie, int * error) {
     return triangle;
 
  FAIL:
-    swf_destroy_tagrecord(triangle);
+    //    swf_destroy_tagrecord(triangle);
     *error = SWF_EMallocFailure;
     return NULL;
 }
@@ -571,6 +562,7 @@ swf_make_finalise(swf_movie * movie, int * error)
   swf_movie_put_dword(movie, error, tmp_size);
 
   fclose(movie->file);
+  free(file_buf);
 }
 
 void 

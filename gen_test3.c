@@ -232,6 +232,7 @@ int main (int argc, char *argv[]) {
     swf_free(matrix);
     swf_destroy_movie(movie);
 
+
     fprintf (stderr, "OK\n");
     return 0;
 }

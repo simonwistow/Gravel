@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_destroy.h,v $
+ * Revision 1.10  2002/05/22 11:49:31  kitty_goth
+ * Start having a proper destructor block. Make valgrind a bit happier
+ *
  * Revision 1.9  2001/07/14 00:17:55  clampr
  * added emacs file variables to avoid clashing with existing style (now I know what it is)
  *
@@ -28,6 +31,8 @@
 
 #ifndef SWF_DESTROY_H
 #define SWF_DESTROY_H
+
+extern void init_destructors(void (**shiva)(), int * error);
 
 extern void swf_destroy_parser (swf_parser *);
 extern void swf_destroy_tag (swf_tag *);
