@@ -1,0 +1,35 @@
+NAME
+    SWF::Parser - Parse SWF files and generate SAX events
+
+SYNOPSIS
+      my $handler = XML::Handler::BuildDOM->new(KeepCDATA => 1);
+      my $parser = SWF::Parser->new(handler => $handler);
+      ok(ref($parser));
+
+      my $doc = $parser->parsefile("../swfs/test5.swf");
+
+      my $xml = $doc->toString;
+
+      # Returns something like:
+      # <swf>
+      #  <header>
+      #   <filename>../swfs/test5.swf</filename>
+      #   <size>829</size>
+      #   <version>3</version>
+      #   <rate>12</rate>
+      #   <count>1</count>
+      #  </header>
+      # </swf>
+
+DESCRIPTION
+    ENODOCS
+
+AUTHOR
+    Leon Brocard <acme@astray.com>
+
+COPYRIGHT
+    Copyright (C) 2001, Leon Brocard
+
+    This module is free software; you can redistribute it or modify it under
+    the same terms as Perl itself.
+
