@@ -17,6 +17,14 @@ oldswfparse.cpp
 gpl.txt           
 todo              
 dos.pl		  
+configure.ac 
+sizes.h.in 
+aclocl.m4 
+config.guess 
+config.sub
+configure 
+install-sh 
+lt-main.sh
 swfs/
 swfs/button.swf    
 swfs/profero.swf  
