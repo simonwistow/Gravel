@@ -98,9 +98,11 @@ sub frames {
 	my $ra_m = $self->{_effects}->[0]->matrices();
 	my $start = $self->{_effects}->[0]->start;
 	my $end = $self->{_effects}->[0]->end;
+	my $depth = $self->{_effects}->[0]->depth;
 	for (my $i = $start; $i < $end; ++$i ) {
 		my $mx = $ra_m->[$i];
-		my $f = Gravel::Frame->new({matrix => $mx, shape => $self->{_shape}});
+		my $f = Gravel::Frame->new({matrix => $mx, shape => $self->{_shape},
+								    depth => $depth, });
 		$m->[$i] = $f;
 	}
 

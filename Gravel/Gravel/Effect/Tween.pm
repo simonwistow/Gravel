@@ -36,6 +36,7 @@ sub new {
 
     $self->{_start} = $conf{start};
     $self->{_end} = $conf{end};
+    $self->{_depth} = $conf{depth} || 1;
 
     $self->{_startx} = $conf{startx};
     $self->{_endx} = $conf{endx};
@@ -45,36 +46,6 @@ sub new {
 
     return $self;
 }
-
-#
-
-
-sub frames {
-	my $self = shift;
-	my $shape = shift;
-	
-	my $ra_f = [];
-
-	my $numf = $self->{_end} - $self->{_start};
-	my ($x, $y) = ($self->{_startx}, $self->{_starty});
-
-	my $dx = ( $self->{_endx} - $self->{_startx} ) / $numf;
-	my $dy = ( $self->{_endy} - $self->{_starty} ) / $numf;
-
-	for (my $i = $self->{_start}; $i < $self->{_end}; ++$i) {
-		my $f = Gravel::Frame->new();
-
-		$f->shape($shape);
-		$f->place($x, $y);
-
-		$ra_f->[$i] = $f;
-		$x += $dx;
-		$y += $dy;
-	}
-
-	return $ra_f;
-}
-
 
 #
 
@@ -104,6 +75,7 @@ sub matrices {
 
 sub start { return (shift)->{_start}; }
 sub end { return (shift)->{_end}; }
+sub depth { return (shift)->{_depth}; }
 
 #
 

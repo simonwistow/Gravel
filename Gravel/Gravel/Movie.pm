@@ -734,10 +734,12 @@ swf_matrix* _matrix_from_frame(int * error, HV * h_frame) {
 void _bake_place(swf_movie * movie, int * error, HV * h_place) {
 	swf_matrix * matrix;
 	SWF_U16 depth, obj_id;
+	SV** p_depth;
 	SV** p_shape;
 	SV*  shape;
 
 	obj_id = 0;
+	depth = 1;
 
 	// When do we actually want to throw an exception?
 	if (*error) {
@@ -752,12 +754,52 @@ void _bake_place(swf_movie * movie, int * error, HV * h_place) {
 		obj_id = _shape_id(error, *p_shape);
 	}
 
+	p_depth = hv_fetch(h_place, "_depth", 6, 0);
+	if (NULL != p_depth) {  
+		depth = (SWF_U16)(SvIV(*p_depth));
+	}
+
 	/* Paranoia */
 	*error = 0;
-	swf_add_placeobject(movie, error, matrix, obj_id, 1);
+
+	swf_add_placeobject(movie, error, matrix, obj_id, depth);
 
 	return;
 }
+
+void _bake_remove(swf_movie * movie, int * error, HV * h_place) {
+	SWF_U16 depth, obj_id;
+	SV** p_depth;
+	SV** p_shape;
+	SV*  shape;
+
+	obj_id = 0;
+	depth = 1;
+
+	// When do we actually want to throw an exception?
+	if (*error) {
+		fprintf(stderr, "non-zero error code on entry to _bake_remove\n");
+		return;
+	}
+
+	p_shape = hv_fetch(h_place, "_shape", 6, 0);	
+	if (NULL != p_shape) {  
+		obj_id = _shape_id(error, *p_shape);
+	}
+
+	p_depth = hv_fetch(h_place, "_depth", 6, 0);
+	if (NULL != p_depth) {  
+		depth = (SWF_U16)(SvIV(*p_depth));
+	}
+
+	/* Paranoia */
+	*error = 0;
+
+	swf_add_removeobject(movie, error, obj_id, depth);
+
+	return;
+}
+
 
 void _bake_frames(SV* obj, SV* self) {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
@@ -787,6 +829,18 @@ void _bake_frames(SV* obj, SV* self) {
 					}
 				}
 				swf_add_showframe(m->movie, &error);
+
+				/* If this isnt the last frame, remove all the shapes for the
+                   start of the next frame */
+				if (i < av_len(a_frames)) {
+					for (j=0; j<=av_len(a_frame); ++j) {
+						ph_shape = av_fetch(a_frame, j, 0);
+						if (NULL != ph_shape) {
+							_bake_remove(m->movie, &error, (HV *)SvRV(*ph_shape));
+						}
+					}
+				}
+
 				if (SWF_ENoError != error) {
 					fprintf(stderr, "Non-zero error condition 12 detected\n");
 				}

@@ -26,8 +26,9 @@ sub new {
 		%conf = @_;
     }
 
-	$self->{_contents} = {};
+#	$self->{_contents} = {};
 	$self->{_shape} = $conf{shape};
+	$self->{_depth} = $conf{depth};
 	$self->{_matrix} = $conf{matrix};
 
     bless $self => $class;
