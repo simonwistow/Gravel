@@ -137,32 +137,62 @@ void
 swf_buffer_shapestyle(swf_buffer * buffer, int * error, swf_shapestyle * s)
 {
 	SWF_U16 max;
-	SWF_U8 i;
+	SWF_U8 i, type;
 
-	for (i=0; i < s->nfills; i++) {
-		// buffer out the fillstyles...
+	if (s->nfills < 255) {
+		swf_buffer_put_byte (buffer, error, (SWF_U8)s->nfills);
+	} else {
+		swf_buffer_put_word (buffer, error, s->nfills);
 	}
 
+	/* FIXME: Alpha channels... */
+	for (i=0; i < s->nfills; i++) {
+		type = s->fills[i]->fill_style;
+		swf_buffer_put_byte (buffer, error, type);
+
+		/* FIXME: Do the other fill types */
+        if (type & fillGradient) {
+			/* Gradient Fill */
+			fprintf(stderr, "Warning! Unsupported fill type...\n");
+        } else if (type & fillBits) {
+			/* Bitmap Fill */
+			fprintf(stderr, "Warning! Unsupported fill type...\n");
+		} else {
+			/* Solid Fill */
+			swf_serialise_cxform(buffer, error, s->fills[i]->colour);
+		}
+	}
+
+	if (s->nlines < 255) {
+		swf_buffer_put_byte (buffer, error, (SWF_U8)s->nlines);
+	} else {
+		swf_buffer_put_word (buffer, error, s->nlines);
+	}
+
+	/* FIXME: Alpha channels... */
 	for (i=0; i < s->nlines; i++) {
-		// buffer out the linestyles...
+		swf_buffer_put_word (buffer, error, s->lines[i]->width);
+		swf_serialise_cxform(buffer, error, s->lines[i]->colour);
 	}
 
 
 	i = 1; /* The nbits is a UB value, so i = 1 here*/
-	max = 0;
-	if (s->nfills > max) {
-		max = s->nfills;
-	}
-	if (s->lines > max) {
-		max = s->lines;
-	}
-
+	max = s->nfills;
 	while (1 < max) {
 		i++;
 		max = max >> 1;
 	}
+	swf_buffer_put_bits(buffer, 4, i);
 
-	swf_buffer_put_bits(buffer, 5, i);
+	i = 1; /* The nbits is a UB value, so i = 1 here*/
+	max = s->nlines;
+	while (1 < max) {
+		i++;
+		max = max >> 1;
+	}
+	swf_buffer_put_bits(buffer, 4, i);
+	swf_buffer_flush_bits(buffer);
+
 }
 
 /*

@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.32  2002/06/07 13:53:45  kitty_goth
+ * More progress towards defineShape type stuff
+ *
  * Revision 1.31  2002/06/06 17:51:28  kitty_goth
  * Start working on some lower-level stuff
  *
@@ -582,7 +585,7 @@ struct swf_shapestyle {
 };
 
 struct swf_fillstyle {
-    SWF_U16 fill_style;              /* the type : 0x00 = solid fill,
+    SWF_U8 fill_style;              /* the type : 0x00 = solid fill,
                                                    0x10 = linear gradient fill,
                                                    0x12 = radial gradient fill,
                                                    0x40 = tiled bitmap fill,
@@ -1042,7 +1045,7 @@ struct swf_doaction_list {
 
 struct swf_shaperecord {
 	/* General */
-    int is_edge;                 /* is this an edge? 1 = yes, 0 = no */
+    SWF_U8 is_edge;                 /* is this an edge? 1 = yes, 0 = no */
     swf_shaperecord * next;      /* next element in the list */
 
 	/* TODO: simon - is this necessary? */
@@ -1052,11 +1055,6 @@ struct swf_shaperecord {
 	/* TODO: New Styles... */
 	/* TODO: MoveTo... */
     swf_shapestyle * shapestyle; /* the stle of the shape */
-
-	/* For Edges */
-    int change_fs0;              /* fill style 0 change flag */
-    int change_fs1;              /* fill style 0 change flag */
-    int change_ls;               /* line style change flag */
 
 	/* As a UB[4] can be at most 15, this is safe, for now... */
 	/* FIXME: More styles, and widening this to SWF_U32... */

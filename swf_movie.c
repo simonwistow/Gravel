@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.26 2002/06/06 17:51:28 kitty_goth Exp $	
+ * 	$Id: swf_movie.c,v 1.27 2002/06/07 13:53:45 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -280,9 +280,7 @@ swf_make_shaperecord(int * error, int isEdge)
     }
 
     record->is_edge = isEdge;
-    record->change_fs0 = 0;
-    record->change_fs1 = 0;
-    record->change_ls = 0;
+    record->flags = 0;
 
     record->x =0;
     record->y =0;

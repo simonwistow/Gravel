@@ -82,6 +82,56 @@ swf_parse_defineshape_aux (swf_parser * context, int * error, int with_alpha)
 
 
 void
+swf_buffer_shaperecord(swf_buffer * buffer, int * error, swf_shaperecord * s) 
+{
+	swf_buffer_put_bits(buffer, 1, s->is_edge);
+	
+	if (!s->is_edge) {
+		/* State change */
+		
+		swf_buffer_put_bits(buffer, 5, s->flags);
+
+        /* Are we at the end? */
+        if (s->flags == 0) {
+            return;
+        }
+
+        /* TODO: Process a move to. */
+        if (s->flags & eflagsMoveTo) {
+
+
+			/*            nbits = (SWF_U16) swf_parse_get_bits(context, 5);
+            s->x = swf_parse_get_sbits(context, nbits);
+            s->y = swf_parse_get_sbits(context, nbits);
+            xlast = s->x;
+            ylast = s->y; */
+        }
+
+        /* Process new fill info. */
+        if (s->flags & eflagsFill0) {
+			//			swf_buffer_put_bits(buffer, ,s->fillstyle0);
+        }
+
+        if (s->flags & eflagsFill1) {
+        }
+
+        /* Get new line info */
+        if (s->flags & eflagsLine) {
+
+        }
+
+        /* TODO: Process new styles*/
+        if (s->flags & eflagsNewStyles) {
+        }
+
+		return;
+	} else {
+		
+	}
+
+}
+
+void
 swf_serialise_defineshape (swf_buffer * buffer, int * error, swf_defineshape * shape)
 {
 	swf_shaperecord *node, *temp;
@@ -97,7 +147,8 @@ swf_serialise_defineshape (swf_buffer * buffer, int * error, swf_defineshape * s
 	while (node != NULL) {
 		temp = node;
 		node = node->next;
-		// FIXME: Do stuff...
+
+		swf_buffer_shaperecord(buffer, error, temp);
 	}
 
 }
