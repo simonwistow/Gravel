@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.24  2001/07/13 12:58:22  clampr
+ * electric fence fixes for swf_parse_ef against 3deng_01
+ *
  * Revision 1.23  2001/07/13 00:57:48  clampr
  * fixed a memory leak in swf_parser->font_chars deallocation
  * documented a magic number that needs slaying
@@ -1702,7 +1705,7 @@ swf_parse_definefont2 (swf_parser * context, int * error)
     SWF_U32 code_offset;
     SWF_U32 * offset_table;
 
-    if ((font = (swf_definefont2 *) calloc (1, sizeof (swf_definefont))) == NULL) {
+    if ((font = (swf_definefont2 *) calloc (1, sizeof (swf_definefont2))) == NULL) {
         *error = SWF_EMallocFailure;
     	return NULL;
     }
@@ -1746,19 +1749,19 @@ swf_parse_definefont2 (swf_parser * context, int * error)
      * put checks in for that
      */
 
-    if ((context->font_chars [font->fontid] = (char *) calloc (font->glyph_count, sizeof (char))) == NULL)
-    {
-        *error = SWF_EMallocFailure;
-        goto FAIL;
-
-    }
-
-
-    data_pos = swf_parse_tell(context);
-
 
     if (font->glyph_count > 0)
     {
+	    if ((context->font_chars [font->fontid] = (char *) calloc (font->glyph_count, sizeof (char))) == NULL)
+	    {
+		    *error = SWF_EMallocFailure;
+		    goto FAIL;
+		    
+	    }
+
+
+	    data_pos = swf_parse_tell(context);
+
 
         /* Get the FontOffsetTable */
 
@@ -1864,10 +1867,12 @@ swf_parse_definefont2 (swf_parser * context, int * error)
 
     	font->nkerning_pairs = swf_parse_get_word (context);
 
-        if ((font->kerning_pairs = (swf_kerningpair **) calloc (font->nkerning_pairs, sizeof(swf_kerningpair *))) == NULL) {
-            *error = SWF_EMallocFailure;
-            goto FAIL;
-        }
+	if (font->nkerning_pairs) {
+		if ((font->kerning_pairs = (swf_kerningpair **) calloc (font->nkerning_pairs, sizeof(swf_kerningpair *))) == NULL) {
+			*error = SWF_EMallocFailure;
+			goto FAIL;
+		}
+	}
 
 
         for (i=0; i<font->nkerning_pairs; i++)
