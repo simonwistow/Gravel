@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_destroy.c,v $
+ * Revision 1.22  2001/07/13 13:48:08  clampr
+ * doh!
+ *
  * Revision 1.21  2001/07/13 13:47:02  clampr
  * move to swf_free over free
  *
@@ -620,9 +623,8 @@ swf_destroy_button2action_list (swf_button2action_list * list)
         tmp = node;
         node = node->next;
 
-	    swf_destroy_button2action(tmp);
+	swf_destroy_button2action(tmp);
     }
-    swf_free (list->actions);
     swf_free (list);
 
     return;
