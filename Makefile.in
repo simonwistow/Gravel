@@ -7,18 +7,31 @@ LIBTOOL = ./libtool
 INSTALL = ./install-sh
 
 #flags
-CFLAGS =  -Wall -Wwrite-strings -Wmissing-prototypes  -O3
+CFLAGS =  -Wall -Wwrite-strings -Wmissing-prototypes  -O3 -pipe
 DEBUG = -DDEBUG -g
 
 #other stuff
-LIB_OBJECTS=swf_parse.lo swf_destroy.lo swf_error.lo swf_tags.lo
+LIB_OBJECTS=swf_parse.o swf_destroy.o swf_error.o swf_tags.o \
+	tag/cxform.o		tag/definebits.o	tag/definebitsjpeg2.o	tag/definebitsjpeg3.o 	\
+	tag/definebitslossless.o			tag/definebitslossless2.o			\
+	tag/definebutton.o	tag/definebutton2.o	tag/definebuttoncxform.o			\
+	tag/definebuttonsound.o	tag/defineedittext.o	tag/definefont.o	tag/definefont2.o	\
+	tag/definefontinfo.o	tag/definemorphshape.o	tag/defineshape.o	tag/definesound.o	\
+	tag/definetext.o	tag/definetext2.o	tag/doaction.o		tag/framelabel.o	\
+	tag/freecharacter.o	tag/imageguts.o		tag/jpegtables.o	tag/matrix.o		\
+	tag/namecharacter.o	tag/placeobject.o	tag/placeobject2.o	tag/rect.o		\
+	tag/removeobject.o	tag/removeobject2.o	tag/setbackgroundcolour.o			\
+	tag/shapestyle.o	tag/soundstreamblock.o	tag/soundstreamhead.o	tag/soundstreamhead2.o	\
+	tag/startsound.o	tag/textrecord.o
+
+DLIB_OBJECTS=$(LIB_OBJECTS:.o=.lo)
 ELIB_OBJECTS=lib_swfextract.lo
 OBJECTS=parser.o print_utils.o
 TEXT_OBJECTS=text_extract.o
-D_LIB_OBJECTS=swf_parse.do swf_destroy.do swf_error.do swf_tags.do
-D_OBJECTS=parser.do print_utils.do
-D_TEXT_OBJECTS=text_extract.do lib_swfextract.do
-ALL_OBJECTS=$(LIB_OBJECTS) $(OBJECTS) $(TEXT_OBJECTS) $(D_LIB_OBJECTS) $(D_OBJECTS) $(D_TEXT_OBJECTS)
+D_LIB_OBJECTS=$(LIB_OBJECTS:.o=.do)
+D_OBJECTS=$(OBJECTS:.o=.do)
+D_TEXT_OBJECTS=$(TEXT_OBJECTS:.o=.do) lib_swfextract.do
+ALL_OBJECTS=$(DLIB_OBJECTS) $(OBJECTS) $(DTEXT_OBJECTS) $(D_LIB_OBJECTS) $(D_OBJECTS) $(D_TEXT_OBJECTS)
 
 LIB_PATH=/usr/local/lib
 BIN_PATH=/usr/local/bin
@@ -28,13 +41,13 @@ DATE=$(shell date +%Y-%m-%d)
 
 # production rules
 %.do: %.c
-	$(CC) $(CFLAGS) -c $(DEBUG) -o $@ $<
+	$(CC) $(CFLAGS) -I. -c $(DEBUG) -o $@ $<
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) -I. -c -o $@ $<
 
 %.lo: %.c
-	$(LIBTOOL) $(CC) $(CFLAGS) -c -o $@ $<
+	$(LIBTOOL) $(CC) $(CFLAGS) -I. -c -o $@ $<
 
 ## Targets
 all: swf_parse text_extract
@@ -42,8 +55,8 @@ all: swf_parse text_extract
 debug: swf_parse_debug text_extract_debug
 memdebug: debug swf_parse_ef swf_parse_debauch swf_parse_ktrace text_extract_ef text_extract_debauch text_extract_ktrace
 
-libswfparse.la: $(LIB_OBJECTS)
-	$(LIBTOOL) $(CC) $(CFLAGS) -o libswfparse.la $(LIB_OBJECTS) -rpath $(LIB_PATH)
+libswfparse.la: $(DLIB_OBJECTS)
+	$(LIBTOOL) $(CC) $(CFLAGS) -o libswfparse.la $(DLIB_OBJECTS) -rpath $(LIB_PATH)
 
 libswfextract.la: $(ELIB_OBJECTS)
 	$(LIBTOOL) $(CC) $(CFLAGS) -o libswfextract.la $(ELIB_OBJECTS) -lswfparse -rpath $(LIB_PATH)
@@ -99,8 +112,8 @@ snapshot:
 	rm -rf libswfparse-snapshot-$(DATE)
 
 clean:
-	rm -f *.do *.o *.la *.lo *.tar.gz swf_parse{,_debug,_debauch,_ef,_ktrace} text_extract{,_debug,_debauch,_ef,_ktrace}
-	rm -rf .libs
+	rm -f $(ALL_OBJECTS) *.la *.tar.gz swf_parse{,_debug,_debauch,_ef,_ktrace} text_extract{,_debug,_debauch,_ef,_ktrace}
+	rm -rf .libs tag/.libs
 
 reallyclean: clean
 	rm -f *~

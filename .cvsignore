@@ -13,10 +13,10 @@ text_extract_debug
 text_extract_debauch
 text_extract_ef
 text_extract_ktrace
+libtool
+libswfparse-snapshot-*
+Makefile
 *.lo
 *.do
 *.la
 .libs
-libtool
-libswfparse-snapshot-*
-Makefile

@@ -16,6 +16,9 @@
  *
  *
  * $Log: parser.c,v $
+ * Revision 1.16  2001/07/15 14:09:46  clampr
+ * slice swf_parse.c and swf_destroy.c into tag/*.c files
+ *
  * Revision 1.15  2001/07/14 22:16:41  clampr
  * fix up an ugly switch statement
  *
@@ -1283,3 +1286,13 @@ void parse_doaction (swf_parser * context, const char * str)
     swf_destroy_doaction_list (actions);
 
 }
+
+
+
+/* 
+Local Variables:
+mode: C
+c-basic-offset: 4
+tab-width: 4
+End:
+*/

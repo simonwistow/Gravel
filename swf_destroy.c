@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_destroy.c,v $
+ * Revision 1.25  2001/07/15 14:09:46  clampr
+ * slice swf_parse.c and swf_destroy.c into tag/*.c files
+ *
  * Revision 1.24  2001/07/14 00:17:55  clampr
  * added emacs file variables to avoid clashing with existing style (now I know what it is)
  *
@@ -107,43 +110,6 @@ swf_destroy_parser (swf_parser * context)
     return;
 }
 
-/*
- * Shapestyle's are reasonably complicated types.
- *
- * I think what is needed here is for the ith line/fillstyle
- * to be free'd (with a check to make sure it points at something)
- *
- * There's no need to keep track of how many we've actually allocated
- * (for the case where we crash out halfway through) as we're
- * using calloc for memory allocation, so test-for-NULL will do
- * it for us.
- */
-
-void
-swf_destroy_shapestyle (swf_shapestyle * style)
-{
-    int i;
-
-    if (style==NULL) {
-        return;
-    }
-
-    for (i=0; i<style->nlines && style->lines[i] != NULL; i++) {
-       swf_free (style->lines[i]);
-    }
-
-    swf_free (style->lines);
-
-    for (i=0; i<style->nfills && style->fills[i] != NULL; i++) {
-        swf_destroy_fillstyle (style->fills[i]);
-    }
-    swf_free (style->fills);
-
-    swf_free (style);
-
-    return;
-}
-
 void
 swf_destroy_fillstyle (swf_fillstyle * style)
 {
@@ -164,39 +130,6 @@ swf_destroy_fillstyle (swf_fillstyle * style)
 
     return;
 }
-
-void
-swf_destroy_defineshape (swf_defineshape * shape)
-{
-
-    if (shape==NULL) {
-        return;
-    }
-    swf_destroy_rect (shape->rect);
-    swf_destroy_shapestyle (shape->style);
-    swf_destroy_shaperecord_list (shape->record);
-    swf_free(shape);
-    return;
-}
-
-void
-swf_destroy_textrecord (swf_textrecord * record)
-{
-    int i=0;
-
-    if (record==NULL) {
-        return;
-    }
-
-    for (i=0; i<record->glyph_count; i++) {
-        swf_free (record->glyphs[i]);
-    }
-    swf_free (record->glyphs);
-    swf_free (record);
-
-    return;
-}
-
 void
 swf_destroy_textrecord_list (swf_textrecord_list * list)
 {
@@ -243,65 +176,12 @@ swf_destroy_shaperecord_list (swf_shaperecord_list * list)
 }
 
 void
-swf_destroy_definemorphshape (swf_definemorphshape * shape)
-{
-    int i, j;
-
-    if (shape==NULL) {
-        return;
-    }
-
-    swf_destroy_rect (shape->r1);
-    swf_destroy_rect (shape->r2);
-
-    for (i=0; i<shape->nfills; i++) {
-        swf_free (shape->fills[i]->matrix1);
-    	swf_free (shape->fills[i]->matrix2);
-
-	for (j=0; j<shape->fills[i]->ncolours; j++) {
-	    swf_free (shape->fills[i]->colours[j]);
-	}
-
-	swf_free (shape->fills[i]->colours);
-    }
-
-    swf_free (shape->fills);
-
-    for (i=0; i<shape->nlines; i++) {
-    	swf_free (shape->lines[i]);
-    }
-
-    swf_free (shape->lines);
-
-    swf_destroy_shaperecord_list(shape->records1);
-    swf_destroy_shaperecord_list(shape->records2);
-
-    swf_free (shape);
-
-    return;
-}
-
-
-
-void
 swf_destroy_tag (swf_tag * tag)
 {
     if (tag==NULL) {
         return;
     }
     swf_free (tag);
-
-    return;
-}
-
-void
-swf_destroy_rect (swf_rect * rect)
-{
-    if (rect==NULL) {
-        return;
-    }
-
-    swf_free (rect);
 
     return;
 }
@@ -342,30 +222,6 @@ swf_destroy_gradcolour (swf_gradcolour * colour)
 
     return;
 }
-
-void
-swf_destroy_cxform (swf_cxform * cxform)
-{
-    if (cxform==NULL) {
-        return;
-    }
-
-    swf_free (cxform);
-
-    return;
-}
-
-void
-swf_destroy_matrix (swf_matrix * matrix)
-{
-    if (matrix==NULL) {
-        return;
-    }
-
-    swf_free (matrix);
-    return;
-}
-
 
 void
 swf_destroy_linestyle (swf_linestyle * style)
@@ -430,18 +286,6 @@ swf_destroy_soundpoint (swf_soundpoint * point)
     }
 
     swf_free (point);
-	return;
-}
-
-void
-swf_destroy_imageguts (swf_imageguts * guts)
-{
-    if (guts==NULL) {
-        return;
-    }
-
-    swf_free (guts->data);
-    swf_free (guts);
 	return;
 }
 
@@ -543,24 +387,6 @@ swf_destroy_buttonrecord_list (swf_buttonrecord_list * list)
 }
 
 void
-swf_destroy_doaction (swf_doaction * action)
-{
-    if (action==NULL)
-    {
-        return;
-    }
-
-    swf_free (action->url);
-    swf_free (action->target);
-    swf_free (action->goto_label);
-    swf_free (action->push_data_string);
-
-    swf_free (action);
-
-    return;
-}
-
-void
 swf_destroy_doaction_list (swf_doaction_list * list)
 {
     swf_doaction *tmp, *node;
@@ -632,408 +458,6 @@ swf_destroy_button2action_list (swf_button2action_list * list)
 	swf_destroy_button2action(tmp);
     }
     swf_free (list);
-
-    return;
-}
-
-void
-swf_destroy_setbackgroundcolour (swf_setbackgroundcolour * tag)
-{
-    if (tag==NULL) {
-        return;
-    }
-    swf_destroy_colour (tag->colour);
-    swf_free (tag);
-
-    return;
-}
-
-void
-swf_destroy_definesound (swf_definesound * sound)
-{
-
-    if (sound==NULL) {
-        return;
-    }
-    swf_destroy_mp3header_list (sound->mp3header_list);
-    swf_destroy_adpcm (sound->adpcm);
-    swf_free (sound);
-
-    return;
-}
-
-void
-swf_destroy_definefont (swf_definefont * font)
-{
-    int i = 0;
-
-    if (font==NULL) {
-        return;
-    }
-
-    for (i=0; i<font->glyph_count && (font->shape_records != NULL); i++) {
-        swf_destroy_shaperecord_list (font->shape_records[i]);
-    }
-
-    swf_free (font->shape_records);
-    swf_free (font);
-
-    return;
-}
-
-void
-swf_destroy_definefont2 (swf_definefont2 * font)
-{
-    int i=0;
-
-    if (font==NULL) {
-        return;
-    }
-
-    for (i=0; i<font->glyph_count; i++) {
-        swf_destroy_shaperecord_list (font->glyphs[i]);
-        if (font->bounds) swf_destroy_rect (font->bounds[i]);
-    }
-
-    swf_free (font->glyphs);
-    swf_free (font->name);
-    swf_free (font->code_table);
-    swf_free (font->bounds);
-
-    for (i=0; i<font->nkerning_pairs; i++) {
-        swf_destroy_kerningpair (font->kerning_pairs[i]);
-    }
-
-    swf_free (font);
-
-    return;
-}
-
-void
-swf_destroy_definefontinfo (swf_definefontinfo * info)
-{
-    if (info==NULL) {
-        return;
-    }
-
-    swf_free (info->code_table);
-    swf_free (info->fontname);
-    swf_free (info);
-
-    return;
-}
-
-void
-swf_destroy_placeobject (swf_placeobject * object)
-{
-    if (object==NULL) {
-        return;
-    }
-
-    swf_destroy_matrix (object->matrix);
-    swf_destroy_cxform (object->cxform);
-
-    swf_free (object);
-
-    return;
-}
-
-void
-swf_destroy_placeobject2 (swf_placeobject2 * object)
-{
-    if (object==NULL) {
-        return;
-    }
-
-    swf_destroy_matrix (object->matrix);
-    swf_destroy_cxform (object->cxform);
-
-    swf_free (object->name);
-    swf_free (object);
-
-    return;
-}
-
-
-
-void
-swf_destroy_freecharacter (swf_freecharacter * object)
-{
-    if (object==NULL) {
-        return;
-    }
-
-    swf_free (object);
-
-    return;
-}
-
-void
-swf_destroy_namecharacter (swf_namecharacter * object)
-{
-    if (object==NULL) {
-        return;
-    }
-
-    swf_free (object->label);
-    swf_free (object);
-	return;
-}
-
-void
-swf_destroy_removeobject (swf_removeobject * object)
-{
-    if (object==NULL) {
-        return;
-    }
-
-
-    swf_free (object);
-	return;
-}
-
-void
-swf_destroy_removeobject2 (swf_removeobject2 * object)
-{
-    if (object==NULL) {
-        return;
-    }
-
-    swf_free (object);
-	return;
-}
-
-void
-swf_destroy_startsound (swf_startsound * sound)
-{
-    int i = 0;
-
-    if (sound==NULL) {
-        return;
-    }
-
-
-    for (i=0; i<sound->npoints; i++) {
-        swf_destroy_soundpoint(sound->points[i]);
-    }
-    swf_free (sound->points);
-    swf_free (sound);
-	return;
-}
-
-void
-swf_destroy_definebits (swf_definebits * bits)
-{
-
-    if (bits==NULL) {
-        return;
-    }
-
-    swf_destroy_imageguts (bits->guts);
-    swf_free (bits);
-
-    return;
-}
-
-void
-swf_destroy_jpegtables (swf_jpegtables * bits)
-{
-    if (bits==NULL) {
-        return;
-    }
-
-    swf_destroy_imageguts (bits->guts);
-    swf_free (bits);
-
-
-    return;
-}
-
-void
-swf_destroy_definebitsjpeg2 (swf_definebitsjpeg2 * bits)
-{
-
-    if (bits==NULL) {
-        return;
-    }
-
-    swf_destroy_imageguts (bits->guts);
-    swf_free (bits);
-
-
-    return;
-}
-
-void
-swf_destroy_definebitsjpeg3 (swf_definebitsjpeg3 * bits)
-{
-    if (bits==NULL) {
-        return;
-    }
-
-    swf_destroy_imageguts (bits->guts);
-    swf_free (bits);
-
-
-    return;
-}
-
-void
-swf_destroy_definebitslossless (swf_definebitslossless * object)
-{
-    if (object==NULL) {
-        return;
-    }
-
-
-    return;
-}
-
-void
-swf_destroy_definetext (swf_definetext * text)
-{
-    if (text==NULL) {
-        return;
-    }
-
-    swf_destroy_rect (text->rect);
-    swf_destroy_matrix (text->matrix);
-    swf_destroy_textrecord_list (text->records);
-    swf_free (text);
-
-    return;
-}
-
-void
-swf_destroy_definetext2 (swf_definetext2 * text)
-{
-    if (text==NULL) {
-        return;
-    }
-
-    swf_destroy_rect (text->rect);
-    swf_destroy_matrix (text->matrix);
-    swf_destroy_textrecord_list (text->records);
-    swf_free (text);
-
-
-    return;
-}
-
-void
-swf_destroy_definebutton (swf_definebutton * button)
-{
-    if (button==NULL) {
-        return;
-    }
-
-    swf_destroy_buttonrecord_list(button->records);
-    swf_destroy_doaction_list (button->actions);
-    swf_free (button);
-
-    return;
-}
-
-void
-swf_destroy_definebutton2 (swf_definebutton2 * button)
-{
-    if (button==NULL) {
-        return;
-    }
-
-    swf_destroy_buttonrecord_list(button->records);
-    swf_destroy_button2action_list (button->actions);
-    swf_free (button);
-
-    return;
-}
-
-void
-swf_destroy_defineedittext (swf_defineedittext * text)
-{
-
-    if (text==NULL) {
-        return;
-    }
-
-    swf_free (text->variable);
-    swf_free (text->initial_text);
-
-    swf_destroy_rect (text->bounds);
-
-    swf_free (text);
-
-    return;
-}
-
-void
-swf_destroy_framelabel (swf_framelabel * label)
-{
-    if (label==NULL) {
-        return;
-    }
-
-    swf_free (label->label);
-    swf_free (label);
-    return;
-}
-
-void
-swf_destroy_definebuttoncxform (swf_definebuttoncxform * button)
-{
-    int i=0;
-
-    if (button==NULL) {
-        return;
-    }
-
-
-    for (i=0; i<button->ncxforms; i++) {
-        swf_destroy_cxform (button->cxforms[i]);
-    }
-    swf_free (button->cxforms);
-
-    swf_free (button);
-
-	return;
-}
-
-void
-swf_destroy_definebuttonsound (swf_definebuttonsound * button)
-{
-    if (button==NULL) {
-        return;
-    }
-
-    swf_destroy_startsound (button->up_state);
-    swf_destroy_startsound (button->over_state);
-    swf_destroy_startsound (button->down_state);
-    swf_free (button);
-
-	return;
-}
-
-void
-swf_destroy_soundstreamblock (swf_soundstreamblock * block)
-{
-    if (block==NULL) {
-        return;
-    }
-
-    swf_destroy_adpcm (block->adpcm);
-    swf_destroy_mp3header_list (block->mp3header_list);
-    swf_free (block);
-	return;
-}
-
-void
-swf_destroy_soundstreamhead (swf_soundstreamhead * head)
-{
-    if (head==NULL) {
-        return;
-    }
-
-    swf_free (head);
 
     return;
 }
