@@ -177,7 +177,6 @@ swf_parse_definemorphshape (swf_parser * context, int * error)
     context->line_bits = swf_parse_get_bits(context, 4); /* there are no styles so none of this make sense. */
 
 
-
     /*
      * Parse the end shape
      */
@@ -187,7 +186,7 @@ swf_parse_definemorphshape (swf_parser * context, int * error)
 
     return shape;
 
-    FAIL:
+ FAIL:
     swf_destroy_definemorphshape (shape);
     return NULL;
 }
@@ -209,11 +208,12 @@ swf_destroy_definemorphshape (swf_definemorphshape * shape)
         swf_free (shape->fills[i]->matrix1);
     	swf_free (shape->fills[i]->matrix2);
 
-	for (j=0; j<shape->fills[i]->ncolours; j++) {
-	    swf_free (shape->fills[i]->colours[j]);
-	}
+		for (j=0; j<shape->fills[i]->ncolours; j++) {
+			swf_free (shape->fills[i]->colours[j]);
+		}
 
-	swf_free (shape->fills[i]->colours);
+		swf_free (shape->fills[i]->colours);
+		swf_free (shape->fills[i]);
     }
 
     swf_free (shape->fills);
@@ -228,8 +228,6 @@ swf_destroy_definemorphshape (swf_definemorphshape * shape)
     swf_destroy_shaperecord_list(shape->records2);
 
     swf_free (shape);
-
-    return;
 }
 
 

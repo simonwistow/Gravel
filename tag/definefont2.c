@@ -217,6 +217,7 @@ swf_destroy_definefont2 (swf_definefont2 * font)
     for (i=0; i<font->nkerning_pairs; i++) {
         swf_destroy_kerningpair (font->kerning_pairs[i]);
     }
+	swf_free(font->kerning_pairs);
 
     swf_free (font);
 }

@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_destroy.c,v $
+ * Revision 1.31  2001/07/23 03:38:05  clampr
+ * memory leaks (and maybe an ickle bitty linespace delta)
+ *
  * Revision 1.30  2001/07/19 03:13:41  clampr
  * spurious whitespace nits
  *
@@ -166,8 +169,6 @@ swf_destroy_textrecord_list (swf_textrecord_list * list)
 		swf_destroy_textrecord(tmp);
     }
     swf_free(list);
-
-    return;
 }
 
 
@@ -186,11 +187,11 @@ swf_destroy_shaperecord_list (swf_shaperecord_list * list)
     while (node != NULL) {
         tmp = node;
         node = node->next;
-
-	swf_destroy_shaperecord(tmp);
+		
+		swf_destroy_shaperecord(tmp);
     }
 
-    return;
+	swf_free(list);
 }
 
 void
