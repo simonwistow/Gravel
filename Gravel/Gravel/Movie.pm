@@ -157,8 +157,6 @@ sub bake_movie {
 	$b->_bake_preamble($self, 0);
 	$b->_bake_library($self);
 
-#	print STDERR DumperX $self;
-
 	$b->_bake_frames($self);
 
 	$b->_bake_end($self);
@@ -254,10 +252,12 @@ void _bake_preamble(SV* obj, SV* self, U32 protect) {
 	// FIXME: Need to do with the case of no bgcol better...
 	p_col = hv_fetch(h, "_bgcol", 6, 0);
 
-	if (NULL == p_col) {
-		col = swf_make_colour(&error, 255, 255, 255);
-	} else {
-		col = gravel_parse_colour((char *)(SvPVX(*p_col)));
+	if (NULL != p_col) {
+		if (!SvOK(*p_col)) {
+			col = swf_make_colour(&error, 255, 255, 255);
+		} else {
+			col = gravel_parse_colour((char *)(SvPVX(*p_col)));
+		}
 	}
 
     swf_add_setbgcol(m->movie, &error, col);
