@@ -1,10 +1,24 @@
 #!/usr/bin/perl -w
 
+# convert dos line endings to Unix ones
+
 use strict;
 
 use IO::File;
 
 # my $file = $ARGV[0];
+
+
+
+unless (@ARGV)
+{
+	my $name = $0;
+	$name =~ s!^.*/!!;
+
+	print STDERR "usage : $name [filename(s)]\n";
+
+	exit 1;
+}
 
 foreach my $file (@ARGV) {
 
