@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.38  2001/07/14 23:28:01  clampr
+ * spurious line deltas 'o the day
+ *
  * Revision 1.37  2001/07/14 23:17:11  clampr
  * tweak up some layout
  *
@@ -1624,128 +1627,101 @@ swf_parse_get_doactions (swf_parser * context, int * error)
 swf_doaction *
 swf_parse_get_doaction (swf_parser * context, int * error)
 {
-        swf_doaction * action;
-        int len = 0;
-        SWF_S32 pos;
+	swf_doaction * action;
+	int len = 0;
+	SWF_S32 pos;
 
-        if ((action = (swf_doaction *) calloc (1, sizeof (swf_doaction))) == NULL)
-        {
-            *error = SWF_EMallocFailure;
-            return NULL;
-        }
+	if ((action = (swf_doaction *) calloc (1, sizeof (swf_doaction))) == NULL)
+	{
+		*error = SWF_EMallocFailure;
+		return NULL;
+	}
 
-        action->next = NULL;
-        action->url  = NULL;
-        action->target = NULL;
-        action->goto_label = NULL;
-        action->push_data_string = NULL;
-
-
-        /* Handle the action */
-        action->code = swf_parse_get_byte(context);
-        if (action->code == 0)
-        {
-
-            return action;
-        }
+	action->next = NULL;
+	action->url  = NULL;
+	action->target = NULL;
+	action->goto_label = NULL;
+	action->push_data_string = NULL;
 
 
-        if (action->code & sactionHasLength)
-        {
-            len = swf_parse_get_word (context);
-        }
-
-        pos = swf_parse_tell (context) + len;
-
-        switch ( action->code )
-        {
+	/* Handle the action */
+	action->code = swf_parse_get_byte(context);
+	if (action->code == 0)
+	{
+		return action;
+	}
 
 
-            case sactionGotoFrame:
-            {
-                action->frame = swf_parse_get_word(context);
-                break;
-            }
+	if (action->code & sactionHasLength)
+	{
+		len = swf_parse_get_word (context);
+	}
 
-            case sactionGetURL:
-            {
-                action->url    = swf_parse_get_string(context, error);
-                action->target = swf_parse_get_string(context, error);
-                break;
-            }
+	pos = swf_parse_tell (context) + len;
+	
+	switch ( action->code )
+	{
+	case sactionGotoFrame:
+		action->frame = swf_parse_get_word(context);
+		break;
 
-            case sactionWaitForFrame:
-            {
-                action->frame      = swf_parse_get_word(context);
-                action->skip_count = swf_parse_get_byte(context);
-                break;
-            }
+	case sactionGetURL:
+		action->url    = swf_parse_get_string(context, error);
+		action->target = swf_parse_get_string(context, error);
+		break;
 
-            case sactionSetTarget:
-            {
-                action->target = swf_parse_get_string (context, error);
-                break;
-            }
+	case sactionWaitForFrame:
+		action->frame      = swf_parse_get_word(context);
+		action->skip_count = swf_parse_get_byte(context);
+		break;
 
-            case sactionGotoLabel:
-            {
+	case sactionSetTarget:
+		action->target = swf_parse_get_string (context, error);
+		break;
 
-                action->goto_label = swf_parse_get_string (context, error);
-                break;
-            }
+	case sactionGotoLabel:
+		action->goto_label = swf_parse_get_string (context, error);
+		break;
 
-            case sactionWaitForFrameExpression:
-            {
-                action->skip_count = swf_parse_get_byte(context);
-                break;
-            }
+	case sactionWaitForFrameExpression:
+		action->skip_count = swf_parse_get_byte(context);
+		break;
 
-            case sactionPushData:
-            {
-                action->push_data_type = swf_parse_get_byte (context);
+	case sactionPushData:
+		action->push_data_type = swf_parse_get_byte (context);
+		
+		/* property ids are pushed as floats for some reason */
+		if ( action->push_data_type == 1 )
+		{
+			action->push_data_float.dw = swf_parse_get_dword (context);
+		}
+		else
+			if ( action->push_data_type == 0 )
+			{
+				action->push_data_string = swf_parse_get_string (context, error);
+			}
+		break;
+		
+	case sactionBranchAlways:
+		action->branch_offset = swf_parse_get_word(context);
+		break;
 
-                /* property ids are pushed as floats for some reason */
-                if ( action->push_data_type == 1 )
-                {
+	case sactionGetURL2:
+		action->url2_flag = swf_parse_get_byte(context);
+		break;
 
-                    action->push_data_float.dw = swf_parse_get_dword (context);
-                }
-                else
-                if ( action->push_data_type == 0 )
-                {
-                    action->push_data_string = swf_parse_get_string (context, error);
-                }
-                break;
-            }
+	case sactionBranchIfTrue:
+		action->branch_offset = swf_parse_get_word(context);
+		break;
 
-            case sactionBranchAlways:
-            {
-                action->branch_offset = swf_parse_get_word(context);
-                break;
-            }
+	case sactionGotoExpression:
+		action->stop_flag = swf_parse_get_byte(context);
+		
+	}
 
-            case sactionGetURL2:
-            {
-                action->url2_flag = swf_parse_get_byte(context);
-                break;
-            }
-
-            case sactionBranchIfTrue:
-            {
-                action->branch_offset = swf_parse_get_word(context);
-                break;
-            }
-
-
-            case sactionGotoExpression:
-            {
-                action->stop_flag = swf_parse_get_byte(context);
-            }
-        }
-
-        swf_parse_seek(context, pos);
-
-        return action;
+	swf_parse_seek(context, pos);
+		
+	return action;
 }
 
 
@@ -1828,11 +1804,6 @@ swf_parse_definefont2 (swf_parser * context, int * error)
     font->bounds = NULL;
 
     font->fontid = swf_parse_get_word (context);
-
-
-
-
-
     font->flags = swf_parse_get_word (context);
     font->name_len = swf_parse_get_byte (context);
 
@@ -1869,10 +1840,7 @@ swf_parse_definefont2 (swf_parser * context, int * error)
 		    
 	    }
 
-
-    data_pos = swf_parse_tell(context);
-
-
+		data_pos = swf_parse_tell(context);
 
         /* Get the FontOffsetTable */
 
@@ -1899,12 +1867,12 @@ swf_parse_definefont2 (swf_parser * context, int * error)
             code_offset = swf_parse_get_dword(context);
         } else {
             code_offset = swf_parse_get_word(context);
-	}
+		}
 
         /* Get the Glyphs */
-	if ((font->glyphs = (swf_shaperecord_list **) calloc (font->glyph_count, sizeof(swf_shaperecord_list *))) == NULL) {
-	    goto FAIL;
-	}
+		if ((font->glyphs = (swf_shaperecord_list **) calloc (font->glyph_count, sizeof(swf_shaperecord_list *))) == NULL) {
+			goto FAIL;
+		}
 
 
         for(n=0; n<font->glyph_count; n++) {
@@ -1936,12 +1904,11 @@ swf_parse_definefont2 (swf_parser * context, int * error)
 
     	/* Get the CodeTable */
         for (i=0; i<font->glyph_count; i++) {
-
             if (font->flags & sfontFlagsWideOffsets) {
                 font->code_table [i] = swf_parse_get_word (context);
             } else {
                 font->code_table [i] = swf_parse_get_byte (context);
-	    }
+			}
         }
     }
 
@@ -1954,13 +1921,13 @@ swf_parse_definefont2 (swf_parser * context, int * error)
         font->leading = swf_parse_get_word (context);
 
         /* Skip Advance table */
-	/* todo simon : does this need to be done ???*/
+		/* todo simon : does this need to be done ???*/
         swf_parse_skip (context, font->glyph_count * 2);
-
+		
 
 
         /* Get BoundsTable */
-	if ((font->bounds = (swf_rect **) calloc (font->glyph_count, sizeof(swf_rect*))) == NULL) {
+		if ((font->bounds = (swf_rect **) calloc (font->glyph_count, sizeof(swf_rect*))) == NULL) {
             *error = SWF_EMallocFailure;
             goto FAIL;
 	    }
