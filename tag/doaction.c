@@ -121,10 +121,9 @@ swf_parse_get_doaction (swf_parser * context, int * error)
 
 
 void
-swf_add_doaction (swf_movie * movie, int * error)
+swf_add_doaction (swf_movie * movie, int * error, SWF_U8 saction)
 {
 	swf_tagrecord * temp;
-	SWF_U8 saction;
 	SWF_U16 frame;
 
     temp = swf_make_tagrecord(error, tagDoAction);
@@ -140,12 +139,18 @@ swf_add_doaction (swf_movie * movie, int * error)
     }
 
 	// FIXME: Test code
-	saction = sactionGotoFrame;
 	frame = 1;
 
-	swf_buffer_put_byte(temp->buffer, error, saction);
-	swf_buffer_put_word(temp->buffer, error, 2);
-	swf_buffer_put_word(temp->buffer, error, frame);
+	switch(saction) {
+	case sactionGotoFrame:
+		swf_action_put_gotoframe(temp->buffer, error, frame);
+		break;
+
+	case sactionPlay:
+		swf_buffer_put_byte(temp->buffer, error, saction);
+		break;
+	}
+
 
 	/* End of action records marker */
 	swf_buffer_put_byte(temp->buffer, error, 0);

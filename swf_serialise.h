@@ -15,7 +15,7 @@ extern void swf_add_removeobject2 (swf_movie * movie, int * error, SWF_U16 depth
 
 // FIXME: Test API
 extern void swf_add_definebutton (swf_movie * movie, int * error, SWF_U16 button_id, SWF_U16 char_id);
-extern void swf_add_doaction (swf_movie * movie, int * error);
+extern void swf_add_doaction (swf_movie * movie, int * error, SWF_U8 saction);
 
 
 /* Serialisation API */
