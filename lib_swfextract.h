@@ -16,6 +16,10 @@
  *
  *
  * $Log: lib_swfextract.h,v $
+ * Revision 1.2  2001/07/09 13:51:37  muttley
+ * fixed minor bug in text_extract and lib_swfextract where it would try
+ * and print out strings instead of urls :(
+ *
  * Revision 1.1  2001/07/09 12:47:06  muttley
  * Initial revision
  *

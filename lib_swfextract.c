@@ -16,6 +16,10 @@
  *
  *
  * $Log: lib_swfextract.c,v $
+ * Revision 1.2  2001/07/09 13:51:37  muttley
+ * fixed minor bug in text_extract and lib_swfextract where it would try
+ * and print out strings instead of urls :(
+ *
  * Revision 1.1  2001/07/09 12:47:06  muttley
  * Initial revision
  *
@@ -114,7 +118,7 @@ load_swf (char * file, int * error)
     }
 
     fprintf (stderr, "\n\n[load_swf : number of urls is %d]\n",swf->num_urls);
-    for (i=0; i<swf->num_strings; i++)
+    for (i=0; i<swf->num_urls; i++)
     {
         fprintf (stderr, "[load_swf : url %d = '%s']\n", i, (swf->urls)[i]);
     }
@@ -606,7 +610,7 @@ add_text (int * error, char *** list, int * num, int * max, char * string)
 
 
     #ifdef DEBUG
-    fprintf (stderr, "[add_text : added the text '%s' the count for this list now stands at %d]\n", (*list)[*num], *num);
+    fprintf (stderr, "[add_text : added the text '%s' the count for this list now stands at %d]\n", (*list)[*num], (*num)+1);
     #endif
 
     (*num)++;

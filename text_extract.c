@@ -16,6 +16,10 @@
  *
  *
  * $Log: text_extract.c,v $
+ * Revision 1.2  2001/07/09 13:51:37  muttley
+ * fixed minor bug in text_extract and lib_swfextract where it would try
+ * and print out strings instead of urls :(
+ *
  * Revision 1.1  2001/07/09 12:47:22  muttley
  * Initial revision
  *
@@ -79,7 +83,7 @@ main (int argc, char *argv[])
     printf ("Number of urls is %d\n", num_url);
     for (i=0; i<num_url; i++)
     {
-	    printf ("\t ... %s\n",strings[i]);
+	    printf ("\t ... %s\n",urls[i]);
     }
 
 
