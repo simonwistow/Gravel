@@ -16,6 +16,9 @@
  *
  *
  * $Log: lib_swfextract.c,v $
+ * Revision 1.5  2001/07/12 22:21:29  clampr
+ * do the inital calloc rather than realloc(NULL, x)
+ *
  * Revision 1.4  2001/07/12 22:10:50  clampr
  * off by one error
  *
@@ -608,14 +611,19 @@ add_text (int * error, char *** list, int * num, int * max, char * string)
 
         *max+=255;
         /* malloc space for the strings*/
-        if (((*list) = (char **) realloc ((*list), sizeof (char *) * (*max))) == NULL)
-        {
-            *error = SWF_EMallocFailure;
-            return;
-        }
-	    #ifdef DEBUG
-	    fprintf (stderr, "[add_text : the realloc worked]\n");
-	    #endif
+	if (*list) {
+		*list = (char **) realloc (*list, sizeof(char *) * *max);
+	}
+	else {
+		*list = (char **) calloc (sizeof(char *), *max);
+	}
+	if (*list == NULL) {
+		*error = SWF_EMallocFailure;
+		return;
+	}
+        #ifdef DEBUG
+	fprintf (stderr, "[add_text : memory (re)allocation worked]\n");
+	#endif
     }
 
 
