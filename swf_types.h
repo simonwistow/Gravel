@@ -16,6 +16,11 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.37  2002/07/03 08:05:20  kitty_goth
+ * Add support for gradient fills in generation. These need to be tested along
+ * with curves. New test script. Fix some segfaults (still weirdness in
+ * lossless, though). Remove U32 instead of proper colour nonsense.
+ *
  * Revision 1.36  2002/06/26 20:37:33  kitty_goth
  * Initial version of write_through works...
  *
@@ -607,33 +612,34 @@ struct swf_shapestyle {
 };
 
 struct swf_fillstyle {
-    SWF_U8 fill_style;              /* the type : 0x00 = solid fill,
-                                                   0x10 = linear gradient fill,
-                                                   0x12 = radial gradient fill,
-                                                   0x40 = tiled bitmap fill,
-                                                   0x41 = clipped bitmap fill
-                                      */
-    SWF_U16 ncolours;                 /* the number of colours used in a gradient fill */
-    SWF_U16 bitmap_id;                /* the id of bitmap used in a bitmap fill */
-    swf_matrix * matrix;              /* the transformation matrix for the bitmap */
-    swf_rgba_pos ** colours;          /* the colours used in the gradient fill and the positions they're in*/
+    SWF_U8 fill_style;           /* the type : 0x00 = solid fill,
+									0x10 = linear gradient fill,
+									0x12 = radial gradient fill,
+									0x40 = tiled bitmap fill,
+									0x41 = clipped bitmap fill
+									*/
+    SWF_U8 ncolours;             /* the number of colours used in a 
+									gradient fill */
+    SWF_U16 bitmap_id;           /* the id of bitmap used in a bitmap fill */
+    swf_matrix * matrix;         /* the transformation matrix for the bitmap */
+    swf_rgba_pos ** colours;     /* the colours used in the gradient
+									fill and the positions they're in */
 
-    swf_colour * col;                   /* the colour used in the solid fill */
+    swf_colour * col;            /* the colour used in the solid fill */
 };
 
 struct swf_linestyle {
     SWF_U16 width;                    /* the width of the line */
     swf_colour * col;                   /* the colour fo the line */
-
-	/* FIXME: This is supposed to be a proper colour */
-	//    SWF_U32 colour;                   /* the colour fo the line */
 };
 
 struct swf_rgba_pos {
 	/* FIXME: This is supposed to be a proper colour */
-    SWF_U32 rgba;                    /* an rgba value */ 
-    SWF_U8 pos;                      /* the position of the colour */
-                                     /* todo simon : I'm not sure, looking at the spec, that this is correct. */
+//    SWF_U32 rgba;              /* an rgba value */ 
+    swf_colour * col;            /* the colour used in the solid fill */
+    SWF_U8 pos;                  /* the position of the colour */
+                                 /* TODO: I'm not sure, looking at the
+									spec, that this is correct. */
 };
 
 

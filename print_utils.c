@@ -16,6 +16,11 @@
  *
  *
  * $Log: print_utils.c,v $
+ * Revision 1.21  2002/07/03 08:05:20  kitty_goth
+ * Add support for gradient fills in generation. These need to be tested along
+ * with curves. New test script. Fix some segfaults (still weirdness in
+ * lossless, though). Remove U32 instead of proper colour nonsense.
+ *
  * Revision 1.20  2002/06/28 17:52:42  muttley
  * Trying to get write_through to work
  *
@@ -643,7 +648,7 @@ print_shapestyle (swf_shapestyle * style,const char * str)
 
             /* Get each of the colors. */
             for (j = 0; j < style->fills[i]->ncolours; j++) {
-                printf("%s\tcolor:%d: at:%d  RGBA:%08"pSWF_U32"x\n", str, j, style->fills[i]->colours[j]->pos, style->fills[i]->colours[j]->rgba);
+                printf("%s\tcolor:%d: at:%d  RGBA:%02"pSWF_U8":%02"pSWF_U8":%02"pSWF_U8":x\n", str, j, style->fills[i]->colours[j]->pos, style->fills[i]->colours[j]->col->r, style->fills[i]->colours[j]->col->g, style->fills[i]->colours[j]->col->b);
             }
             printf("%s\tGradient Matrix:\n", str);
             print_matrix(style->fills[i]->matrix, str);
@@ -653,9 +658,7 @@ print_shapestyle (swf_shapestyle * style,const char * str)
             /* Get the bitmap matrix. */
             printf("%s\tBitmap Fill: %04x\n", str, style->fills[i]->bitmap_id);
             print_matrix(style->fills[i]->matrix, str);
-        }
-        else
-        {
+        } else {
             /* A solid color */
             printf("%s\tSolid Color Fill in R:G:B HEX: %02"pSWF_U8":%02"pSWF_U8":%02"pSWF_U8":x\n", str, style->fills[i]->col->r, style->fills[i]->col->g, style->fills[i]->col->b);
         }

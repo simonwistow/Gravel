@@ -72,7 +72,7 @@ swf_parse_get_shapestyle (swf_parser * context, int * error, int with_alpha)
             styles->fills[i]->matrix = (swf_matrix *) swf_parse_get_matrix (context, error);
 
             /* Get the number of colors. */
-            styles->fills[i]->ncolours = (SWF_U16) swf_parse_get_byte(context);
+            styles->fills[i]->ncolours = swf_parse_get_byte(context);
 
             if ((styles->fills[i]->colours = (swf_rgba_pos **) calloc (styles->fills[i]->ncolours, sizeof (swf_rgba_pos *))) == NULL) {
                 *error = SWF_EMallocFailure;
@@ -86,8 +86,16 @@ swf_parse_get_shapestyle (swf_parser * context, int * error, int with_alpha)
                     goto FAIL;
                 }
 
+                if ((styles->fills[i]->colours[j]->col = (swf_colour *) calloc (1, sizeof (swf_colour))) == NULL) {
+                    *error = SWF_EMallocFailure;
+                    goto FAIL;
+                }
+
                 styles->fills[i]->colours[j]->pos  = swf_parse_get_byte   (context);
-                styles->fills[i]->colours[j]->rgba = swf_parse_get_colour (context, error,  with_alpha);
+				// FIXME: These need to be proper colours...
+//                styles->fills[i]->colours[j]->rgba = swf_parse_get_colour (context, error,  with_alpha);
+
+                styles->fills[i]->colours[j]->col = swf_parse_get_col (context, error,  with_alpha);
 
             }
         } else if (styles->fills[i]->fill_style & fillBits) {
@@ -137,10 +145,11 @@ swf_parse_get_shapestyle (swf_parser * context, int * error, int with_alpha)
 }
 
 /* TODO: Buffer out the shapestyles... */
+// FIXME: Alpha channel handling...
 void
 swf_buffer_shapestyle(swf_buffer * buffer, int * error, swf_shapestyle * s)
 {
-	SWF_U8 i, type;
+	SWF_U8 i, j, type;
 
 	swf_buffer_initbits(buffer);
 	if (s->nfills < 255) {
@@ -156,10 +165,17 @@ swf_buffer_shapestyle(swf_buffer * buffer, int * error, swf_shapestyle * s)
 		type = s->fills[i]->fill_style;
 		swf_buffer_put_byte (buffer, error, type);
 
-		/* FIXME: Do the other fill types */
+		/* FIXME: Do the bitmap fill type */
         if (type & fillGradient) {
 			/* Gradient Fill */
-			fprintf(stderr, "Warning! Unsupported fill type...\n");
+
+			swf_serialise_matrix(buffer, error, s->fills[i]->matrix);
+			swf_buffer_put_byte(buffer, error, s->fills[i]->ncolours);
+			for (j=0; j < s->fills[i]->ncolours && s->fills[i]->colours[j] != NULL; j++) {
+				swf_buffer_put_byte(buffer, error, s->fills[i]->colours[j]->pos);
+				swf_buffer_colour(buffer, error, s->fills[i]->colours[j]->col, NO_ALPHA);
+			}
+
         } else if (type & fillBits) {
 			/* Bitmap Fill */
 			fprintf(stderr, "Warning! Unsupported fill type...\n");

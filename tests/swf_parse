@@ -1,0 +1,15 @@
+#!/usr/bin/perl -w
+use strict;
+
+for my $file (<../swfs/*.swf>) {
+    my $v = $file;
+    $v =~ s|../swfs/||;
+    $v = "VALGRIND/$v";
+
+    my $cmd = qq[../swf_parse $file > /dev/null];
+    print "$cmd\n";
+
+    my $ret = system($cmd);
+    print "$ret\n";
+}
+

@@ -337,7 +337,7 @@ parse_definefont (swf_parser * context, const char * str)
     printf("%s\tiOffset: 0x%04x\n", str, font->offset);
 	printf("%s\tnumber of glyphs: %d\n", str, font->glyph_count);
 
-    while (n < font->glyph_count && font->shape_records != NULL)
+    while (n < font->glyph_count && font->shape_records[n] != NULL)
     {
         print_shaperecords (font->shape_records [n++], str);
     }

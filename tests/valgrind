@@ -4,14 +4,19 @@ use Fcntl 'F_SETFD';
 
 for my $file (<../swfs/*.swf>) {
     my $v = $file;
-    $v =~ tr{./}{:-};
+#    $v =~ tr{./}{:-};
+    $v =~ s|../swfs/||;
     $v = "VALGRIND/$v";
-    open VGF, ">", $v or die "Couldn't open $v: $!";
+    open (VGF, ">$v") or die "Couldn't open $v: $!";
     my $vgfd = fileno VGF;
     fcntl VGF, F_SETFD, 0 or die "fcntl: $!";
 
     print "$file\n";
-    `valgrind --leak-check=yes --logfile-fd=$vgfd ../swf_parse_static $file`;
+    my $cmd = qq[valgrind --leak-check=yes --logfile-fd=$vgfd ../swf_parse $file];
+    print "$cmd\n";
+
+    `valgrind --leak-check=yes ../swf_parse $file`;
+
     close VGF;
 }
 
