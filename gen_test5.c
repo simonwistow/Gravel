@@ -43,7 +43,8 @@
 #define SWF_PNG_SIG_SIZE 8
 #define STD_8_BIT_FORMAT 3
 
-#define CHAR_ID 2
+#define CHAR_ID 1
+#define BITMAP_ID 2
 
 int verbose = 0;
 
@@ -294,87 +295,6 @@ swf_write_dbl(int * error, swf_png_data * png, SWF_U16 bitmap_id)
 	return self;
 }
 
-
-int main2 (int argc, char *argv[]) {
-    swf_movie * movie;
-    int error = SWF_ENoError;
-    swf_parser * parser;
-    swf_header * hdr;
-    swf_tagrecord * temp;
-    swf_matrix * m3;
-
-    if ((m3 = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
-      error = SWF_EMallocFailure;
-      return 1;
-    }
-    
-    // FIXME: Make a fresh header and calc it properly...
-	/* First, get a parser up, to steal a header */
-
-    parser = swf_parse_create("swfs/ibm.swf", &error);
-
-    if (parser == NULL) {
-	fprintf (stderr, "Failed to create SWF context\n");
-	return -1;
-    }
-    printf ("Name of file is '%s'\n", parser->name);
-
-
-    printf("----- Reading the file input header -----\n");
-    hdr = swf_parse_header(parser, &error);
-
-    if (hdr == NULL) {
-        fprintf (stderr, "Failed to parse headers\n");
-        exit(1);
-    }
-    swf_print_header(hdr, &error);
-
-    printf("\n----- Reading PNG file -----\n");
-
-    temp = swf_read_png("pngs/png1.png", &error);
-
-	if (temp == NULL) {
-		fprintf(stderr, "Failed to read PNG: %i\n", error);
-	}
-
-/* Now generate the output movie */
-
-    if ((movie = swf_make_movie(&error)) == NULL) {
-		fprintf (stderr, "Fail\n");
-		return 1;
-    }
-
-/* Ensure we import a good header... */
-
-    movie->header = hdr;
-    movie->name = (char *) "ben5.swf";
-
-    movie->header->rate = FRAMERATE * 256;
-
-    /* Do the frames */
-    swf_add_setbackgroundcolour_noalpha(movie, &error, 192, 255, 0);
-
-    swf_dump_shape(movie, &error, temp);
-
-    m3->a  = m3->d  = 1 * 256 * 256;
-    m3->b  = m3->c  = 0;
-    m3->tx = 10 * 20;
-    m3->ty = 10 * 20;
-
-    swf_add_placeobject(movie, &error, m3, 1, 2);
-    swf_add_showframe(movie, &error);
-    swf_add_end(movie, &error);
-
-    swf_make_finalise(movie, &error);
-
-    swf_destroy_movie(movie);
-    swf_destroy_parser(parser);
-    swf_free(m3);
-    
-    fprintf (stderr, "OK\n");
-    return 0;
-}
-
 swf_tagrecord *
 swf_read_dbl(char * filename, int * error) 
 {
@@ -413,7 +333,7 @@ swf_read_dbl(char * filename, int * error)
     }	
 
 	fread(temp, 1, size, fp);
-	swf_buffer_put_word(self->buffer, error, CHAR_ID);
+	swf_buffer_put_word(self->buffer, error, BITMAP_ID);
 	swf_buffer_put_bytes(self->buffer, error, size, temp);
 
 	self->serialised = 1;
@@ -422,12 +342,149 @@ swf_read_dbl(char * filename, int * error)
 	return self;
 }
 
+swf_shaperecord_list * 
+swf_make_shaperecords_for_box(int * error) 
+{
+    swf_shaperecord_list * list;
+    swf_shaperecord * record;
+
+    if ((list = (swf_shaperecord_list *) calloc (1, sizeof (swf_shaperecord_list))) == NULL) {
+	*error = SWF_EMallocFailure;
+	return NULL;
+    }
+
+    list->record_count = 0;
+    list->first = NULL;
+    list->lastp = &(list->first);
+
+/* First, we need a non-edge, change of style record */ 
+    record = swf_make_shaperecord(error, 0);
+    record->flags = eflagsFill1 | eflagsMoveTo;
+
+    record->fillstyle0 = 0;
+    record->fillstyle1 = 1;
+    record->linestyle = 1;
+
+    record->x = 100*20;
+    record->y = 0*20;
+
+
+    swf_add_shaperecord(list, error, record);
+    list->record_count++;
+
+/* Then we need some edges */
+
+    /* */
+    record = swf_make_shaperecord(error, 1);
+    record->x = 75 * 20;
+    record->y = 20 * 20;
+    swf_add_shaperecord(list, error, record);
+    list->record_count++;
+
+    /* */
+    record = swf_make_shaperecord(error, 1);
+    record->y = 50 * 20;
+    swf_add_shaperecord(list, error, record);
+    list->record_count++;
+
+    /* */
+    record = swf_make_shaperecord(error, 1);
+    record->x = -75 * 20;
+    record->y = -70 * 20;
+    swf_add_shaperecord(list, error, record);
+    list->record_count++;
+
+/* Then we need an end-of-shape edge */
+    record = swf_make_shaperecord(error, 0);
+    swf_add_shaperecord(list, error, record);
+    list->record_count++;
+
+    return list;
+}
+
+swf_tagrecord * 
+swf_make_box(swf_movie * movie, int * error) 
+{
+    swf_tagrecord * self;
+    swf_defineshape * shape;
+    swf_rect * canvas;
+    swf_shapestyle * mystyle;
+
+    self = swf_make_tagrecord(error, tagDefineShape);
+
+    if (*error) {
+	return NULL;
+    }
+
+    if ((shape = (swf_defineshape *) calloc (1, sizeof (swf_defineshape))) == NULL) {
+		*error = SWF_EMallocFailure;
+		goto FAIL;
+    }
+
+    if ((canvas = (swf_rect *) calloc (1, sizeof (swf_rect))) == NULL) {
+		*error = SWF_EMallocFailure;
+		goto FAIL;
+    }
+
+    if ((mystyle = (swf_shapestyle *) calloc (1, sizeof (swf_shapestyle))) == NULL) {
+		*error = SWF_EMallocFailure;
+		goto FAIL;
+    }
+    if ((mystyle->fills = (swf_fillstyle **) calloc (1, sizeof (swf_fillstyle *))) == NULL) {
+		*error = SWF_EMallocFailure;
+		goto FAIL;
+    }
+    if ((mystyle->lines = (swf_linestyle **) calloc (1, sizeof (swf_linestyle *))) == NULL) {
+		*error = SWF_EMallocFailure;
+		goto FAIL;
+    }
+
+    shape->tagid = ++(movie->max_obj_id);
+
+    canvas->xmin = -200 * 20;
+    canvas->xmax = 200 * 20;
+    canvas->ymin = -200 * 20;
+    canvas->ymax = 200 * 20;
+
+    shape->rect = canvas;
+
+    mystyle->nfills = 1;
+    mystyle->nlines = 1;
+
+    *(mystyle->fills) = swf_make_bitmap_fillstyle(error, fillBitsTiled);
+    *(mystyle->lines) = swf_make_linestyle(error);
+
+    /* Now populate the fill and line styles */
+    mystyle->fills[0]->matrix->a  = 2 * 256 * 256;
+    mystyle->fills[0]->matrix->d  = 2 * 256 * 256;
+    mystyle->fills[0]->matrix->b  = 0;
+    mystyle->fills[0]->matrix->c  = 0;
+    mystyle->fills[0]->matrix->tx = 75 * 20;
+    mystyle->fills[0]->matrix->ty = 30 * 20;
+
+    mystyle->fills[0]->bitmap_id = BITMAP_ID;
+
+    shape->style = mystyle;
+
+    shape->record = swf_make_shaperecords_for_box(error);
+
+    self->tag = (void *) shape;
+
+    return self;
+
+ FAIL:
+    swf_destroy_tagrecord(self);
+    *error = SWF_EMallocFailure;
+    return NULL;
+}
+
+
 int main (int argc, char *argv[]) {
     swf_movie * movie;
     int error = SWF_ENoError;
     swf_parser * parser;
     swf_header * hdr;
-    swf_tagrecord * temp;
+    swf_tagrecord * temp, * temp2;
     swf_matrix * m3;
 
     if ((m3 = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
@@ -483,17 +540,24 @@ int main (int argc, char *argv[]) {
 
     swf_dump_shape(movie, &error, temp);
 
+	temp = swf_make_box(movie, &error);
+
+    /* Need to calloc a (raw) buffer for temp... */
+    if ((temp->buffer->raw = (SWF_U8 *) calloc (10240, sizeof (SWF_U8))) == NULL) {
+	fprintf (stderr, "Calloc Fail\n");
+        return 1;
+    }
+
+    swf_serialise_defineshape(temp->buffer, &error, (swf_defineshape *) temp->tag);
+    temp->serialised = 1;
+
+    swf_dump_shape(movie, &error, temp);
+
     m3->a  = m3->d  = 1 * 256 * 256;
     m3->b  = m3->c  = 0;
     m3->tx = 10 * 20;
     m3->ty = 10 * 20;
 
-    swf_add_placeobject(movie, &error, m3, CHAR_ID, 1);
-    swf_add_showframe(movie, &error);
-    swf_add_placeobject(movie, &error, m3, CHAR_ID, 1);
-    swf_add_showframe(movie, &error);
-    swf_add_placeobject(movie, &error, m3, CHAR_ID, 1);
-    swf_add_showframe(movie, &error);
     swf_add_placeobject(movie, &error, m3, CHAR_ID, 1);
     swf_add_showframe(movie, &error);
     swf_add_end(movie, &error);

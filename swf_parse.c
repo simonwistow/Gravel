@@ -270,7 +270,6 @@ SWF_U32
 swf_parse_nextid(swf_parser * context, int * error)
 {
     SWF_U16 raw_code, id;
-	int j1, j2;
 
     if (context->headers_parsed == 0) {
         fprintf (stderr, "Headers, not parsed yet\n");
@@ -278,10 +277,6 @@ swf_parse_nextid(swf_parser * context, int * error)
     }
 
     if (swf_parse_tell(context) != context->next_tag_pos) {
-		j1 = swf_parse_tell(context);
-		j2 =  context->next_tag_pos;
-		fprintf(stdout, "Malformed Tag found. Errrrrk\n");
-		fprintf(stdout, "Here: %i There: %i\n", j1, j2);
         swf_parse_seek(context, context->next_tag_pos);
     }
 
@@ -788,6 +783,9 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
 
 /*
  * $Log: swf_parse.c,v $
+ * Revision 1.56  2002/07/15 14:31:52  kitty_goth
+ * Gen Test 5 segfaults but does PNG bitmaps now, or at least starts to.
+ *
  * Revision 1.55  2002/07/11 16:16:47  kitty_goth
  * This is still borken. Checkin to carry on at home
  *

@@ -178,6 +178,8 @@ swf_buffer_shapestyle(swf_buffer * buffer, int * error, swf_shapestyle * s)
 
         } else if (type & fillBits) {
 			/* Bitmap Fill */
+			swf_buffer_put_word(buffer, error, s->fills[i]->bitmap_id);
+			swf_serialise_matrix(buffer, error, s->fills[i]->matrix);
 			fprintf(stderr, "Warning! Unsupported fill type...\n");
 		} else {
 			/* Solid Fill */
