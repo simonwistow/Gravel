@@ -91,7 +91,7 @@ swf_parse_get_shaperecord (swf_parser * context, int * error, int * at_end, int 
             /* Handle a line */
             nbits = (SWF_U16) swf_parse_get_bits(context, 4) + 2;   /* nbits is biased by 2 */
 
-			printf("nbits of line: %i\n", nbits);
+			printf("nbits of line: %x\n", nbits);
 
             /* Save the deltas */
             if (swf_parse_get_bits(context, 1)) {

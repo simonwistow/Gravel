@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: triangle.c,v 1.1 2002/06/10 16:44:02 kitty_goth Exp $	
+ * 	$Id: triangle.c,v 1.2 2002/06/18 22:38:27 kitty_goth Exp $	
  */
 
 #include "swf_types.h"
@@ -52,7 +52,7 @@ swf_make_shaperecords_for_triangle(int * error)
     record->linestyle = 1;
 
     record->x = 100*20;
-    record->y = 100*20;
+    record->y = 0*20;
 
 
     swf_add_shaperecord(list, error, record);
@@ -62,29 +62,27 @@ swf_make_shaperecords_for_triangle(int * error)
 
     /* */
     record = swf_make_shaperecord(error, 1);
-    record->x = 50 * 20;
+    record->x = 75 * 20;
     swf_add_shaperecord(list, error, record);
     list->record_count++;
 
     /* */
     record = swf_make_shaperecord(error, 1);
-    record->y = 75 * 20;
+    record->y = 50 * 20;
     swf_add_shaperecord(list, error, record);
     list->record_count++;
 
     /* */
     record = swf_make_shaperecord(error, 1);
-    record->x = -50 * 20;
-    record->y = -75 * 20;
+    record->x = -75 * 20;
+    record->y = -50 * 20;
     swf_add_shaperecord(list, error, record);
     list->record_count++;
 
-    /* 
-    record = swf_make_shaperecord(error, 1);
-    record->y = -75 * 20;
+    /*    record = swf_make_shaperecord(error, 1);
+    record->y = -50 * 20;
     swf_add_shaperecord(list, error, record);
-    list->record_count++;
-    */
+    list->record_count++; */
 
 
 /* Then we need an end-of-shape edge */
