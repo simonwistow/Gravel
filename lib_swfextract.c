@@ -16,6 +16,9 @@
  *
  *
  * $Log: lib_swfextract.c,v $
+ * Revision 1.12  2001/07/14 00:42:35  clampr
+ * swf_realloc - does the 'right' thing for realloc(NULL, n)
+ *
  * Revision 1.11  2001/07/14 00:28:07  clampr
  * spurious layout delta :)
  *
@@ -54,8 +57,6 @@
  *
  *
  */
-
-
 
 #include "lib_swfextract.h"
 #ifdef DEBUG
@@ -638,32 +639,24 @@ add_text (int * error, char *** list, int * num, int * max, char * string)
 
     if (*num>=*max)
     {
-
+		
     	#ifdef DEBUG
         fprintf (stderr, "[add_text : increasing maximum limit]\n");
         #endif
 
         *max+=255;
         /* malloc space for the strings*/
-	if (*list) {
-		*list = (char **) realloc (*list, sizeof(char *) * *max);
-	}
-	else {
-		*list = (char **) calloc (sizeof(char *), *max);
-	}
-	if (*list == NULL) {
-		*error = SWF_EMallocFailure;
-		return;
-	}
+		if (!(*list = (char **) swf_realloc(*list, sizeof(char *) * *max))) {
+			*error = SWF_EMallocFailure;
+			return;
+		}
         #ifdef DEBUG
-	fprintf (stderr, "[add_text : memory (re)allocation worked]\n");
-	#endif
+		fprintf (stderr, "[add_text : memory (re)allocation worked]\n");
+        #endif
     }
-
 
     (*list)[*num] = (char *) calloc (strlen(string) + 1, sizeof (char));
     strcpy ((*list)[*num], string);
-
 
     #ifdef DEBUG
     fprintf (stderr, "[add_text : added the text '%s' the count for this list now stands at %d]\n", (*list)[*num], (*num)+1);
@@ -671,7 +664,6 @@ add_text (int * error, char *** list, int * num, int * max, char * string)
 
     (*num)++;
     return;
-
 }
 
 

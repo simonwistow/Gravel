@@ -1,7 +1,8 @@
 #ifndef _SWF_MEMORY_H
 #define _SWF_MEMORY_H
 
-#define swf_free(x) if((x)) free((x))
+#define swf_free(x)       if( (x) ) free( (x) )
+#define swf_realloc(x, y) ( (x) ? realloc( (x), (y) ) : calloc( 1, (y) ) )
 
 typedef @SWF_U8@  SWF_U8,  *P_SWF_U8,  **PP_SWF_U8;
 typedef @SWF_S8@  SWF_S8,  *P_SWF_S8,  **PP_SWF_S8;
