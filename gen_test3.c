@@ -43,10 +43,10 @@ SWF_U16 swf_get_object_id(swf_tagrecord * mytag, int * error);
 SWF_U16 
 swf_get_object_id(swf_tagrecord * mytag, int * error)
 {
-  swf_defineshape * shape = (swf_defineshape *) mytag->tag;
+	swf_defineshape * shape = (swf_defineshape *) mytag->tag;
 
-  return ((SWF_U16) shape->tagid);
-  //    return (((SWF_U16) mytag->buffer->raw[1]) << 8) | (SWF_U16) mytag->buffer->raw[0];
+	return ((SWF_U16) shape->tagid);
+	//	return (((SWF_U16) mytag->buffer->raw[1]) << 8) | (SWF_U16) mytag->buffer->raw[0];
 }
 
 int main (int argc, char *argv[]) {
@@ -62,10 +62,9 @@ int main (int argc, char *argv[]) {
     int i;
     char * myname;
     
-   if (argc<2)
-   {
-	usage(argv[0]);
-	exit (1);
+   if (argc < 3) {
+	   usage(argv[0]);
+	   exit (1);
    }
 
 /* First, get a parser up */
@@ -74,8 +73,8 @@ int main (int argc, char *argv[]) {
     shape_num = atoi(argv[2]);
 
     if (parser == NULL) {
-	fprintf (stderr, "Failed to create SWF context\n");
-	return -1;
+		fprintf (stderr, "Failed to create SWF context\n");
+		return -1;
     }
     printf ("Name of file is '%s'\n", parser->name);
 
@@ -103,24 +102,24 @@ int main (int argc, char *argv[]) {
     printf("\n----- Reading movie details -----\n");
 
     if ((matrix = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
-      error = SWF_EMallocFailure;
-      return 1;
+		error = SWF_EMallocFailure;
+		return 1;
     }
     if ((mycx = (swf_cxform *) calloc (1, sizeof (swf_cxform))) == NULL) {
-      error = SWF_EMallocFailure;
-      return 1;
+		error = SWF_EMallocFailure;
+		return 1;
     }
     if ((m2 = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
-      error = SWF_EMallocFailure;
-      return 1;
+		error = SWF_EMallocFailure;
+		return 1;
     }
     if ((m3 = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
-      error = SWF_EMallocFailure;
-      return 1;
+		error = SWF_EMallocFailure;
+		return 1;
     }
     if ((cx2 = (swf_cxform *) calloc (1, sizeof (swf_cxform))) == NULL) {
-      error = SWF_EMallocFailure;
-      return 1;
+		error = SWF_EMallocFailure;
+		return 1;
     }
 
     mycx->ra = 0;
@@ -141,8 +140,8 @@ int main (int argc, char *argv[]) {
 /* Now generate the output movie */
 
     if ((movie = swf_make_movie(&error)) == NULL) {
-	fprintf (stderr, "Fail\n");
-	return 1;
+		fprintf (stderr, "Fail\n");
+		return 1;
     }
 
 /* Ensure we import a good header... */
@@ -152,15 +151,24 @@ int main (int argc, char *argv[]) {
 
     movie->header->rate = FRAMERATE * 256;
 
-/* Right, now we need a tagrecord.. */
+/* Right, now we need a triangle .. */
 	temp = swf_make_triangle(movie, &error);
  
 	if (error != SWF_ENoError || temp == NULL) {
-      fprintf(stderr,"Error getting %dth shape : %s\n", shape_num, swf_error_code_to_string(error));
-      exit(1);
+		fprintf(stderr,"Error getting %dth shape : %s\n", shape_num, swf_error_code_to_string(error));
+		exit(1);
     } 
 
+    /* Need to calloc a (raw) buffer for temp... */
+    if ((temp->buffer->raw = (SWF_U8 *) calloc (10240, sizeof (SWF_U8))) == NULL) {
+		fprintf (stderr, "Calloc Fail\n");
+        return 1;
+    }
+
     obj_id = swf_get_object_id(temp, &error);
+	fprintf(stderr, "Object ID = %i\n", obj_id);
+    swf_serialise_defineshape(temp->buffer, &error, (swf_defineshape *) temp->tag);
+    temp->serialised = 1;
 
     swf_add_protect(movie, &error);
     swf_add_setbackgroundcolour(movie, &error, 0, 255, 0, 255);
@@ -196,23 +204,23 @@ int main (int argc, char *argv[]) {
     m3->ty = 100 * 20;
 
     for (i=1; i<=NUMFRAMES; i++) {
-      swf_add_placeobject2(movie, &error, matrix, obj_id, i, mycx, NULL);
-      swf_add_placeobject2(movie, &error, m2, obj_id, 1, cx2, myname);
-      swf_add_placeobject(movie, &error, m3, 14, 2);
+		swf_add_placeobject2(movie, &error, matrix, obj_id, i, mycx, NULL);
+		swf_add_placeobject2(movie, &error, m2, obj_id, 1, cx2, myname);
+		swf_add_placeobject(movie, &error, m3, 14, 2);
 
       if (30 == i) {
 //	swf_add_doaction(movie, &error, sactionGotoFrame);
       }
       if (2 == i) {
-		swf_add_doaction(movie, &error, sactionPlay);
+		  swf_add_doaction(movie, &error, sactionPlay);
       }
 
       swf_add_showframe(movie, &error);
 
       if (i < NUMFRAMES) {
-		swf_add_removeobject2(movie, &error, i);
-		swf_add_removeobject2(movie, &error, 1);
-		swf_add_removeobject(movie, &error, 14, 2);
+		  swf_add_removeobject2(movie, &error, i);
+		  swf_add_removeobject2(movie, &error, 1);
+		  swf_add_removeobject(movie, &error, 14, 2);
       }
       matrix->tx += 5 * 20;
       matrix->a += 4 * 256;
@@ -240,7 +248,13 @@ int main (int argc, char *argv[]) {
 }
 
 
-
+/* 
+Local Variables:
+mode: C
+c-basic-offset: 4
+tab-width: 4
+End:
+*/
 
 
 

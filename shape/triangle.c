@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: triangle.c,v 1.5 2002/07/06 08:45:29 kitty_goth Exp $	
+ * 	$Id: triangle.c,v 1.6 2003/07/28 11:56:49 kitty_goth Exp $	
  */
 
 #include "swf_types.h"
@@ -32,8 +32,8 @@ swf_make_shaperecords_for_triangle(int * error)
     swf_shaperecord * record;
 
     if ((list = (swf_shaperecord_list *) calloc (1, sizeof (swf_shaperecord_list))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
+		*error = SWF_EMallocFailure;
+		return NULL;
     }
 
     list->record_count = 0;
@@ -115,32 +115,32 @@ swf_make_triangle(swf_movie * movie, int * error)
     triangle = swf_make_tagrecord(error, tagDefineShape);
 
     if (*error) {
-	return NULL;
+		return NULL;
     }
 
     if ((shape = (swf_defineshape *) calloc (1, sizeof (swf_defineshape))) == NULL) {
-	*error = SWF_EMallocFailure;
-	goto FAIL;
+		*error = SWF_EMallocFailure;
+		goto FAIL;
     }
 
     if ((canvas = (swf_rect *) calloc (1, sizeof (swf_rect))) == NULL) {
-	*error = SWF_EMallocFailure;
-	goto FAIL;
+		*error = SWF_EMallocFailure;
+		goto FAIL;
     }
 
     if ((mystyle = (swf_shapestyle *) calloc (1, sizeof (swf_shapestyle))) == NULL) {
-	*error = SWF_EMallocFailure;
-	goto FAIL;
+		*error = SWF_EMallocFailure;
+		goto FAIL;
     }
     if ((mystyle->fills = (swf_fillstyle **) calloc (1, sizeof (swf_fillstyle *))) == NULL) {
-	*error = SWF_EMallocFailure;
-	goto FAIL;
+		*error = SWF_EMallocFailure;
+		goto FAIL;
     }
     if ((mystyle->lines = (swf_linestyle **) calloc (1, sizeof (swf_linestyle *))) == NULL) {
-	*error = SWF_EMallocFailure;
-	goto FAIL;
+		*error = SWF_EMallocFailure;
+		goto FAIL;
     }
-
+	
     shape->tagid = ++(movie->max_obj_id);
 
     canvas->xmin = -200 * 20;
@@ -191,3 +191,10 @@ swf_make_triangle(swf_movie * movie, int * error)
     return NULL;
 }
 
+/* 
+Local Variables:
+mode: C
+c-basic-offset: 4
+tab-width: 4
+End:
+*/
