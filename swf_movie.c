@@ -227,7 +227,7 @@ swf_shaperecord_list * swf_make_shaperecords_for_triangle(int * error) {
 
 /* UB[1] = 0, UB[1] = 0, UB[1] = 1, UB[1] = 0, UB[1] = 0, UB[1] = 0 */
 
-    
+/*    00100000 == 32 == 0x20 */
 
 /* Then we need a non-edge, change of fillstyle record. */ 
 
@@ -241,6 +241,93 @@ swf_shaperecord_list * swf_make_shaperecords_for_triangle(int * error) {
 
     return list;
 }
+
+/*
+ * Get a raw shape from the define shape frames.
+ */
+void swf_get_raw_shape (swf_parser * swf, int * error, int which_shape, swf_shape_buffer * mybuffer) {
+    int next_id, i, length;
+    SWF_U32 startpos;
+    
+    startpos = i = length = 0;
+    
+    /* parse all the tags, looking for a defineshape  */
+    do {
+        /* reset the error, just to be paranoid */
+        *error = SWF_ENoError;
+	
+        /* get the next id */
+        next_id = swf_parse_nextid(swf, error);
+
+        /* if there's been an error, bug out */
+        if (*error != SWF_ENoError) {
+			return;
+	}
+
+        switch (next_id) {
+	    case tagDoAction:
+		break;
+		
+	    case tagDefineEditText:
+		break;
+		
+	    case tagDefineText:
+		break;
+				
+	    case tagDefineText2:
+		break;
+		
+	    case tagDefineButton:
+		break;
+		
+	    case tagDefineButton2:
+		break;
+		
+	    case tagDefineFont:
+		break;
+		
+	    case tagDefineFont2:
+		break;
+		
+	    case tagDefineFontInfo:
+		break;
+				
+	    case tagDefineShape:
+		if (i  == which_shape ) {
+		    startpos = swf->filepos;
+		    length = swf->cur_tag_len;
+		}
+		i++;
+		break;
+		
+	    case tagDefineShape2:
+		if (i  == which_shape ) {
+		    startpos = swf->filepos;
+		    length = swf->cur_tag_len;
+				}
+		i++;
+		break;
+				
+	    case tagDefineShape3:
+		if (i  == which_shape ) {
+		    startpos = swf->filepos;
+		    length = swf->cur_tag_len;
+		}
+		i++;
+		
+		break;
+        }
+    } while ((!*error) && next_id && !length);
+
+    swf_parse_seek(swf, startpos);
+    
+    mybuffer->buffer = swf_parse_get_bytes(swf, length);
+    mybuffer->size = length;
+    
+    return;
+}
+
+
 
 /* To make a triangle, we need
    A shaperecord, comprising...

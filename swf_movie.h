@@ -87,8 +87,6 @@ void swf_make_header_raw (swf_movie * movie, int * error, swf_rect * rect);
 void swf_make_header (swf_movie * movie, int * error, SCOORD x1, SCOORD x2, SCOORD y1, SCOORD y2);
 
 
-swf_defineshape * get_shape (swf_parser * swf, int * error, swf_shape_buffer * mybuffer);
-
 void swf_make_finalise(swf_movie * movie, int * error);
 
 swf_movie * swf_make_movie (int * error);
@@ -98,6 +96,8 @@ swf_shaperecord_list * swf_make_shaperecords_for_triangle(int * error);
 
 swf_tagrecord * swf_make_triangle_as_tag(swf_movie * movie, int * error);
 
+
+void swf_get_raw_shape (swf_parser * swf, int * error, int which_shape, swf_shape_buffer * mybuffer);
 
 void swf_destroy_tagrecord (swf_tagrecord * tagrec);
 
