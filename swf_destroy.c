@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_destroy.c,v $
+ * Revision 1.17  2001/07/12 23:24:29  clampr
+ * fixed a leak found by kmtrace
+ *
  * Revision 1.16  2001/07/12 20:27:53  clampr
  * more unchecked frees
  *
@@ -187,6 +190,7 @@ swf_destroy_textrecord_list (swf_textrecord_list * list)
 
 	swf_destroy_textrecord(tmp);
     }
+    free(list);
 
     return;
 }
@@ -865,7 +869,6 @@ swf_destroy_definetext (swf_definetext * text)
     swf_destroy_rect (text->rect);
     swf_destroy_matrix (text->matrix);
     swf_destroy_textrecord_list (text->records);
-
     free (text);
 
     return;
