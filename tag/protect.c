@@ -32,8 +32,6 @@ swf_add_protect(swf_movie * movie, int * error)
     temp->id = tagProtect;
     temp->tag = NULL;
     temp->serialised = 1;
-    temp->size = 0;
-    temp->buffer = NULL;
 
     *(movie->lastp) = temp;
     movie->lastp = &(temp->next);

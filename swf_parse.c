@@ -44,11 +44,18 @@ swf_parse_create (char * name, int * error)
 		*error = SWF_EMallocFailure;
 		return NULL;
 	}
+
+	if ((context->buffer = (swf_buffer *) calloc (1, sizeof (swf_buffer))) == NULL) {
+		*error = SWF_EMallocFailure;
+		return NULL;
+	}
 	
 	context->file = file;
 	context->name =  (char *) strdup (name);
-	context->bitpos = 0;
-	context->bitbuf = 0;
+	context->buffer->bitpos = 0;
+	context->buffer->bitbuf = 0;
+	context->buffer->size = 0;
+	context->buffer->raw = NULL;
 	context->headers_parsed = 0;
 	context->frame  = 0;
 
@@ -126,8 +133,8 @@ void
 swf_parse_initbits (swf_parser * context)
 {
     /* Reset the bit position and buffer. */
-    context->bitpos = 0;
-    context->bitbuf = 0;
+    context->buffer->bitpos = 0;
+    context->buffer->bitbuf = 0;
 }
 
 /*
@@ -181,20 +188,20 @@ swf_parse_get_bits (swf_parser * context, SWF_S32 n)
     SWF_U32 v = 0;
 	
     while (1) {
-        SWF_S32 s = n - context->bitpos;
+        SWF_S32 s = n - context->buffer->bitpos;
         if (s > 0) {
             /* Consume the entire buffer */
-            v |= context->bitbuf << s;
-            n -= context->bitpos;
+            v |= context->buffer->bitbuf << s;
+            n -= context->buffer->bitpos;
 			
             /* Get the next buffer */
-            context->bitbuf = swf_parse_get_byte(context);
-            context->bitpos = 8;
+            context->buffer->bitbuf = swf_parse_get_byte(context);
+            context->buffer->bitpos = 8;
         } else {
             /* Consume a portion of the buffer */
-            v |= context->bitbuf >> -s;
-            context->bitpos -= n;
-            context->bitbuf &= 0xff >> (8 - context->bitpos); /* mask off the consumed bits. */
+            v |= context->buffer->bitbuf >> -s;
+            context->buffer->bitpos -= n;
+            context->buffer->bitbuf &= 0xff >> (8 - context->buffer->bitpos); /* mask off the consumed bits. */
 
             return v;
         }
@@ -944,6 +951,12 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
 
 /*
  * $Log: swf_parse.c,v $
+ * Revision 1.48  2002/05/10 17:07:51  kitty_goth
+ * Right, this leaks like a son of a bitch, and I've only tested it against
+ * gen_test1, but the buffer delta should work now.
+ *
+ * Please hack on it lots, it needs it.
+ *
  * Revision 1.47  2002/05/09 15:26:55  clampr
  * More stealing from perl, now we have pSWF_* macros which are the printf
  * formats for out internal data types.

@@ -16,6 +16,12 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.26  2002/05/10 17:07:51  kitty_goth
+ * Right, this leaks like a son of a bitch, and I've only tested it against
+ * gen_test1, but the buffer delta should work now.
+ *
+ * Please hack on it lots, it needs it.
+ *
  * Revision 1.25  2001/08/09 10:18:36  acme
  * Added todo for simon ;-)
  *
@@ -274,14 +280,19 @@ typedef signed long SFIXED, *P_SFIXED;
 typedef signed long SCOORD, *P_SCOORD;
 
 
-typedef struct swf_parser swf_parser;
+typedef struct swf_buffer swf_buffer;
 typedef struct swf_tag swf_tag;
+typedef struct swf_tagrecord swf_tagrecord;
 typedef struct swf_rect swf_rect;
-typedef struct swf_header swf_header;
 typedef struct swf_colour swf_colour;
 typedef struct swf_gradcolour swf_gradcolour;
 typedef struct swf_cxform swf_cxform;
 typedef struct swf_matrix swf_matrix;
+
+typedef struct swf_header swf_header;
+typedef struct swf_parser swf_parser;
+typedef struct swf_movie swf_movie;
+
 
 typedef struct swf_shapestyle swf_shapestyle;
 typedef struct swf_linestyle swf_linestyle;
@@ -354,11 +365,20 @@ struct swf_header {
     swf_rect * bounds; /* the xmin, xmax, ymin and ymax of the movie */
 };
 
+struct swf_buffer {
+    /* Bit Handling. */
+    SWF_S32 bitpos;       /* what position we're at in the bit buffer */
+    SWF_U32 bitbuf;       /* the bit buffer, used for storing bits */
+
+    SWF_U8 * raw;
+    SWF_U32 size;
+};
 
 struct swf_parser {
     FILE * file;          /* The file handle of the SWF file we're parsing */
     char * name;          /* the name of the file we're handling */
     swf_header * header;  /* the headers of this swf */
+	swf_buffer * buffer;   /* The buffer structure */
 
     int headers_parsed;   /* have the headers been parsed yet */
 
@@ -366,10 +386,6 @@ struct swf_parser {
     SWF_U32 filepos;
     SWF_U32 next_tag_pos; /* what the position of the next tag is */
     SWF_U32 frame;        /* what the current frame we're on is */
-
-    /* Bit Handling. */
-    SWF_S32 bitpos;       /* what position we're at in the bit buffer */
-    SWF_U32 bitbuf;       /* the bit buffer, used for storing bits */
 
     /* Tag parsing information. */
 
@@ -396,6 +412,30 @@ struct swf_parser {
     int n_stream_samples;
 
 	swf_font_extra *font_extras;
+};
+
+struct swf_tagrecord {
+    SWF_U16 id; /* ID of tag */
+    void * tag; /* This is a pointer to the tag structure */
+
+    int serialised; /* Flag, used to indicate that a buffer is fully parsed and RTG*/
+
+    swf_buffer * buffer; /* Buffer structure excludes tag header */
+    swf_tagrecord *  next;     /* pointer to the next element in the list */
+};
+
+struct swf_movie {
+    FILE * file;          /* The file handle of the SWF file we're parsing */
+    char * name;          /* the name of the file we're handling */
+    swf_header * header;
+	swf_buffer * buffer;  /* Scratchpad buffer just in case */
+
+    SWF_U32 filepos;      /* We will need to do seeks before outputing*/
+
+    SWF_U32 max_obj_id;    /* the highest id of the objects we've created */
+
+    swf_tagrecord *  first;     /* pointer to the first element in the list */
+    swf_tagrecord ** lastp;    /* pointer to the last element in the list */
 };
 
 struct swf_font_extra {

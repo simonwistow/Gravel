@@ -52,6 +52,40 @@ swf_parse_placeobject (swf_parser * context, int * error)
 
 
 void
+swf_add_placeobject (swf_movie * movie, int * error, SWF_U16 char_id) 
+{
+    swf_tagrecord * temp;
+	SWF_U16 depth;
+
+    temp = swf_make_tagrecord(error);
+
+    if (*error) {
+		return;
+    }
+
+    temp->next = NULL;
+    temp->id = tagPlaceObject;
+    temp->tag = NULL;
+    temp->serialised = 0;
+
+/* Place Object specifics */
+	depth = 1;
+	
+	swf_movie_put_word(movie, error, char_id);
+	swf_movie_put_word(movie, error, depth);
+    temp->buffer->size = 4;
+
+	
+/* Footer ... */
+
+    *(movie->lastp) = temp;
+    movie->lastp = &(temp->next);
+
+    return;
+}
+
+
+void
 swf_destroy_placeobject (swf_placeobject * object)
 {
     if (object==NULL) {

@@ -65,6 +65,91 @@ swf_parse_get_matrix (swf_parser * context, int * error)
 }
 
 
+
+void
+swf_serialise_matrix (swf_movie * movie, int * error, swf_matrix * mym)
+{
+	SWF_U32 max, i;
+
+    swf_movie_initbits(movie);
+
+	/* 'Scale' bits first... */
+	if (mym->a | mym->c) {
+		swf_movie_put_bits(movie, 1, 1);
+
+		max = 0;
+		i = 2;
+
+		if (abs(mym->a) > max) {
+			max = abs(mym->a);
+		}
+		if (abs(mym->c) > max) {
+			max = abs(mym->c);
+		}
+		while (1 < max) {
+			i++;
+			max = max >> 1;
+		}
+
+		swf_movie_put_bits(movie, 5, i);
+		swf_movie_put_sbits(movie, i, mym->a);
+		swf_movie_put_sbits(movie, i, mym->c);
+	}
+
+	/* 'Rotate' bits next... */
+	if (mym->b | mym->d) {
+		swf_movie_put_bits(movie, 1, 1);
+
+		max = 0;
+		i = 2;
+
+		if (abs(mym->b) > max) {
+			max = abs(mym->b);
+		}
+		if (abs(mym->d) > max) {
+			max = abs(mym->d);
+		}
+		while (1 < max) {
+			i++;
+			max = max >> 1;
+		}
+
+		swf_movie_put_bits(movie, 5, i);
+		swf_movie_put_sbits(movie, i, mym->b);
+		swf_movie_put_sbits(movie, i, mym->d);
+	}
+	
+	/* Non-optional translation bits next... */
+
+	max = 0;
+	i = 2;
+
+	if (abs(mym->tx) > max) {
+		max = abs(mym->tx);
+	}
+	if (abs(mym->ty) > max) {
+		max = abs(mym->ty);
+	}
+	while (1 < max) {
+		i++;
+		max = max >> 1;
+	}
+
+	swf_movie_put_bits(movie, 5, i);
+	swf_movie_put_sbits(movie, i, mym->tx);
+	swf_movie_put_sbits(movie, i, mym->ty);
+
+    swf_movie_flush_bits(movie);
+}
+
+void
+swf_add_matrix (swf_movie * movie, int * error, swf_matrix * mym)
+{
+    swf_movie_initbits (movie);
+
+	/* swf_movie_put_bits (movie, 5, mym->n_bits); */
+}
+
 void
 swf_destroy_matrix (swf_matrix * matrix)
 {

@@ -51,8 +51,10 @@ int main (int argc, char *argv[]) {
     swf_add_showframe(movie, &error);
     swf_add_end(movie, &error);
 
+    fprintf(stderr, "foo b\n");
     swf_make_finalise(movie, &error);
-    
+    fprintf(stderr, "foo c\n");    
+
     swf_destroy_movie(movie);
 
     fprintf (stderr, "OK\n");

@@ -28,8 +28,28 @@
 
 void usage (char * name);
 
-void usage (char * name) {
+void 
+usage (char * name) 
+{
     fprintf (stderr, "%s <filename>\n", name);
+}
+
+
+void  swf_dump_shape (swf_movie * movie, int * error, swf_tagrecord * temp);
+
+void 
+swf_dump_shape (swf_movie * movie, int * error, swf_tagrecord * temp) 
+{
+    *(movie->lastp) = temp;
+    movie->lastp = &(temp->next);
+}
+
+SWF_U16 swf_get_object_id(swf_tagrecord * mytag, int * error);
+
+SWF_U16 
+swf_get_object_id(swf_tagrecord * mytag, int * error)
+{
+    return (((SWF_U16) mytag->buffer[1]) << 8) | (SWF_U16) mytag->buffer[0];
 }
 
 int main (int argc, char *argv[]) {
@@ -38,6 +58,8 @@ int main (int argc, char *argv[]) {
     int shape_num;
     swf_parser * parser;
     swf_header * hdr;
+    swf_tagrecord * temp;
+    SWF_U16 obj_id;
 
 /* First, get a parser up */
 
@@ -69,7 +91,23 @@ int main (int argc, char *argv[]) {
 
     printf("\n----- Reading movie details -----\n");
 
+/* Right, now we need a tagrecord.. */
 
+    temp = swf_make_tagrecord(&error);
+
+    if (error) {
+	exit(1);
+    }
+
+    temp->next = NULL;
+    temp->id = 0;
+    temp->tag = NULL;
+    temp->serialised = 0;
+    temp->size = 0;
+    temp->buffer = NULL;
+
+    swf_get_nth_shape(parser, &error, shape_num, temp);
+    obj_id = swf_get_object_id(temp, &error);
 
 
 /* Now generate the output movie */
@@ -79,12 +117,16 @@ int main (int argc, char *argv[]) {
 	return 1;
     }
 
+/* Ensure we steal a good header... */
+
     movie->header = hdr;
-    movie->name = "ben1.swf\0";
+    movie->name = "ben2.swf\0";
 
     swf_add_setbackgroundcolour(movie, &error, 0, 255, 0, 255);
     swf_add_showframe(movie, &error);
+    swf_dump_shape(movie, &error, temp);
     swf_add_showframe(movie, &error);
+//    swf_add_placeobject();
     swf_add_showframe(movie, &error);
     swf_add_end(movie, &error);
 

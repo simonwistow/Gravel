@@ -14,22 +14,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_buffer.h,v 1.1 2002/05/10 15:37:19 kitty_goth Exp $	
+ * 	$Id: swf_buffer.h,v 1.2 2002/05/10 17:07:51 kitty_goth Exp $	
  */
 
 #include "swf_types.h"
-
-typedef struct swf_buffer swf_buffer;
-
-struct swf_buffer {
-    /* Bit Handling. */
-    SWF_S32 bitpos;       /* what position we're at in the bit buffer */
-    SWF_U32 bitbuf;       /* the bit buffer, used for storing bits */
-
-    SWF_U8 * raw;
-    SWF_U32 size;
-};
-
 
 extern void  swf_buffer_initbits(swf_buffer * buffer);
 extern void  swf_buffer_put_byte(swf_buffer * context, int * error, SWF_U8 byte);

@@ -48,9 +48,10 @@ swf_add_setbackgroundcolour(swf_movie * movie, int * error, SWF_U8 red, SWF_U8 g
 {
     swf_tagrecord * temp;
     swf_setbackgroundcolour * col;
-    SWF_U8 * buffy;
 
     temp = swf_make_tagrecord(error);
+
+	fprintf(stderr, "foo 1\n");
 
     if (*error) {
 		return;
@@ -66,7 +67,7 @@ swf_add_setbackgroundcolour(swf_movie * movie, int * error, SWF_U8 red, SWF_U8 g
       return;
     }
 
-    if ((buffy = (SWF_U8 *) calloc ( 4, sizeof (SWF_U8))) == NULL) {
+    if ((temp->buffer->raw = (SWF_U8 *) calloc ( 4, sizeof (SWF_U8))) == NULL) {
       fprintf(stderr, "alloc fuckup\n");
       return;
     }
@@ -76,17 +77,16 @@ swf_add_setbackgroundcolour(swf_movie * movie, int * error, SWF_U8 red, SWF_U8 g
     col->colour->b = blue;
     col->colour->a = alpha;
 
-    buffy[0] = col->colour->r;
-    buffy[1] = col->colour->g;
-    buffy[2] = col->colour->b;
-    buffy[3] = col->colour->a;
+    temp->buffer->raw[0] = col->colour->r;
+	temp->buffer->raw[1] = col->colour->g;
+	temp->buffer->raw[2] = col->colour->b;
+	temp->buffer->raw[3] = col->colour->a;
 
     temp->next = NULL;
     temp->id = tagSetBackgroundColour;
     temp->tag = col;
     temp->serialised = 1;
-    temp->size = 4;
-    temp->buffer = buffy;
+    temp->buffer->size = 4;
 
     *(movie->lastp) = temp;
     movie->lastp = &(temp->next);

@@ -31,8 +31,6 @@
 
 #define LINESTYLEMASK 0x20
 
-typedef struct swf_movie swf_movie;
-typedef struct swf_tagrecord swf_tagrecord;
 typedef struct swf_triangle swf_triangle;
 
 /* 
@@ -40,34 +38,6 @@ typedef struct swf_triangle swf_triangle;
  * Perhaps we should refactor into a stream adaptor shared by the
  * generator and parser
  */
-
-struct swf_movie {
-    FILE * file;          /* The file handle of the SWF file we're parsing */
-    char * name;          /* the name of the file we're handling */
-    SWF_U32 filepos;    
-
-    /* Bit Handling. */
-    SWF_S32 bitpos;       /* what position we're at in the bit buffer */
-    SWF_U32 bitbuf;       /* the bit buffer, used for storing bits */
-
-    swf_header * header;
-
-    SWF_U32 max_obj_id;    /* the highest id of the objects we've created */
-
-    swf_tagrecord *  first;     /* pointer to the first element in the list */
-    swf_tagrecord ** lastp;    /* pointer to the last element in the list */
-};
-
-struct swf_tagrecord {
-    SWF_U16 id; /* ID of tag */
-    void * tag; /* This is a pointer to the tag structure */
-
-    int serialised;
-    SWF_U32 size;
-    SWF_U8 * buffer; /* Raw buffer excluding header */
-
-    swf_tagrecord *  next;     /* pointer to the next element in the list */
-};
 
 /* 
  * High level for testing serialisation
@@ -86,20 +56,15 @@ void swf_make_header (swf_movie * movie, int * error, SCOORD x1, SCOORD x2, SCOO
 
 
 void swf_make_finalise(swf_movie * movie, int * error);
-
 swf_movie * swf_make_movie (int * error);
 void swf_destroy_movie (swf_movie * movie);
 
 
 swf_tagrecord * swf_make_tagrecord (int * error);
-
 swf_shaperecord_list * swf_make_shaperecords_for_triangle(int * error);
-
 swf_tagrecord * swf_make_triangle_as_tag(swf_movie * movie, int * error);
 
-
 void swf_get_nth_shape (swf_parser * swf, int * error, int which_shape, swf_tagrecord * mybuffer);
-
 void swf_get_raw_shape (swf_parser * swf, int * error, swf_tagrecord * mybuffer);
 
 void swf_destroy_tagrecord (swf_tagrecord * tagrec);
