@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.31  2001/07/13 15:22:07  clampr
+ * another realloc of NULL
+ *
  * Revision 1.30  2001/07/13 14:58:44  clampr
  * avoid a calloc(0)
  *
@@ -2255,8 +2258,13 @@ swf_parse_get_mp3headers (swf_parser * context, int * error, int samples_per_fra
             if (header_store_size==frame_count)
             {
                 header_store_size += 10;
-                if ((header_list->headers = (swf_mp3header **) realloc (header_list->headers, sizeof(swf_mp3header *) * header_store_size)) == NULL)
-                {
+                if (header_list->headers) {
+			header_list->headers = (swf_mp3header **) realloc (header_list->headers, sizeof(swf_mp3header *) * header_store_size);
+		}
+		else {
+			header_list->headers = (swf_mp3header **) calloc (header_store_size, sizeof(swf_mp3header *));
+		}
+                if (!header_list->headers) {
                     *error = SWF_EMallocFailure;
                     goto FAIL;
 
