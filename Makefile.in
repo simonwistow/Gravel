@@ -87,7 +87,7 @@ DATE=$(shell date +%Y-%m-%d)
 	$(LIBTOOL) $(CC) $(CFLAGS) -I. -c -o $@ $<
 
 ## Targets
-all: swf_parse text_extract gen_test1 gen_test2
+all: swf_parse text_extract gen_test1 gen_test2 gen_test3
 
 static: swf_parse_static text_extract_static
 debug: swf_parse_debug text_extract_debug
@@ -111,6 +111,10 @@ gen_test1: gen_test1.do libswfparse.la
 
 gen_test2: gen_test2.do libswfparse.la
 	$(LIBTOOL) $(CC) $(CFLAGS) -o gen_test2 gen_test2.do libswfparse.la $(LIBS) -static
+
+gen_test3: gen_test3.do libswfparse.la
+	$(LIBTOOL) $(CC) $(CFLAGS) -o gen_test3 gen_test3.do libswfparse.la $(LIBS) -static
+
 
 ## static, but quiet
 

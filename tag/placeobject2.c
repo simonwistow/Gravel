@@ -84,6 +84,53 @@ swf_parse_placeobject2 (swf_parser * context, int * error)
 }
 
 
+
+void
+swf_add_placeobject2_with_cxform (swf_movie * movie, int * error, SWF_U16 char_id, swf_matrix * mym, swf_cxform * mycx)
+{
+	swf_tagrecord * temp;
+	SWF_U16 depth;
+
+    temp = swf_make_tagrecord(error);
+
+    if (*error) {
+		return;
+    }
+   
+    temp->next = NULL;
+    temp->id = tagPlaceObject2;
+    temp->tag = NULL;
+    temp->serialised = 0;
+
+/* Place Object2 specifics */
+    if ((temp->buffer->raw = (SWF_U8 *) calloc (MAX_PLACE_SIZE, sizeof (SWF_U8))) == NULL) {
+		*error = SWF_EMallocFailure;
+		return;
+    }
+
+	depth = 1;
+	
+	swf_buffer_put_word(temp->buffer, error, char_id);
+	swf_buffer_put_word(temp->buffer, error, depth);
+    temp->buffer->size = 4;
+
+	swf_serialise_matrix(temp->buffer, error, mym);
+
+	if (mycx != NULL) {
+		swf_serialise_cxform(temp->buffer, error, mycx);
+	}
+
+    temp->serialised = 1;
+	
+/* Footer ... */
+
+    *(movie->lastp) = temp;
+    movie->lastp = &(temp->next);
+
+    return;
+}
+
+
 void
 swf_destroy_placeobject2 (swf_placeobject2 * object)
 {

@@ -133,7 +133,7 @@ int main (int argc, char *argv[]) {
 /* Ensure we steal a good header... */
 
     movie->header = hdr;
-    movie->name = (char *) "ben2.swf";
+    movie->name = (char *) "ben3.swf";
 
     movie->header->rate = 25 * 256;
 
