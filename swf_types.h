@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.10  2001/06/26 17:40:30  kitty_goth
+ * Bug fix for swf_parse_get_bytes to fix sound stream stuff. --Kitty
+ *
  * Revision 1.9  2001/06/26 13:45:58  muttley
  * Change swf_text_records
  *
@@ -565,7 +568,6 @@ struct swf_fillstyle2 {
     U16 tag;
     U32 rgb1;
     U32 rgb2;
-
 };
 
 struct swf_linestyle2 {

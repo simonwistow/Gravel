@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.11  2001/06/26 17:40:30  kitty_goth
+ * Bug fix for swf_parse_get_bytes to fix sound stream stuff. --Kitty
+ *
  * Revision 1.10  2001/06/26 13:43:02  muttley
  * Fix text_record and text_record_list parsing
  *
@@ -191,7 +194,7 @@ swf_parse_get_bytes (swf_parser * context, int nbytes)
 
     swf_parse_initbits(context);
 
-    fread (&bytes, 1, nbytes, context->file);
+    fread (bytes, 1, nbytes, context->file);
     context->filepos += nbytes;
 
     return bytes;
