@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.37  2001/07/14 23:17:11  clampr
+ * tweak up some layout
+ *
  * Revision 1.36  2001/07/14 23:03:18  clampr
  * avoid a calloc(0)
  *
@@ -750,8 +753,8 @@ swf_parse_definefont (swf_parser * context, int * error)
     SWF_U16 fillbits, linebits;
 
     if ((font = (swf_definefont *) calloc (1, sizeof (swf_definefont))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
+		*error = SWF_EMallocFailure;
+		return NULL;
     }
 
     font->shape_records = NULL;
@@ -782,19 +785,19 @@ swf_parse_definefont (swf_parser * context, int * error)
 
 
     if  ((offset_table =  (int *) calloc (font->glyph_count, sizeof (int))) == NULL) {
-	*error = SWF_EMallocFailure;
-	goto FAIL;
+		*error = SWF_EMallocFailure;
+		goto FAIL;
     }
 
     offset_table[0] = font->offset;
 
     for(n=1; n<font->glyph_count; n++) {
-	offset_table[n] = swf_parse_get_word(context);
+		offset_table[n] = swf_parse_get_word(context);
     }
 
     if  ((font->shape_records =  (swf_shaperecord_list **) calloc (font->glyph_count, sizeof (swf_shaperecord_list *))) == NULL) {
-	*error = SWF_EMallocFailure;
-	goto FAIL;
+		*error = SWF_EMallocFailure;
+		goto FAIL;
     }
 
     for(n=0; n<font->glyph_count; n++) {
