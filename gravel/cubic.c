@@ -17,14 +17,18 @@
 //
 
 
-swf_shaperecord ** gravel_cubic_to_quadratic(gravel_cubic * p)
+swf_shaperecord ** 
+gravel_cubic_to_quadratic(gravel_cubic * p)
 {
 	int i, j;
+	int error = 0;
 	SWF_S32 AX, AY, BX, BY, CX, CY, DX, DY;
 	SWF_S32 EX, EY;
     double dSplitPoint = 0.5;
 	swf_shaperecord *  edge;
 	swf_shaperecord ** rec;
+	swf_shaperecord *  BC;
+	double SideA, SideD;
 
 	if ((rec = (swf_shaperecord **) calloc (1, sizeof (swf_shaperecord *))) == NULL) {
 		return NULL;
@@ -43,7 +47,7 @@ swf_shaperecord ** gravel_cubic_to_quadratic(gravel_cubic * p)
 	DY = p->dy;
 
 
-    BOOL fForceSplit = false;
+    BOOL fForceSplit = FALSE;
 
     /* Are all the points equal? */
     if (AX == BX && BX == CX && CX == DX && AY == BY && BY == CY && CY == DY) {
@@ -52,26 +56,31 @@ swf_shaperecord ** gravel_cubic_to_quadratic(gravel_cubic * p)
 		/* Are the end-points and off-points equal? */
     } else if (AX == BX && CX == DX && AY == BY && CY == DY) {
         /* its a line! */
-		edge = gravel_make_line(ax, ay, dx, dy);
+		edge = gravel_make_line(&error, AX, AY, DX, DY);
+		if (error) {
+			return NULL;
+		}
 		*rec = edge;
         return rec;
     } else if (BX != CX || BY != CY) {
-        CDoubleLine  BC(B, C);
+        BC = gravel_make_line(&error, BX, BY, CX, CY);
 
-        double SideA = BC.WhichSide(A);
-        double SideD = BC.WhichSide(D);
+        SideA = gravel_which_side(BC, AX, AY);
+        SideD = gravel_which_side(BC, DX, DY);
 
         if (SideA != SideD && SideA != 0 && SideD != 0)
         {
             // A and D are on opposite sides of BC
             // Cubic must be split in middle
-            fForceSplit = true;
-        }
-        else if (SideA == 0 && SideD == 0)
-        {
-            // ABCD co-linear: this is a line!
-            ReplaceCurveWithLine(p);
-            return;
+            fForceSplit = TRUE;
+        } else if (SideA == 0 && SideD == 0) {
+            /* ABCD co-linear: this is a line! */
+			edge = gravel_make_line(&error, AX, AY, DX, DY);
+			if (error) {
+				return NULL;
+			}
+			*rec = edge;
+			return rec;
         }
         else if (SideA == SideD ||                  // same sides
                 (SideA == 0 && SideD != 0) ||       // ABC colinear
@@ -151,33 +160,20 @@ swf_shaperecord ** gravel_cubic_to_quadratic(gravel_cubic * p)
 
 /* ---- */
 
-void CPath::ReplaceCurveWithLine(POSITION p)
-{
-    CPathNode*  pCurveNode = m_lNodes[p];
-    ASSERT(pCurveNode->IsCurve());
-
-    // save lineto point
-    CDoublePoint dpLineTo = GetLastPointOfNode(p);
-
-    // Replace the curve with lineto
-    m_lNodes.SetAt(p, new CNodeLineTo(dpLineTo));
-    SetModifiedFlag();
-
-    delete pCurveNode;
-}
-
 /* 
  * Split Cubic bezier in two
  */
 
 BOOL gravel_split_cubic(POSITION p, double dSplit)
 {
-    if (p == m_lNodes.GetHeadPosition())
-        return false;
+    if (p == m_lNodes.GetHeadPosition()) {
+        return FALSE;
+	}
 
     CPathNode*  pCurveTo3 = m_lNodes[p];
-    if (pCurveTo3->GetCount() != 3)
-        return false;
+    if (pCurveTo3->GetCount() != 3) {
+        return FALSE;
+	}
 
     // Copy control points
     CDoublePoint*   pdpPoints = pCurveTo3->GetPoints();
@@ -210,7 +206,7 @@ BOOL gravel_split_cubic(POSITION p, double dSplit)
         dpPoints[j-1] = Vtemp[3-j][j]; 
     m_lNodes.InsertAfter(p, new CNodeCurveTo3(dpPoints));
 
-    return true;
+    return TRUE;
 }
 
 /* 

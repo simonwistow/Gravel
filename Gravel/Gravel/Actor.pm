@@ -34,18 +34,15 @@ sub new {
 
     my $self = {};
 
-	$self->{_is_button} = $conf{is_button};
+	$self->{_button} = $conf{button};
+	$self->{_effects} = [$conf{effect}];
 
-	if ($self->{_is_button}) {
-
-	} else {
-		$self->{_effects} = [$conf{effect}];
+	unless ($self->{_button}) {
+		$self->{_shape} = $conf{shape};
 	}
 
-
 	$self->{_current} = 0;
-	$self->{_shape} = $conf{shape};
-
+	
 	$self->{_start} = $conf{start};
 	$self->{_end} = $conf{end};
 
@@ -130,8 +127,6 @@ sub merge_matrix {
 sub frames {
 	my $self = shift;
 
-#	return $self->
-
 	my $m = [];
 	my $ra_m = [];
 
@@ -151,12 +146,19 @@ sub frames {
 
 #	print STDERR DumperX $ra_m;
 
+	my $s;
+	if ($self->{_shape}) {
+		$s = {shape => $self->{_shape}, };
+	} elsif ($self->{_button}) {
+		$s = {button => $self->{_button}, };
+	} else {
+		$s = {};
+	}
+
 	for (my $j = $start; $j < $end; ++$j ) {
 		my $mx = $self->merge_matrix($ra_m, $j);
-		my $f = Gravel::Frame->new({matrix => $mx, shape => $self->{_shape},
-								    depth => $depth, });
-
-#		print STDERR DumperX $f;
+		my %s = ((matrix => $mx, depth => $depth), %$s);
+		my $f = Gravel::Frame->new(\%s);
 
 		$m->[$j] = $f;
 	}
@@ -171,14 +173,24 @@ sub frames_single {
 
 	my $m = [];
 
+	my $s;
+	if ($self->{_shape}) {
+		$s = {shape => $self->{_shape}, };
+	} elsif ($self->{_button}) {
+		$s = {button => $self->{_button}, };
+	} else {
+		$s = {};
+	}
+
 	my $ra_m = $self->{_effects}->[0]->matrices();
 	my $start = $self->{_effects}->[0]->start;
 	my $end = $self->{_effects}->[0]->end;
 	my $depth = $self->{_effects}->[0]->depth;
 	for (my $i = $start; $i < $end; ++$i ) {
 		my $mx = $ra_m->[$i];
-		my $f = Gravel::Frame->new({matrix => $mx, shape => $self->{_shape},
-								    depth => $depth, });
+		my %s = ((matrix => $mx, depth => $depth), %$s);
+		my $f = Gravel::Frame->new(\%s);
+
 		$m->[$i] = $f;
 	}
 
@@ -187,7 +199,15 @@ sub frames_single {
 
 #
 
+sub contents {
+	my $self = shift;
+	return $self->{_shape} || $self->{_button};
+}
+
+#
+
 sub shape   {return (shift)->{_shape};}
+sub button  {return (shift)->{_button};}
 sub effects {return (shift)->{_effects};}
 
 #

@@ -42,20 +42,35 @@ sub new {
 	return $self;
 }
 
+#
+
+# A buttons vertices are the extremal vertices of all
+# its' potential composite shapes
+
+sub vertices {
+	my $self = shift;
+
+	my $vert = [];
+	foreach my $state (@{$self->{_states}}) {
+		push @$vert, $state->shape->vertices;
+	}
+}
 
 #
 
 sub make {
 	my $self = shift;
-	my $g = shift;
+	my $ra_g = shift;
 	
+	$self->{_states} = $ra_g;
+
 	my $s = {start => $self->{_start}, end => $self->{_end}, 
 			 startx => $self->{_tx}, endx => $self->{_tx},
 			 starty => $self->{_ty}, endy => $self->{_ty},
 		 };
 
 	my $e = Gravel::Effect::Tween->new($s);
-	return $g->action($e);
+	return Gravel::Actor->new({button => $self, effect => $e, start => $e->start, end => $e->end,});
 }
 
 #

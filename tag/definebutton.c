@@ -49,6 +49,42 @@ swf_parse_definebutton (swf_parser * context, int * error)
 }
 
 
+void
+swf_add_buttonrec(swf_definebutton * button, int * error, SWF_U32 char_id, 
+				  swf_matrix * matrix, SWF_U32 depth, SWF_U32 hit_test, 
+				  SWF_U32 down, SWF_U32 over, SWF_U32 up)
+{
+	swf_buttonrecord * temp;
+
+    if ((temp = (swf_buttonrecord *) calloc (1, sizeof (swf_buttonrecord))) == NULL) {
+		*error = SWF_EMallocFailure;
+		return;
+    }
+
+	temp->state_hit_test = hit_test;
+	temp->state_down = down;
+	temp->state_over = over;
+	temp->state_up = up;
+
+	temp->character = char_id;
+	temp->layer = depth;
+	temp->matrix = matrix;
+
+    *(button->records->lastp) = temp;
+    button->records->lastp = &(temp->next);	
+	
+	return;
+}
+
+// FIXME: Macro-ise this type of function
+void 
+swf_add_buttonrecord (swf_definebutton * button, int * error, swf_buttonrecord * temp) 
+{
+    *(button->records->lastp) = temp;
+    button->records->lastp = &(temp->next);	
+}
+
+
 /* FIXME: Test API while I knock this up */
 // For now, just pass in a char_id, and use the same shape twice,
 	// just reduce in size on MouseOver...

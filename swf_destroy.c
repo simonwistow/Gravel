@@ -160,17 +160,6 @@ swf_destroy_shaperecord_list (swf_shaperecord_list * list)
 }
 
 void
-swf_destroy_tag (swf_tag * tag)
-{
-    if (tag==NULL) {
-        return;
-    }
-    swf_free (tag);
-
-    return;
-}
-
-void
 swf_destroy_header (swf_header * header)
 {
     if (header==NULL) {

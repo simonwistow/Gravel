@@ -367,20 +367,11 @@ swf_make_shaperecord(int * error, int isEdge)
     swf_shaperecord * record;
 
     if ((record = (swf_shaperecord *) calloc (1, sizeof (swf_shaperecord))) == NULL) {
-      *error = SWF_EMallocFailure;
-      return NULL;
+		*error = SWF_EMallocFailure;
+		return NULL;
     }
 
     record->is_edge = isEdge;
-    record->flags = 0;
-
-    record->x =0;
-    record->y =0;
-
-    record->ax =0;
-    record->ay =0;
-    record->cx =0;
-    record->cy =0;
 
     return record;
 }

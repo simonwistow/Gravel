@@ -25,6 +25,21 @@
 
 #include <stdio.h>
 
+swf_shaperecord *
+gravel_make_line (int * error, SWF_S32 x1, SWF_S32 y1, SWF_S32 x2, SWF_S32 y2)
+{
+	swf_shaperecord * line;
+
+	line = swf_make_shaperecord(error, 1);
+	if (*error) {
+		return NULL;
+	}
+
+	line->x = x2 - x1;
+	line->y = y2 - y1;
+
+	return line;
+}
 
 swf_colour *
 gravel_parse_colour (char * s)

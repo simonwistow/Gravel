@@ -28,6 +28,7 @@ sub new {
 
 #	$self->{_contents} = {};
 	$self->{_shape} = $conf{shape};
+	$self->{_button} = $conf{button};
 	$self->{_depth} = $conf{depth};
 	$self->{_matrix} = $conf{matrix};
 

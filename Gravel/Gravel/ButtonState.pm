@@ -16,6 +16,8 @@ our $VERSION = '0.10';
 sub new {
     my $proto = shift;
     my $class = ref($proto) || $proto;
+	my $shape = shift;
+
     my $cf = ref($_[0]);
     my %conf;
     
@@ -30,18 +32,21 @@ sub new {
 	# Set default for the menu flag
 	$self->{_menu} = 0;
 
-	$self->{_start} = $conf{start};
-    $self->{_end} = $conf{end};
-    $self->{_depth} = $conf{depth} || 1;
+	$self->{_hit} = $conf{hit};
+    $self->{_up} = $conf{up};
+    $self->{_down} = $conf{down} || 1;
 
-    $self->{_tx} = $conf{tx};
-    $self->{_ty} = $conf{ty};
+	# FIXME
+	$self->{_shape} = $shape;
 
 	bless $self => $class;
 
 	return $self;
 }
 
+#
+
+sub shape { return (shift)->{_shape}; }
 
 #
 

@@ -53,7 +53,7 @@ sub event {
     my $self = shift;
     my $e = shift;
     push @{$self->{_events}}, $e;
-    my $g = $e->shape();
+    my $g = $e->contents();
     foreach (@{$self->{_library}}) {
 		return if $_ == $g;
     }
@@ -510,6 +510,7 @@ void _bake_edge(int * error, swf_defineshape * mytag, HV * h_edge)
 			/* spec says these are expressed as deltas */
 			record->ax = ax - x1;
 			record->ay = ay - y1;
+		} else if (0 == strcmp(type, "CUBIC")) {
 		}
 
 
@@ -579,7 +580,8 @@ void _bake_library(SV* obj, SV* self)
 	SV* tag_id;
 	swf_tagrecord * temp;
 	swf_defineshape * mytag;
-	
+    swf_tagrecord * tmp;
+	swf_definebutton * tmp_tag;
 
 	p_lib = hv_fetch(h, "_library", 8, 0);
 	if (NULL != p_lib) {

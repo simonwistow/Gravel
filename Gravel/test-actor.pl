@@ -22,7 +22,7 @@ $m->size(0, 0, 10000, 10000);
 my $g = Gravel::Shape->new({fills => [{colour => HAZY_RED, type => 'solid'}]});
 $g->poly(0, 0, 0, 500, 500, 500, 500, 0, );
 
-my $s = {start => 0, end => 20, depth => 2,
+my $s = {start => 0, end => 30, depth => 2,
 		 startx => 0, starty => 0, 
 		 endx => 1500, endy => 3000};
 my $e = Gravel::Effect::Tween->new($s);

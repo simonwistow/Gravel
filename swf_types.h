@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.41  2003/05/15 16:09:09  kitty_goth
+ * more stuff, mostly buttons-related
+ *
  * Revision 1.40  2003/03/12 17:11:11  kitty_goth
  * Carry on at home
  *
@@ -336,7 +339,7 @@ typedef signed long SCOORD, *P_SCOORD;
 
 
 typedef struct swf_buffer swf_buffer;
-typedef struct swf_tag swf_tag;
+//typedef struct swf_tag swf_tag;
 typedef struct swf_tagrecord swf_tagrecord;
 typedef struct swf_rect swf_rect;
 typedef struct swf_colour swf_colour;
@@ -503,13 +506,6 @@ struct swf_font_extra {
 	int n;
 	char *glyphs;
 	char *chars;
-};
-
-/* a raw swf tag */
-/* todo simon : this should have the raw data in as well */
-struct swf_tag {
-    SWF_U16 id;   /* the id of the tag */
-    SWF_U32 len;  /* how long it is */
 };
 
 /* just holds the bounds of a rectangle */
@@ -1022,11 +1018,11 @@ struct swf_buttonrecord {
     SWF_U32 state_down;             /* state down flag */
     SWF_U32 state_over;             /* state over flag */
     SWF_U32 state_up;               /* state up flag */
+
     SWF_U32 character;              /* button character id */
     SWF_U32 layer;                  /* button character layer */
 
-
-    swf_matrix * matrix;            /* button charcetr matrix */
+    swf_matrix * matrix;            /* button character matrix */
 
     int ncharacters;                /* todo simon : */
     swf_cxform ** characters;       /* hmm, thse aren't in the spec */

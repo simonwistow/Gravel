@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_destroy.h,v $
+ * Revision 1.13  2003/05/15 16:09:09  kitty_goth
+ * more stuff, mostly buttons-related
+ *
  * Revision 1.12  2002/06/03 22:28:34  kitty_goth
  * Fix memory leask and a couple of minor nits
  *
@@ -97,7 +100,6 @@ extern void swf_destroy_shapestyle (swf_shapestyle * style);
 /* Now do the types */
 
 extern void swf_destroy_tagrecord (swf_tagrecord * tagrec);
-extern void swf_destroy_tag (swf_tag *);
 extern void swf_destroy_rect (swf_rect *);
 extern void swf_destroy_header (swf_header *);
 extern void swf_destroy_colour (swf_colour *);

@@ -4,3 +4,24 @@ void gravel_add_line_to_shape(swf_tagrecord* tag, int* error, SWF_S32 x, SWF_S32
 void gravel_end_shape(swf_tagrecord* tag, int* error);
 swf_colour * gravel_parse_colour (char * s);
 SWF_U8 gravel_parse_hex(char * s);
+swf_shaperecord * gravel_make_line (int * error, SWF_S32 x1, SWF_S32 y1, SWF_S32 x2, SWF_S32 y2);
+
+typedef struct gravel_cubic gravel_cubic;
+
+/* This structure is absolute, not relative. So A and D are
+ * endpoints and B, C are the midpoints
+ */
+
+struct gravel_cubic {
+    SWF_S32 ax;
+    SWF_S32 ay;
+
+    SWF_S32 bx;
+    SWF_S32 by;
+
+    SWF_S32 cx;
+    SWF_S32 cy;
+
+    SWF_S32 dx;
+    SWF_S32 dy;
+};

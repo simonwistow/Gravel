@@ -124,11 +124,11 @@ sub arc {
     my $ra_v = $self->last_vertex();
     
     if (defined $ra_v) {
-	unless ( ($ra_v->[0] == $p{x1}) && ($ra_v->[1] == $p{y1}) ) {
-	    push @{$self->{_vertices}}, [$p{x1}, $p{y1}];
-	}
+		unless ( ($ra_v->[0] == $p{x1}) && ($ra_v->[1] == $p{y1}) ) {
+			push @{$self->{_vertices}}, [$p{x1}, $p{y1}];
+		}
     } else {
-	push @{$self->{_vertices}}, [$p{x1}, $p{y1}];
+		push @{$self->{_vertices}}, [$p{x1}, $p{y1}];
     }
     push @{$self->{_vertices}}, [$p{x2}, $p{y2}];
     

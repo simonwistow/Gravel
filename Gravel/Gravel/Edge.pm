@@ -11,9 +11,9 @@ sub new {
     my %conf;
     
     if ($cf eq 'HASH') {
-	%conf = %{$_[0]};
+		%conf = %{$_[0]};
     } else {
-	%conf = @_;
+		%conf = @_;
     }
 
 # TYPE should be:
@@ -33,12 +33,18 @@ sub new {
     unless ($self->is_straight) {
 		$self->{_ax} = $conf{ax} || $conf{AX} || 0;
 		$self->{_ay} = $conf{ay} || $conf{AY} || 0;
+
+		if ($self->is_cubic) {
+			$self->{_bx} = $conf{bx} || $conf{BX} || 0;
+			$self->{_by} = $conf{by} || $conf{BY} || 0;
+		}
     }
 
     return $self;
 }
 
 sub is_straight() {  return (shift)->{_EDGE_TYPE} eq 'STRAIGHT' ? 1 : 0; }
+sub is_cubic() {  return (shift)->{_EDGE_TYPE} eq 'CUBIC' ? 1 : 0; }
 sub type() {  return (shift)->{_EDGE_TYPE}; }
 
 1;
