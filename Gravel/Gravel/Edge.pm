@@ -11,9 +11,9 @@ sub new {
     my %conf;
     
     if ($cf eq 'HASH') {
-	%conf = %{$_[0]};
+		%conf = %{$_[0]};
     } else {
-	%conf = @_;
+		%conf = @_;
     }
 
     $self->{_EDGE_TYPE} = $conf{EDGE_TYPE} || 'STRAIGHT';
@@ -21,13 +21,13 @@ sub new {
     bless $self => $class;
 
     if ($self->is_straight) {
-	$self->{_dx} = $conf{dx} || $conf{DX} || $conf{x} || $conf{X};
-	$self->{_dy} = $conf{dy} || $conf{DY} || $conf{y} || $conf{Y};
+		$self->{_dx} = $conf{dx} || $conf{DX} || $conf{x} || $conf{X};
+		$self->{_dy} = $conf{dy} || $conf{DY} || $conf{y} || $conf{Y};
     } else {
-	$self->{_cdx} = $conf{controldx} || $conf{cdx} || $conf{CDX};
-	$self->{_cdy} = $conf{controldy} || $conf{cdy} || $conf{CDY};
-	$self->{_adx} = $conf{anchordx} || $conf{adx} || $conf{ADX};
-	$self->{_ady} = $conf{anchordy} || $conf{ady} || $conf{ADY};
+		$self->{_cdx} = $conf{controldx} || $conf{cdx} || $conf{CDX};
+		$self->{_cdy} = $conf{controldy} || $conf{cdy} || $conf{CDY};
+		$self->{_adx} = $conf{anchordx} || $conf{adx} || $conf{ADX};
+		$self->{_ady} = $conf{anchordy} || $conf{ady} || $conf{ADY};
     }
 
     return $self;
