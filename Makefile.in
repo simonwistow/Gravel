@@ -11,8 +11,10 @@ DEBUG = -DDEBUG -g
 LIB_OBJECTS=swf_parse.lo swf_destroy.lo swf_error.lo swf_tags.lo
 OBJECTS=parser.o print_utils.o
 TEXT_OBJECTS=text_extract.o lib_swfextract.o
-D_OBJECTS=swf_parse.do parser.do swf_destroy.do swf_error.do print_utils.do
-ALL_OBJECTS=$(LIB_OBJECTS) $(OBJECTS) $(TEXT_OBJECTS) $(D_OBJECTS)
+D_LIB_OBJECTS=swf_parse.do swf_destroy.do swf_error.do swf_tags.do
+D_OBJECTS=parser.do print_utils.do
+D_TEXT_OBJECTS=text_extract.do lib_swfextract.do
+ALL_OBJECTS=$(LIB_OBJECTS) $(OBJECTS) $(TEXT_OBJECTS) $(D_LIB_OBJECTS) $(D_OBJECTS) $(D_TEXT_OBJECTS)
 
 LIB_PATH=/usr/local/lib
 BIN_PATH=/usr/local/bin
@@ -34,7 +36,7 @@ DATE=$(shell date +%Y-%m-%d)
 
 all: swf_parse text_extract
 
-debug: swf_parse_debug
+debug: swf_parse_debug text_extract_debug
 
 libswfparse.la: $(LIB_OBJECTS)
 	$(LIBTOOL) $(CC) $(CFLAGS) -o libswfparse.la $(LIB_OBJECTS) -rpath $(LIB_PATH)
@@ -45,8 +47,11 @@ swf_parse: libswfparse.la $(OBJECTS)
 text_extract: libswfparse.la $(TEXT_OBJECTS)
 	$(LIBTOOL) $(CC) $(CFLAGS) -o text_extract $(TEXT_OBJECTS) libswfparse.la
 
-swf_parse_debug: $(D_OBJECTS)
-	$(CC) $(CFLAGS) -I . $(DEBUG) -o swf_parse_debug $(D_OBJECTS)
+swf_parse_debug: $(D_LIB_OBJECTS) $(D_OBJECTS)
+	$(CC) $(CFLAGS) -I . $(DEBUG) -o swf_parse_debug $(D_LIB_OBJECTS) $(D_OBJECTS)
+
+text_extract_debug: $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS)
+	$(CC) $(CFLAGS) -I . $(DEBUG) -o text_extract_debug $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS)
 
 install: all
 	echo richardc is really slack

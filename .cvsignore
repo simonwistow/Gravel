@@ -6,6 +6,7 @@ swf_sizes.h
 swf_parse
 swf_parse_debug
 text_extract
+text_extract_debug
 *.lo
 *.do
 *.la
