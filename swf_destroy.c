@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_destroy.c,v $
+ * Revision 1.29  2001/07/19 03:05:03  clampr
+ * free up the font_extras list on context destroy
+ *
  * Revision 1.28  2001/07/16 15:05:15  clampr
  * get rid of glib due to randomness (I suspect it may have been a dynamic linking issue)
  *
@@ -104,11 +107,22 @@
 void
 swf_destroy_parser (swf_parser * context)
 {
+	swf_font_extra *extra, *last;
     if (!context) return;
 
     fclose(context->file);
     swf_free(context->name);
     swf_free(context->header);
+
+	extra = context->font_extras;
+	while (extra) {
+		last = extra;
+		extra = extra->next;
+		swf_free(last->glyphs);
+		swf_free(last->chars);
+		swf_free(last);		
+	}
+
     swf_free (context);
 }
 
