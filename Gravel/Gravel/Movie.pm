@@ -302,7 +302,7 @@ void _bake_fills(int * error, swf_defineshape * mytag, HV * h_sh)
 				mytag->style->fills[j] = swf_make_solid_fillstyle(error);
 				p_col = hv_fetch(h_fill, "colour", 6, 0);
 				if (NULL != p_col) {
-					mytag->style->fills[j]->col = gravel_parse_colour((char *)(SvPVX(*p_col)));
+					mytag->style->fills[j]->col = gravel_parse_colour((char *)SvPVX(*p_col));
 				}
 			} /* FIXME: Do the other styles */
 		}			
@@ -312,7 +312,11 @@ void _bake_fills(int * error, swf_defineshape * mytag, HV * h_sh)
 
 void _get_to_start(int * error, swf_defineshape * mytag, HV * h_sh) 
 {
-	SV** p_vert;	
+	SV** pa_vert;
+	AV*  a_vert;
+	SV** p_vert;
+	SV** p_num;
+	AV*  a_num;
 	swf_shaperecord * record;
 
 	/* First, we need a non-edge, change of style record */ 
@@ -323,15 +327,70 @@ void _get_to_start(int * error, swf_defineshape * mytag, HV * h_sh)
 	record->fillstyle1 = 1;
 	record->linestyle = 1;
 
-	/* FIXME: initial determined by first vertex */
 	record->x = 0;
 	record->y = 0;
+
+	/* initial start point determined by first vertex */
+    pa_vert = hv_fetch(h_sh, "_vertices", 6, 0);
+	if (NULL != pa_vert) {
+		a_vert = (AV *)SvRV(*pa_vert); 
+		p_vert = av_fetch(a_vert, 0, 0);
+
+		if (NULL != p_vert) {
+			a_num = (AV *)SvRV(*p_vert);
+
+			p_num = av_fetch(a_num, 0, 0);
+			if (NULL != p_num) {
+				record->x = (SWF_S32)(SvIV(*p_num));
+			}
+
+			p_num = av_fetch(a_num, 0, 0);
+			if (NULL != p_num) {
+				record->y = (SWF_S32)(SvIV(*p_num));
+			}
+		}
+	}
 
 	swf_add_shaperecord(mytag->record, error, record);
 	++mytag->record->record_count;
 }
 
-void _bake_library(SV* obj, SV* self) {
+void _bake_edge(int * error, swf_defineshape * mytag, HV * h_edge) 
+{
+	swf_shaperecord * record;
+
+	record = swf_make_shaperecord(error, 0);
+
+
+
+
+	swf_add_shaperecord(mytag->record, error, record);
+	++mytag->record->record_count;
+}
+
+void _bake_edges(int * error, swf_defineshape * mytag, HV * h_sh) 
+{
+	SV** pa_edges;
+	AV*  a_edges;
+	SV** ph_edge;
+	I32  j, num_edges;
+
+    pa_edges = hv_fetch(h_sh, "_edges", 6, 0);	
+	if (NULL != pa_edges) {
+		a_edges = (AV *)SvRV(*pa_edges); 
+
+		num_edges = av_len(a_edges);
+		for (j=0; j<=num_edges; ++j) {
+			ph_edge = av_fetch(a_edges, j, 0);
+			if (NULL != ph_edge) {
+				_bake_edge(error, mytag, (HV *)SvRV(*ph_edge));
+			}
+		}
+	}
+}
+
+void _bake_library(SV* obj, SV* self) 
+{
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
 	int error = SWF_ENoError;
 	HV* h = (HV *)SvRV(self); 
@@ -385,8 +444,9 @@ void _bake_library(SV* obj, SV* self) {
 		_bake_fills(&error, mytag, h_sh);
 
 		_get_to_start(&error, mytag, h_sh);
-		
 		/* Now do the edge records */
+
+		_bake_edges(&error, mytag, h_sh);
 
 
 		/* Need to calloc a (raw) buffer for temp... */
