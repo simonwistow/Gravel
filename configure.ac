@@ -66,5 +66,5 @@ AC_SUBST(S32)
 
 dnl What to do with all this information
 
-AC_OUTPUT(sizes.h)
+AC_OUTPUT( sizes.h )
 
