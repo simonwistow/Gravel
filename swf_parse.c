@@ -2672,7 +2672,7 @@ swf_parse_get_shaperecord (swf_parser * context, int * error, int at_end, int xl
                 {
                     /* Vertical line */
                     record->y = swf_parse_get_sbits(context, nbits);
-                    record->x = NULL;
+                    //record->x = NULL;
                     ylast += record->y;
 
                 }
@@ -2680,7 +2680,7 @@ swf_parse_get_shaperecord (swf_parser * context, int * error, int at_end, int xl
                 {
                     /* Horizontal line */
                     record->x = swf_parse_get_sbits(context, nbits);
-                    record->y = NULL;
+                    //record->y = NULL;
                     xlast += record->x;
                 }
             }
