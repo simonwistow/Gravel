@@ -16,8 +16,8 @@
  *
  *
  * $Log: swf_destroy.c,v $
- * Revision 1.8  2001/06/22 17:16:51  muttley
- * Fixed get_textrecords and get_textrecord and associated destructors and printers
+ * Revision 1.9  2001/06/26 13:46:54  muttley
+ * Changes for new swf_text_records type
  *
  */
 #include "swf_destroy.h"
@@ -410,10 +410,16 @@ swf_destroy_textrecord (swf_textrecord * record)
 }
 
 void
-swf_destroy_textrecord_list (swf_textrecord * node)
+swf_destroy_textrecord_list (swf_textrecord_list * list)
 {
-    swf_textrecord * tmp;
+    swf_textrecord *tmp, *node;
 
+    if (list==NULL){
+            return;
+    }
+
+    *(list->lastp) = NULL;
+    node = list->first;
 
     while (node != NULL)
     {

@@ -16,8 +16,8 @@
  *
  *
  * $Log: swf_destroy.h,v $
- * Revision 1.7  2001/06/22 17:16:51  muttley
- * Fixed get_textrecords and get_textrecord and associated destructors and printers
+ * Revision 1.8  2001/06/26 13:46:54  muttley
+ * Changes for new swf_text_records type
  *
  */
 
@@ -47,7 +47,7 @@ extern void swf_destroy_adpcm (swf_adpcm *);
 extern void swf_destroy_mp3header (swf_mp3header *);
 extern void swf_destroy_mp3header_list (swf_mp3header_list *);
 extern void swf_destroy_textrecord (swf_textrecord *);
-extern void swf_destroy_textrecord_list (swf_textrecord *);
+extern void swf_destroy_textrecord_list (swf_textrecord_list *);
 extern void swf_destroy_buttonrecord (swf_buttonrecord *);
 extern void swf_destroy_buttonrecord_list (swf_buttonrecord_list *);
 extern void swf_destroy_doaction (swf_doaction *);
