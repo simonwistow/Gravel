@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.35 2002/07/06 08:45:28 kitty_goth Exp $	
+ * 	$Id: swf_movie.c,v 1.36 2002/07/11 16:16:47 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -473,7 +473,6 @@ swf_make_finalise(swf_movie * movie, int * error)
       swf_movie_put_word(movie, error, tmp_16);
       tmp_size += 2; /* for the tag header */
     }
-
     swf_movie_put_bytes(movie, error, temp->buffer->size, temp->buffer->raw);
     tmp_size += temp->buffer->size;
   }

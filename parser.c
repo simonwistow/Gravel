@@ -119,7 +119,7 @@ init_parser (void) {
 	parse[17] = parse_definebuttonsound;
 	parse[18] = parse_soundstreamhead;
 	parse[19] = parse_soundstreamblock;
-	parse[20] = dummy;         // parse_definebitslossless
+	parse[20] = parse_definebitslossless;
 	parse[21] = parse_definebitsjpeg2;
 	parse[22] = parse_defineshape2;
 	parse[23] = parse_definebuttoncxform;
@@ -618,6 +618,29 @@ parse_definebits (swf_parser * context, const char * str)
     print_imageguts (bits->guts, str);
     swf_destroy_definebits (bits);
 }
+
+void
+parse_definebitslossless (swf_parser * context, const char * str)
+{
+    int error = SWF_ENoError;
+	int j1;
+    swf_definebitslossless * bits;  
+
+	bits = swf_parse_definebitslossless(context, &error);
+
+	fprintf(stderr, "current pos: %i\n", swf_parse_tell(context));
+
+    if (bits == NULL) {
+        fprintf (stderr, "ERROR : couldn't parse DefineBitsLossless : '%s'\n", swf_error_code_to_string(error));
+        return;
+    }
+
+    printf("%stagDefineBitsLossless \ttagid %-5"pSWF_U32"\n", str, bits->tagid);
+
+	//    print_imageguts (bits->guts, str);
+    swf_destroy_definebitslossless(bits);
+}
+
 
 void
 parse_definebitsjpeg2 (swf_parser * context, const char * str)

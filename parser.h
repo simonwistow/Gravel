@@ -16,6 +16,9 @@
  *
  *
  * $Log: parser.h,v $
+ * Revision 1.12  2002/07/11 16:16:47  kitty_goth
+ * This is still borken. Checkin to carry on at home
+ *
  * Revision 1.11  2002/05/19 09:46:21  kitty_goth
  * Delta for a first stab at a dispatch handler. We should benchmark this versus
  * the switch statement version.
@@ -55,6 +58,7 @@ extern void parse_defineshape2          (swf_parser *, const char *);
 extern void parse_defineshape3          (swf_parser *, const char *);
 extern void parse_definemorphshape      (swf_parser *, const char *);
 extern void parse_definebits            (swf_parser *, const char *);
+extern void parse_definebitslossless    (swf_parser *, const char *);
 extern void parse_jpegtables            (swf_parser *, const char *);
 extern void parse_definebitsjpeg2       (swf_parser *, const char *);
 extern void parse_definebitsjpeg3       (swf_parser *, const char *);

@@ -22,6 +22,7 @@
 #include "swf_parse.h"
 #include "swf_movie.h"
 #include "swf_serialise.h"
+#include "swf_buffer.h"
 #include "swf_destroy.h"
 
 #include "swf_png.h"
@@ -35,19 +36,18 @@
 #include <png.h>
 #include <zlib.h>
 
+
 #define NUMFRAMES 60
 #define FRAMERATE 15
 
 #define SWF_PNG_SIG_SIZE 8
 #define STD_8_BIT_FORMAT 3
 
-void usage (char * name);
+#define CHAR_ID 2
 
-void 
-usage (char * name) 
-{
-    fprintf (stderr, "Usage: %s <PNG filename>\n", name);
-}
+int verbose = 0;
+
+void usage ();
 
 swf_tagrecord *
 swf_read_png(char * filename, int * error) 
@@ -225,6 +225,8 @@ swf_read_png(char * filename, int * error)
 		return NULL;
 	}
 
+	self->serialised = 1;
+
 	return self;
 }
 
@@ -276,28 +278,24 @@ swf_write_dbl(int * error, swf_png_data * png, SWF_U16 bitmap_id)
       return NULL;
     }	
 	
-	/* The size of the block's in outsize now...*/
-
 	swf_buffer_put_word(self, error, bitmap_id);
+
+	//	swf_buffer_put_dword(self, error, outsize + 6);
+
 	swf_buffer_put_byte(self, error, STD_8_BIT_FORMAT);
 	swf_buffer_put_word(self, error, png->width);
 	swf_buffer_put_word(self, error, png->height);
-	
-	swf_buffer_put_byte(self, error, png->num_palette-1);
 
-	
-	/*
-	if(fwrite(outdata, sizeof(char), outsize, f) != outsize) {
-		*error = SWF_EFileWriteError;
-		return NULL;
-	}
-	*/
+	fprintf(stderr, "width: %i height: %i size: %i palette: %i\n", png->width, png->height, outsize, png->num_palette - 1);
+
+	swf_buffer_put_byte(self, error, png->num_palette - 1);
+	swf_buffer_put_bytes(self, error, outsize, outdata);
 
 	return self;
 }
 
 
-int main (int argc, char *argv[]) {
+int main2 (int argc, char *argv[]) {
     swf_movie * movie;
     int error = SWF_ENoError;
     swf_parser * parser;
@@ -311,7 +309,7 @@ int main (int argc, char *argv[]) {
     }
     
     // FIXME: Make a fresh header and calc it properly...
-/* First, get a parser up, to steal a header */
+	/* First, get a parser up, to steal a header */
 
     parser = swf_parse_create("swfs/ibm.swf", &error);
 
@@ -333,7 +331,7 @@ int main (int argc, char *argv[]) {
 
     printf("\n----- Reading PNG file -----\n");
 
-    temp = swf_read_png("pngs/apache_pb.png", &error);
+    temp = swf_read_png("pngs/png1.png", &error);
 
 	if (temp == NULL) {
 		fprintf(stderr, "Failed to read PNG: %i\n", error);
@@ -354,16 +352,14 @@ int main (int argc, char *argv[]) {
     movie->header->rate = FRAMERATE * 256;
 
     /* Do the frames */
-    swf_add_setbackgroundcolour(movie, &error, 0, 255, 0, 255);
+    swf_add_setbackgroundcolour_noalpha(movie, &error, 192, 255, 0);
 
-
-    //    swf_dump_shape(movie, &error, temp);
+    swf_dump_shape(movie, &error, temp);
 
     m3->a  = m3->d  = 1 * 256 * 256;
     m3->b  = m3->c  = 0;
-    m3->tx = 0 * 20;
-    m3->ty = 0 * 20;
-
+    m3->tx = 10 * 20;
+    m3->ty = 10 * 20;
 
     swf_add_placeobject(movie, &error, m3, 1, 2);
     swf_add_showframe(movie, &error);
@@ -378,6 +374,140 @@ int main (int argc, char *argv[]) {
     fprintf (stderr, "OK\n");
     return 0;
 }
+
+swf_tagrecord *
+swf_read_dbl(char * filename, int * error) 
+{
+	FILE * fp;
+	swf_tagrecord * self;
+	SWF_U8 dbl_h[8];
+	SWF_U8 * temp;
+	SWF_U32 size;
+
+	fp = fopen(filename, "rb");
+	
+	if (fp == NULL) {
+		*error = SWF_EFileOpenFailure;
+		return NULL;
+	}
+
+	fread(dbl_h, 1, 8, fp);
+
+	size = ((SWF_U32)dbl_h[4] << 24) | ((SWF_U32)dbl_h[5] << 16) | ((SWF_U32)dbl_h[6] << 8) | dbl_h[7];
+
+	fprintf(stderr, "Size == %lu\n", size);
+
+	fprintf(stderr, "Header = %i %i %i %i %i %i %i %i\n", 
+			dbl_h[0], dbl_h[1], dbl_h[2], dbl_h[3],
+			dbl_h[4], dbl_h[5], dbl_h[6], dbl_h[7]);
+
+	self = swf_make_tagrecord(error, tagDefineBitsLossless);
+
+    if ((temp = (SWF_U8 *) calloc (1, 100 + size) ) == NULL) {
+      *error = SWF_EMallocFailure;
+      return NULL;
+    }
+    if ((self->buffer->raw = (SWF_U8 *) calloc (1, 100 + size) ) == NULL) {
+      *error = SWF_EMallocFailure;
+      return NULL;
+    }	
+
+	fread(temp, 1, size, fp);
+	swf_buffer_put_word(self->buffer, error, CHAR_ID);
+	swf_buffer_put_bytes(self->buffer, error, size, temp);
+
+	self->serialised = 1;
+
+	swf_free(temp);
+	return self;
+}
+
+int main (int argc, char *argv[]) {
+    swf_movie * movie;
+    int error = SWF_ENoError;
+    swf_parser * parser;
+    swf_header * hdr;
+    swf_tagrecord * temp;
+    swf_matrix * m3;
+
+    if ((m3 = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
+      error = SWF_EMallocFailure;
+      return 1;
+    }
+    
+    // FIXME: Make a fresh header and calc it properly...
+	/* First, get a parser up, to steal a header */
+
+    parser = swf_parse_create("swfs/ibm.swf", &error);
+
+    if (parser == NULL) {
+	fprintf (stderr, "Failed to create SWF context\n");
+	return -1;
+    }
+    printf ("Name of file is '%s'\n", parser->name);
+
+
+    printf("----- Reading the file input header -----\n");
+    hdr = swf_parse_header(parser, &error);
+
+    if (hdr == NULL) {
+        fprintf (stderr, "Failed to parse headers\n");
+        exit(1);
+    }
+    swf_print_header(hdr, &error);
+
+    printf("\n----- Reading PNG file -----\n");
+
+    temp = swf_read_dbl("../png/png1.dbl", &error);
+
+	if (temp == NULL) {
+		fprintf(stderr, "Failed to read DBL: %i\n", error);
+	}
+
+/* Now generate the output movie */
+
+    if ((movie = swf_make_movie(&error)) == NULL) {
+		fprintf (stderr, "Fail\n");
+		return 1;
+    }
+
+/* Ensure we import a good header... */
+
+    movie->header = hdr;
+    movie->name = (char *) "ben5.swf";
+
+    movie->header->rate = FRAMERATE * 256;
+
+    /* Do the frames */
+    swf_add_setbackgroundcolour_noalpha(movie, &error, 192, 255, 0);
+
+    swf_dump_shape(movie, &error, temp);
+
+    m3->a  = m3->d  = 1 * 256 * 256;
+    m3->b  = m3->c  = 0;
+    m3->tx = 10 * 20;
+    m3->ty = 10 * 20;
+
+    swf_add_placeobject(movie, &error, m3, CHAR_ID, 1);
+    swf_add_showframe(movie, &error);
+    swf_add_placeobject(movie, &error, m3, CHAR_ID, 1);
+    swf_add_showframe(movie, &error);
+    swf_add_placeobject(movie, &error, m3, CHAR_ID, 1);
+    swf_add_showframe(movie, &error);
+    swf_add_placeobject(movie, &error, m3, CHAR_ID, 1);
+    swf_add_showframe(movie, &error);
+    swf_add_end(movie, &error);
+
+    swf_make_finalise(movie, &error);
+
+    swf_destroy_movie(movie);
+    swf_destroy_parser(parser);
+    swf_free(m3);
+    
+    fprintf (stderr, "OK\n");
+    return 0;
+}
+
 
 /* 
 Local Variables:

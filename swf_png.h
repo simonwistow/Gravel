@@ -10,10 +10,10 @@ struct swf_png_data {
 	png_uint_32 height;
 	int bit_depth;
 	int color_type;
-	int num_palette;
+	SWF_U8 num_palette;
 	int channels;
 	png_colorp palette;
-	unsigned char *data;
+	SWF_U8 *data;
 };
 
 swf_png_data * swf_png_make_swf_png(int * error);

@@ -89,6 +89,50 @@ swf_add_setbackgroundcolour(swf_movie * movie, int * error, SWF_U8 red, SWF_U8 g
     return;
 }
 
+void 
+swf_add_setbackgroundcolour_noalpha(swf_movie * movie, int * error, SWF_U8 red, SWF_U8 green, SWF_U8 blue) 
+{
+    swf_tagrecord * temp;
+    swf_setbackgroundcolour * col;
+
+    temp = swf_make_tagrecord(error, tagSetBackgroundColour);
+
+    if (*error) {
+		return;
+    }
+
+    if ((col = (swf_setbackgroundcolour *) calloc ( 1, sizeof (swf_setbackgroundcolour))) == NULL) {
+      fprintf(stderr, "alloc fuckup\n");
+      return;
+    }
+
+    if ((col->colour = (swf_colour *) calloc ( 1, sizeof (swf_colour))) == NULL) {
+      fprintf(stderr, "alloc fuckup\n");
+      return;
+    }
+
+    if ((temp->buffer->raw = (SWF_U8 *) calloc ( 4, sizeof (SWF_U8))) == NULL) {
+      fprintf(stderr, "alloc fuckup\n");
+      return;
+    }
+
+    col->colour->r = red;
+    col->colour->g = green;
+    col->colour->b = blue;
+
+    temp->buffer->raw[0] = col->colour->r;
+	temp->buffer->raw[1] = col->colour->g;
+	temp->buffer->raw[2] = col->colour->b;
+
+    temp->tag = col;
+    temp->serialised = 1;
+    temp->buffer->size = 3;
+
+    swf_dump_shape(movie, error, temp);
+
+    return;
+}
+
 
 void
 swf_destroy_setbackgroundcolour (swf_setbackgroundcolour * tag)

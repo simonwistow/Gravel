@@ -40,7 +40,7 @@ swf_parse_definebitslossless (swf_parser * context, int * error)
 
     bits->colourtable_size++;
 
-    bits->data = swf_parse_get_bytes (context, context->tagend - swf_parse_tell(context));
+    bits->data = swf_parse_get_bytes (context, context->next_tag_pos - swf_parse_tell(context));
 
     return bits;
 }
