@@ -16,6 +16,9 @@
  *
  *
  * $Log: lib_swfextract.c,v $
+ * Revision 1.4  2001/07/12 22:10:50  clampr
+ * off by one error
+ *
  * Revision 1.3  2001/07/12 20:33:05  clampr
  * tweak around so we don't realloc NULL pointers - some reallocs *really* don't like that
  *
@@ -66,9 +69,9 @@ load_swf (char * file, int * error)
     /* and set everything to null */
     swf->parser      = NULL;
     swf->num_strings = 0;
-    swf->strings     = malloc(0);
+    swf->strings     = NULL;
     swf->num_urls    = 0;
-    swf->urls        = malloc(0);
+    swf->urls        = NULL;
 
 
     #ifdef DEBUG
@@ -616,7 +619,7 @@ add_text (int * error, char *** list, int * num, int * max, char * string)
     }
 
 
-    (*list)[*num] = (char *) calloc (strlen(string), sizeof (char));
+    (*list)[*num] = (char *) calloc (strlen(string) + 1, sizeof (char));
     strcpy ((*list)[*num], string);
 
 
