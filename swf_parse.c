@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.18  2001/07/05 12:06:58  muttley
+ * Whoops, I didn't resolve the conflict in last commit.
+ *
  * Revision 1.17  2001/07/05 12:02:51  muttley
  * Fixed parsing of ButtonRecords and DoActions
  * Updated the types, destroy and print functions to cope with this
@@ -756,7 +759,8 @@ swf_parse_definefont (swf_parser * context, int * error)
 	goto FAIL;
     }
 
-    for(n=0; n<font->glyph_count; n++) {
+    for(n=0; n<font->glyph_count; n++) 
+    {
         font->shape_records[n] = NULL;
 
         swf_parse_seek(context, offset_table[n] + start);
@@ -769,19 +773,14 @@ swf_parse_definefont (swf_parser * context, int * error)
         xlast = 0;
         ylast = 0;
 
-<<<<<<< swf_parse.c
-        font->shape_records[n] = NULL;
-/* TODO swf_parse_get_shaperecords(context, error);*/
-=======
         font->shape_records[n] = swf_parse_get_shaperecords(context, error);
->>>>>>> 1.16
     }
 
     free (offset_table);
 
     return font;
 
- FAIL:
+    FAIL:
     swf_destroy_definefont (font);
     return NULL;
 }
