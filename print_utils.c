@@ -16,6 +16,9 @@
  *
  *
  * $Log: print_utils.c,v $
+ * Revision 1.11  2001/07/09 15:48:54  acme
+ * Renamed U32 to SWF_U32 and so on
+ *
  * Revision 1.10  2001/07/09 12:47:59  muttley
  * Changes for lib_swfextract and text_extract
  *
@@ -656,7 +659,7 @@ void
 print_imageguts (swf_imageguts * guts,const char * str)
 {
 
-    U32 nbytes   = 0;
+    SWF_U32 nbytes   = 0;
 
 
 
@@ -735,7 +738,7 @@ print_startsound (swf_startsound * sound,const char * str)
 void
 print_shapestyle (swf_shapestyle * style,const char * str)
 {
-    U16 i = 0, j = 0;
+    SWF_U16 i = 0, j = 0;
 
     if (style==NULL) {
         return;

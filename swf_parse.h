@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_parse.h,v $
+ * Revision 1.12  2001/07/09 15:48:54  acme
+ * Renamed U32 to SWF_U32 and so on
+ *
  * Revision 1.11  2001/07/09 12:47:59  muttley
  * Changes for lib_swfextract and text_extract
  *
@@ -56,16 +59,16 @@ extern swf_header * swf_parse_header     (swf_parser * , int *);
 
 extern void         swf_parse_initbits   (swf_parser *);
 
-extern U8           swf_parse_get_byte   (swf_parser *);
-extern U8         * swf_parse_get_bytes  (swf_parser * , int);
-extern U16          swf_parse_get_word   (swf_parser *);
-extern U32          swf_parse_get_dword  (swf_parser *);
+extern SWF_U8           swf_parse_get_byte   (swf_parser *);
+extern SWF_U8         * swf_parse_get_bytes  (swf_parser * , int);
+extern SWF_U16          swf_parse_get_word   (swf_parser *);
+extern SWF_U32          swf_parse_get_dword  (swf_parser *);
 
-extern U32          swf_parse_get_sword  (swf_parser *);
-extern U32          swf_parse_get_bits   (swf_parser *, S32);
-extern S32          swf_parse_get_sbits  (swf_parser *, S32);
+extern SWF_U32          swf_parse_get_sword  (swf_parser *);
+extern SWF_U32          swf_parse_get_bits   (swf_parser *, SWF_S32);
+extern SWF_S32          swf_parse_get_sbits  (swf_parser *, SWF_S32);
 
-extern U32          swf_parse_nextid     (swf_parser *, int *);
+extern SWF_U32          swf_parse_nextid     (swf_parser *, int *);
 extern void         swf_parse_skip       (swf_parser *, int);
 extern void         swf_parse_seek       (swf_parser *, int);
 
@@ -85,7 +88,7 @@ extern swf_shapestyle          * swf_parse_get_shapestyle      (swf_parser * , i
 extern swf_defineshape         * swf_parse_defineshape_aux     (swf_parser * , int *, int);
 
 extern swf_adpcm               * swf_parse_adpcm_decompress    (swf_parser * , int *, int, int, int, int);
-extern U32                       swf_parse_get_colour          (swf_parser * , int *, int);
+extern SWF_U32                       swf_parse_get_colour          (swf_parser * , int *, int);
 extern char                    * swf_parse_get_string          (swf_parser * , int *);
 
 extern swf_textrecord          * swf_parse_get_textrecord      (swf_parser * , int *, int, int, int);

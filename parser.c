@@ -16,6 +16,9 @@
  *
  *
  * $Log: parser.c,v $
+ * Revision 1.13  2001/07/09 15:48:54  acme
+ * Renamed U32 to SWF_U32 and so on
+ *
  * Revision 1.12  2001/07/09 12:47:59  muttley
  * Changes for lib_swfextract and text_extract
  *
@@ -104,7 +107,7 @@ main (int argc, char *argv[])
     const char * str = "";
 
 
-    U32 next_id;
+    SWF_U32 next_id;
     tag = (const char **) init_tags();
 
 
@@ -353,7 +356,7 @@ void
 parse_setbackgroundcolour (swf_parser * context, const char * str)
 {
     int error = SWF_ENoError;
-	U32 colour;
+	SWF_U32 colour;
 
 	swf_setbackgroundcolour * back = swf_parse_setbackgroundcolour (context, &error);
 

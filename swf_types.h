@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.15  2001/07/09 15:48:54  acme
+ * Renamed U32 to SWF_U32 and so on
+ *
  * Revision 1.14  2001/07/09 12:47:59  muttley
  * Changes for lib_swfextract and text_extract
  *
@@ -225,12 +228,12 @@
 
 
 /* Global Types*/
-typedef unsigned long U32, *P_U32, **PP_U32;
-typedef signed long S32, *P_S32, **PP_S32;
-typedef unsigned short U16, *P_U16, **PP_U16;
-typedef signed short S16, *P_S16, **PP_S16;
-typedef unsigned char U8, *P_U8, **PP_U8;
-typedef signed char S8, *P_S8, **PP_S8;
+typedef unsigned long SWF_U32, *P_U32, **PP_U32;
+typedef signed long SWF_S32, *P_S32, **PP_S32;
+typedef unsigned short SWF_U16, *P_U16, **PP_U16;
+typedef signed short SWF_S16, *P_S16, **PP_S16;
+typedef unsigned char SWF_U8, *P_U8, **PP_U8;
+typedef signed char SWF_S8, *P_S8, **PP_S8;
 typedef signed long SFIXED, *P_SFIXED;
 typedef signed long SCOORD, *P_SCOORD;
 
@@ -308,10 +311,10 @@ typedef struct swf_soundstreamhead swf_soundstreamhead;
 
 
 struct swf_header {
-    U32 size;
-    U32 version;
-    U32 rate;
-    U32 count;
+    SWF_U32 size;
+    SWF_U32 version;
+    SWF_U32 rate;
+    SWF_U32 count;
     swf_rect * bounds;
 };
 
@@ -323,21 +326,21 @@ struct swf_parser {
 
     int headers_parsed;
 
-    U32 cur_tag_len;
-    U32 filepos;
-    U32 next_tag_pos;
-    U32 frame;
+    SWF_U32 cur_tag_len;
+    SWF_U32 filepos;
+    SWF_U32 next_tag_pos;
+    SWF_U32 frame;
 
     /* Bit Handling. */
-    S32 bitpos;
-    U32 bitbuf;
+    SWF_S32 bitpos;
+    SWF_U32 bitbuf;
 
     /* Tag parsing information. */
-    U32 tagstart;
-    U32 tagzero;
-    U32 tagend;
+    SWF_U32 tagstart;
+    SWF_U32 tagzero;
+    SWF_U32 tagend;
 
-    U32 taglen;
+    SWF_U32 taglen;
 
     int fill_bits;
     int line_bits;
@@ -345,10 +348,10 @@ struct swf_parser {
     /* Font glyph counts (gotta save it somewhere!) */
     int glyph_counts [256];
 
-    U8* src_adpcm;
-    U32 bitbuf_adpcm;       /* this should always contain at least 24 bits of data */
-    S32 bitpos_adpcm;
-    U32 n_samples_adpcm;    /* number of samples decompressed so far */
+    SWF_U8* src_adpcm;
+    SWF_U32 bitbuf_adpcm;       /* this should always contain at least 24 bits of data */
+    SWF_S32 bitpos_adpcm;
+    SWF_U32 n_samples_adpcm;    /* number of samples decompressed so far */
 
     /* Streaming sound info from SoundStreamHead tag */
     int stream_compression;
@@ -363,8 +366,8 @@ struct swf_parser {
 };
 
 struct swf_tag {
-    U16 id;
-    U32 len;
+    SWF_U16 id;
+    SWF_U32 len;
 };
 
 struct swf_rect {
@@ -375,22 +378,22 @@ struct swf_rect {
 };
 
 struct swf_colour {
-    U32 r;
-    U32 g;
-    U32 b;
-    U32 a;
+    SWF_U32 r;
+    SWF_U32 g;
+    SWF_U32 b;
+    SWF_U32 a;
 };
 
 struct swf_cxform {
-    S32 flags;
-    S16 aa;    /* a is multiply factor ... */
-    S16 ab;    /* ... b is addition factor */
-    S16 ra;
-    S16 rb;
-    S16 ga;
-    S16 gb;
-    S16 ba;
-    S16 bb;
+    SWF_S32 flags;
+    SWF_S16 aa;    /* a is multiply factor ... */
+    SWF_S16 ab;    /* ... b is addition factor */
+    SWF_S16 ra;
+    SWF_S16 rb;
+    SWF_S16 ga;
+    SWF_S16 gb;
+    SWF_S16 ba;
+    SWF_S16 bb;
 
 };
 
@@ -409,7 +412,7 @@ struct swf_setbackgroundcolour {
 
 
 struct swf_definefont {
-    U32 fontid;
+    SWF_U32 fontid;
     int offset;
     int glyph_count;
     swf_shaperecord_list ** shape_records;
@@ -417,16 +420,16 @@ struct swf_definefont {
 
 
 struct swf_definefontinfo {
-    U32 fontid;
-    U8 flags;
+    SWF_U32 fontid;
+    SWF_U8 flags;
     int namelen;
     int * code_table;
     char * fontname;
 };
 
 struct swf_placeobject {
-    U32 tagid;
-    U32 depth;
+    SWF_U32 tagid;
+    SWF_U32 depth;
     swf_matrix * matrix;
     swf_cxform * cxform;
 
@@ -439,18 +442,18 @@ struct swf_placeobject {
  */
 
 struct swf_placeobject2 {
-    U8 flags;
-    U32 depth;
-    U32 tag;
+    SWF_U8 flags;
+    SWF_U32 depth;
+    SWF_U32 tag;
     swf_matrix * matrix;
     swf_cxform * cxform;
-    U32 ratio;
-    U32 clip_depth;
+    SWF_U32 ratio;
+    SWF_U32 clip_depth;
     char * name;
 };
 
 struct swf_defineshape {
-    U32 tagid;
+    SWF_U32 tagid;
     swf_rect * rect;
     swf_shapestyle * style;
     swf_shaperecord_list * record;
@@ -458,84 +461,84 @@ struct swf_defineshape {
 };
 
 struct swf_shapestyle {
-    U16 nfills;
+    SWF_U16 nfills;
     swf_fillstyle ** fills;
 
-    U16 nlines;
+    SWF_U16 nlines;
     swf_linestyle ** lines;
 };
 
 struct swf_fillstyle {
-    U16 fill_style;
-    U16 ncolours;
-    U16 bitmap_id;
+    SWF_U16 fill_style;
+    SWF_U16 ncolours;
+    SWF_U16 bitmap_id;
     swf_matrix * matrix;
     swf_rgba_pos ** colours;
-    U32 colour;
+    SWF_U32 colour;
 };
 
 struct swf_linestyle {
-    U16 width;
-    U32 colour;
+    SWF_U16 width;
+    SWF_U32 colour;
 };
 
 struct swf_rgba_pos {
-    U32 rgba;
-    U8 pos;
+    SWF_U32 rgba;
+    SWF_U8 pos;
 };
 
 
 struct swf_freecharacter {
-    U32 tagid;
+    SWF_U32 tagid;
 };
 
 
 struct swf_removeobject {
-    U32 tagid;
-    U32 depth;
+    SWF_U32 tagid;
+    SWF_U32 depth;
 };
 
 struct swf_removeobject2 {
-    U32 depth;
+    SWF_U32 depth;
 };
 
 struct swf_startsound {
-    U32 tagid;
-    U32 code;
-    U32 inpoint;
-    U32 outpoint;
-    U32 loops;
-    U8  npoints;
+    SWF_U32 tagid;
+    SWF_U32 code;
+    SWF_U32 inpoint;
+    SWF_U32 outpoint;
+    SWF_U32 loops;
+    SWF_U8  npoints;
     swf_soundpoint ** points;
 };
 
 struct swf_soundpoint {
-    U32 mark;
-    U32 lc;
-    U32 rc;
+    SWF_U32 mark;
+    SWF_U32 lc;
+    SWF_U32 rc;
 };
 
 struct swf_definebits {
-    U32 tagid;
+    SWF_U32 tagid;
     swf_imageguts * guts;
 
 };
 
 struct swf_definebitsjpeg2 {
-    U32 tagid;
+    SWF_U32 tagid;
     swf_imageguts * guts;
 
 };
 
 struct swf_definebitsjpeg3 {
-    U32 tagid;
+    SWF_U32 tagid;
     swf_imageguts * guts;
 
 };
 
 struct swf_imageguts {
-    U32 nbytes;
-    U8  * data;
+    SWF_U32 nbytes;
+    SWF_U8  * data;
 };
 
 struct swf_jpegtables {
@@ -544,7 +547,7 @@ struct swf_jpegtables {
 };
 
 struct swf_definetext {
-    U32 tagid;
+    SWF_U32 tagid;
     swf_rect    * rect;
     swf_matrix  * matrix;
     swf_textrecord_list * records;
@@ -552,7 +555,7 @@ struct swf_definetext {
 
 
 struct swf_definetext2 {
-    U32 tagid;
+    SWF_U32 tagid;
     swf_rect    * rect;
     swf_matrix  * matrix;
     swf_textrecord_list  * records;
@@ -560,14 +563,14 @@ struct swf_definetext2 {
 
 
 struct swf_definebutton {
-    U32 tagid;
+    SWF_U32 tagid;
     swf_buttonrecord_list * records;
     swf_doaction_list     * actions;
 };
 
 
 struct swf_definebutton2 {
-    U32 tagid;
+    SWF_U32 tagid;
     swf_buttonrecord_list * records;
     //swf_doaction_list     * actions;
     swf_button2action_list * actions;
@@ -576,50 +579,50 @@ struct swf_definebutton2 {
 
 
 struct swf_defineedittext {
-    U32 tagid;
+    SWF_U32 tagid;
     swf_rect * bounds;
-    U16 flags;
-    U16 font_id;
-    U16 font_height;
-    U32 colour;
+    SWF_U16 flags;
+    SWF_U16 font_id;
+    SWF_U16 font_height;
+    SWF_U32 colour;
     int max_length;
     int align;
-    U16 left_margin;
-    U16 right_margin;
-    U16 indent;
-    U16 leading;
+    SWF_U16 left_margin;
+    SWF_U16 right_margin;
+    SWF_U16 indent;
+    SWF_U16 leading;
     char * variable;
     char * initial_text;
 };
 
 struct swf_definefont2 {
-	U32 fontid;
-	U16 flags;
+	SWF_U32 fontid;
+	SWF_U16 flags;
 	int name_len;
 	char * name;
-	U16 glyph_count;
+	SWF_U16 glyph_count;
 	swf_shaperecord_list ** glyphs;
-	U32 * code_table;
-	S16 ascent;
-	S16 descent;
-	S16 leading;
+	SWF_U32 * code_table;
+	SWF_S16 ascent;
+	SWF_S16 descent;
+	SWF_S16 leading;
 	swf_rect ** bounds;
-	S16 nkerning_pairs;
+	SWF_S16 nkerning_pairs;
 	swf_kerningpair ** kerning_pairs;
 
 };
 
 struct swf_kerningpair {
 
-	U16 code1;
-	U16 code2;
-	S16 adjust;
+	SWF_U16 code1;
+	SWF_U16 code2;
+	SWF_S16 adjust;
 };
 
 
 
 struct swf_definemorphshape  {
-    U32 tagid;
+    SWF_U32 tagid;
     swf_rect * r1;
     swf_rect * r2;
     int nfills;
@@ -632,10 +635,10 @@ struct swf_definemorphshape  {
 
 struct swf_gradcolour {
 
-    U8 r1;
-    U8 r2;
-    U32 c1;
-    U32 c2;
+    SWF_U8 r1;
+    SWF_U8 r2;
+    SWF_U32 c1;
+    SWF_U32 c2;
 };
 
 struct swf_fillstyle2 {
@@ -644,23 +647,23 @@ struct swf_fillstyle2 {
     swf_matrix * matrix2;
     int ncolours;
     swf_gradcolour ** colours;
-    U16 tag;
-    U32 rgb1;
-    U32 rgb2;
+    SWF_U16 tag;
+    SWF_U32 rgb1;
+    SWF_U32 rgb2;
 };
 
 struct swf_linestyle2 {
-    U16 thick1;
-    U16 thick2;
-    U32 rgb1;
-    U32 rgb2;
+    SWF_U16 thick1;
+    SWF_U16 thick2;
+    SWF_U32 rgb1;
+    SWF_U32 rgb2;
 
 };
 
 
 
 struct swf_definesound {
-    U32 tagid;
+    SWF_U32 tagid;
     int compression;
     int sample_rate;
     int sample_size;
@@ -673,7 +676,7 @@ struct swf_definesound {
 };
 
 struct  swf_adpcm {
-    U32 tagid;
+    SWF_U32 tagid;
 
 };
 
@@ -686,14 +689,14 @@ struct swf_framelabel {
 
 struct swf_namecharacter {
 
-    U32 tagid;
+    SWF_U32 tagid;
     char * label;
 
 };
 
 struct swf_definebuttoncxform {
 
-    U32 tagid;
+    SWF_U32 tagid;
     int ncxforms;
     swf_cxform ** cxforms;
 };
@@ -701,7 +704,7 @@ struct swf_definebuttoncxform {
 
 struct swf_soundstreamblock {
 
-    U32 tagid;
+    SWF_U32 tagid;
     int n_samples_adpcm;
     int stream_compression;
     int stream_sample_rate;
@@ -716,7 +719,7 @@ struct swf_soundstreamblock {
 };
 
 struct swf_definebuttonsound {
-    U32 tagid;
+    SWF_U32 tagid;
     swf_startsound * up_state;
     swf_startsound * over_state;
     swf_startsound * down_state;
@@ -724,7 +727,7 @@ struct swf_definebuttonsound {
 
 struct swf_soundstreamhead {
 
-    U32 tagid;
+    SWF_U32 tagid;
     int mix_format;
     int stream_compression;
     int stream_sample_rate;
@@ -736,12 +739,12 @@ struct swf_soundstreamhead {
 
 struct swf_definebitslossless {
 
-    U32 tagid;
+    SWF_U32 tagid;
     int format;
     int width;
     int height;
     int colourtable_size;
-    U8  * data;
+    SWF_U8  * data;
 
 };
 
@@ -753,7 +756,7 @@ struct swf_mp3header {
     int stereo;
     int freq;
     int rate;
-    U8 * data;
+    SWF_U8 * data;
     int encoded_frame_size;
     int decoded_frame_size;
 };
@@ -766,9 +769,9 @@ struct swf_mp3header_list {
 struct swf_textrecord {
 
     swf_textrecord * next;
-    U8 flags;
+    SWF_U8 flags;
     long font_id;
-    U32 colour;
+    SWF_U32 colour;
     int xoffset;
     int yoffset;
     int font_height;
@@ -788,12 +791,12 @@ struct swf_buttonrecord {
 
     swf_buttonrecord * next;
 
-    U32 state_hit_test;
-    U32 state_down;
-    U32 state_over;
-    U32 state_up;
-    U32 character;
-    U32 layer;
+    SWF_U32 state_hit_test;
+    SWF_U32 state_down;
+    SWF_U32 state_over;
+    SWF_U32 state_up;
+    SWF_U32 character;
+    SWF_U32 layer;
 
 
     swf_matrix * matrix;
@@ -818,19 +821,19 @@ struct swf_doaction {
     char* url;
     char* target;
     char* goto_label;
-    U32   push_data_type;
-    //U32   push_data_float;
+    SWF_U32   push_data_type;
+    //SWF_U32   push_data_float;
     union
     {
-        U32 dw;
+        SWF_U32 dw;
         float f;
     } push_data_float;
 
 
     char* push_data_string;
-    U16   branch_offset;
-    U8    url2_flag;
-    U8    stop_flag;
+    SWF_U16   branch_offset;
+    SWF_U8    url2_flag;
+    SWF_U8    stop_flag;
 
 
 
@@ -845,17 +848,17 @@ struct swf_doaction_list {
 struct swf_shaperecord {
 
     int is_edge;
-    U16 flags;
-    S32 x;
-    S32 y;
+    SWF_U16 flags;
+    SWF_S32 x;
+    SWF_S32 y;
     int fillstyle0;
     int fillstyle1;
     int linestyle;
     swf_shapestyle * shapestyle;
-    S32 ax;
-    S32 ay;
-    S32 cx;
-    S32 cy;
+    SWF_S32 ax;
+    SWF_S32 ay;
+    SWF_S32 cx;
+    SWF_S32 cy;
 
     swf_shaperecord * next;
 };
@@ -869,7 +872,7 @@ struct swf_shaperecord_list {
 
 struct swf_button2action {
 
-	U32 tagid;
+	SWF_U32 tagid;
 };
 
 struct swf_button2action_list {

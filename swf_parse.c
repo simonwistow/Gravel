@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.21  2001/07/09 15:48:54  acme
+ * Renamed U32 to SWF_U32 and so on
+ *
  * Revision 1.20  2001/07/09 12:38:57  muttley
  * A few bug fixes
  *
@@ -128,7 +131,7 @@ swf_header *
 swf_parse_header (swf_parser * context, int * error)
 {
     swf_header * header;
-    U8 file_hdr[8];
+    SWF_U8 file_hdr[8];
 
     if ((header = (swf_header *) calloc (1, sizeof (swf_header))) == NULL) {
 	*error = SWF_EMallocFailure;
@@ -148,8 +151,8 @@ swf_parse_header (swf_parser * context, int * error)
 
 
     /* Get the file version. */
-    header->version = (U16) file_hdr[3];
-    header->size    = (U32) file_hdr[4] | ((U32) file_hdr[5] << 8) | ((U32) file_hdr[6] << 16) | ((U32) file_hdr[7] << 24);
+    header->version = (SWF_U16) file_hdr[3];
+    header->size    = (SWF_U32) file_hdr[4] | ((SWF_U32) file_hdr[5] << 8) | ((SWF_U32) file_hdr[6] << 16) | ((SWF_U32) file_hdr[7] << 24);
 
     if (header->size < 21) {
 	*error = SWF_EFileTooSmall;
@@ -196,10 +199,10 @@ swf_parse_initbits (swf_parser * context)
  * parse head on by one.
  */
 
-U8
+SWF_U8
 swf_parse_get_byte(swf_parser * context)
 {
-    U8 byte;
+    SWF_U8 byte;
 
     swf_parse_initbits(context);
     fread (&byte, 1, 1, context->file);
@@ -213,12 +216,12 @@ swf_parse_get_byte(swf_parser * context)
  * number of bytes from the stream.
  */
 
-U8 *
+SWF_U8 *
 swf_parse_get_bytes (swf_parser * context, int nbytes)
 {
-    U8 * bytes;
+    SWF_U8 * bytes;
 
-    if ((bytes = (U8 *) calloc (nbytes, sizeof (U8))) == NULL) {
+    if ((bytes = (SWF_U8 *) calloc (nbytes, sizeof (SWF_U8))) == NULL) {
         /* todo : pass back errors ?*/
         return NULL;
     }
@@ -236,13 +239,13 @@ swf_parse_get_bytes (swf_parser * context, int nbytes)
  * Get n bits from the stream.
  */
 
-U32
-swf_parse_get_bits (swf_parser * context, S32 n)
+SWF_U32
+swf_parse_get_bits (swf_parser * context, SWF_S32 n)
 {
-    U32 v = 0;
+    SWF_U32 v = 0;
 
     while (1) {
-        S32 s = n - context->bitpos;
+        SWF_S32 s = n - context->bitpos;
         if (s > 0) {
             /* Consume the entire buffer */
             v |= context->bitbuf << s;
@@ -267,11 +270,11 @@ swf_parse_get_bits (swf_parser * context, S32 n)
  * Get n bits from the stream with sign extension.
  */
 
-S32
-swf_parse_get_sbits(swf_parser * context, S32 n)
+SWF_S32
+swf_parse_get_sbits(swf_parser * context, SWF_S32 n)
 {
     /* Get the number as an unsigned value. */
-    S32 v = (S32) swf_parse_get_bits(context, n);
+    SWF_S32 v = (SWF_S32) swf_parse_get_bits(context, n);
 
     /* Is the number negative? */
     if (v & (1L << (n - 1))) {
@@ -315,13 +318,13 @@ swf_parse_get_rect (swf_parser * context, int * error)
  * parse head on by two.
  */
 
-U16
+SWF_U16
 swf_parse_get_word(swf_parser * context)
 {
 
     swf_parse_initbits(context);
 
-    return (U16) swf_parse_get_byte(context) | ((U16) swf_parse_get_byte(context) << 8);
+    return (SWF_U16) swf_parse_get_byte(context) | ((SWF_U16) swf_parse_get_byte(context) << 8);
 }
 
 /*
@@ -329,13 +332,13 @@ swf_parse_get_word(swf_parser * context)
  * parse head on by four.
  */
 
-U32
+SWF_U32
 swf_parse_get_dword(swf_parser * context)
 {
 
     swf_parse_initbits(context);
 
-    return (U32) swf_parse_get_byte(context) | ((U32) swf_parse_get_byte(context) << 8) | ((U32) swf_parse_get_byte(context) << 16) | ((U32) swf_parse_get_byte(context) << 24);
+    return (SWF_U32) swf_parse_get_byte(context) | ((SWF_U32) swf_parse_get_byte(context) << 8) | ((SWF_U32) swf_parse_get_byte(context) << 16) | ((SWF_U32) swf_parse_get_byte(context) << 24);
 }
 
 /*
@@ -346,10 +349,10 @@ swf_parse_get_dword(swf_parser * context)
  * Return the ID code of the tag.
  */
 
-U32
+SWF_U32
 swf_parse_nextid(swf_parser * context, int * error)
 {
-    U16 raw_code, id;
+    SWF_U16 raw_code, id;
 
     if (context->headers_parsed == 0) {
         fprintf (stderr, "Headers, not parsed yet\n");
@@ -373,7 +376,7 @@ swf_parse_nextid(swf_parser * context, int * error)
     /* Determine if another long word must be read to get the length. */
     if (context->cur_tag_len == 0x3f) {
         /* Long tag .. */
-        context->cur_tag_len = (U32) swf_parse_get_dword(context);
+        context->cur_tag_len = (SWF_U32) swf_parse_get_dword(context);
     }
 
     context->next_tag_pos = swf_parse_tell(context) + context->cur_tag_len;
@@ -435,7 +438,7 @@ swf_parse_definefontinfo (swf_parser * context, int * error)
 	return NULL;
     }
 
-    info->fontid = (U32) swf_parse_get_word (context);
+    info->fontid = (SWF_U32) swf_parse_get_word (context);
     info->namelen = swf_parse_get_byte (context);
 
     /* Allocate enough space to hold the name of the font */
@@ -632,22 +635,22 @@ swf_parse_get_cxform (swf_parser * context, int * error, int has_alpha)
     cxform->ab = 0;
 
     if (need_mul) {
-	cxform->ra = (S16) swf_parse_get_sbits (context, n_bits);
-	cxform->ga = (S16) swf_parse_get_sbits (context, n_bits);
-	cxform->ba = (S16) swf_parse_get_sbits (context, n_bits);
+	cxform->ra = (SWF_S16) swf_parse_get_sbits (context, n_bits);
+	cxform->ga = (SWF_S16) swf_parse_get_sbits (context, n_bits);
+	cxform->ba = (SWF_S16) swf_parse_get_sbits (context, n_bits);
 	if (has_alpha) {
-	    cxform->aa = (S16) swf_parse_get_sbits (context, n_bits);
+	    cxform->aa = (SWF_S16) swf_parse_get_sbits (context, n_bits);
 	}
     } else {
 	cxform->ra = cxform->ga = cxform->ba = 256;
     }
 
     if (need_add) {
-	cxform->rb = (S16) swf_parse_get_sbits (context, n_bits);
-	cxform->gb = (S16) swf_parse_get_sbits (context, n_bits);
-	cxform->bb = (S16) swf_parse_get_sbits (context, n_bits);
+	cxform->rb = (SWF_S16) swf_parse_get_sbits (context, n_bits);
+	cxform->gb = (SWF_S16) swf_parse_get_sbits (context, n_bits);
+	cxform->bb = (SWF_S16) swf_parse_get_sbits (context, n_bits);
 	if (has_alpha) {
-	    cxform->ab = (S16)swf_parse_get_sbits (context, n_bits);
+	    cxform->ab = (SWF_S16)swf_parse_get_sbits (context, n_bits);
 	}
     } else {
 	cxform->rb = cxform->gb = cxform->bb = 0;
@@ -699,7 +702,7 @@ swf_parse_definefont (swf_parser * context, int * error)
     swf_definefont * font;
     int n, start, xlast, ylast;
     int * offset_table;
-    U16 fillbits, linebits;
+    SWF_U16 fillbits, linebits;
 
     if ((font = (swf_definefont *) calloc (1, sizeof (swf_definefont))) == NULL) {
 	*error = SWF_EMallocFailure;
@@ -707,7 +710,7 @@ swf_parse_definefont (swf_parser * context, int * error)
     }
 
     font->shape_records = NULL;
-    font->fontid = (U32) swf_parse_get_word(context);
+    font->fontid = (SWF_U32) swf_parse_get_word(context);
 
     start = swf_parse_tell(context);
     font->offset = swf_parse_get_word (context);
@@ -756,8 +759,8 @@ swf_parse_definefont (swf_parser * context, int * error)
 
         swf_parse_initbits(context); /* reset bit counter */
 
-        fillbits = (U16) swf_parse_get_bits(context, 4);
-        linebits = (U16) swf_parse_get_bits(context, 4);
+        fillbits = (SWF_U16) swf_parse_get_bits(context, 4);
+        linebits = (SWF_U16) swf_parse_get_bits(context, 4);
 
         xlast = 0;
         ylast = 0;
@@ -775,10 +778,10 @@ swf_parse_definefont (swf_parser * context, int * error)
     return NULL;
 }
 
-U32
+SWF_U32
 swf_parse_get_colour (swf_parser * context, int * error, int with_alpha)
 {
-    U32 r,g,b,a;
+    SWF_U32 r,g,b,a;
 
     r = swf_parse_get_byte(context);
     g = swf_parse_get_byte(context);
@@ -839,8 +842,8 @@ swf_parse_defineshape (swf_parser * context, int * error)
 swf_shapestyle *
 swf_parse_get_shapestyle (swf_parser * context, int * error, int with_alpha)
 {
-    U16 i = 0;
-    U16 j = 0;
+    SWF_U16 i = 0;
+    SWF_U16 j = 0;
     swf_shapestyle * styles;
 
     if ((styles = (swf_shapestyle *) calloc (1, sizeof (swf_shapestyle))) == NULL) {
@@ -886,7 +889,7 @@ swf_parse_get_shapestyle (swf_parser * context, int * error, int with_alpha)
             styles->fills[i]->matrix = (swf_matrix *) swf_parse_get_matrix (context, error);
 
             /* Get the number of colors. */
-            styles->fills[i]->ncolours = (U16) swf_parse_get_byte(context);
+            styles->fills[i]->ncolours = (SWF_U16) swf_parse_get_byte(context);
 
             if ((styles->fills[i]->colours = (swf_rgba_pos **) calloc (styles->fills[i]->ncolours, sizeof (swf_rgba_pos *))) == NULL) {
                 *error = SWF_EMallocFailure;
@@ -957,7 +960,7 @@ swf_parse_defineshape_aux (swf_parser * context, int * error, int with_alpha)
 	return NULL;
     }
 
-    shape->tagid  = (U32) swf_parse_get_word (context);
+    shape->tagid  = (SWF_U32) swf_parse_get_word (context);
     shape->rect   = NULL;
     shape->style  = NULL;
     shape->record = NULL;
@@ -981,8 +984,8 @@ swf_parse_defineshape_aux (swf_parser * context, int * error, int with_alpha)
 
     swf_parse_initbits (context);
 
-    context->fill_bits = (U16) swf_parse_get_bits (context, 4);
-    context->line_bits = (U16) swf_parse_get_bits (context, 4);
+    context->fill_bits = (SWF_U16) swf_parse_get_bits (context, 4);
+    context->line_bits = (SWF_U16) swf_parse_get_bits (context, 4);
 
 /* TODO simon */
     if ((shape->record = swf_parse_get_shaperecords (context,error)) == NULL) {
@@ -1009,8 +1012,8 @@ swf_parse_placeobject (swf_parser * context, int * error)
 	return NULL;
     }
 
-    place->tagid = (U32) swf_parse_get_word(context);
-    place->depth = (U32) swf_parse_get_word(context);
+    place->tagid = (SWF_U32) swf_parse_get_word(context);
+    place->depth = (SWF_U32) swf_parse_get_word(context);
 
     place->cxform = NULL;
     place->matrix = NULL;
@@ -1059,8 +1062,8 @@ swf_parse_removeobject(swf_parser * context, int * error)
 	return NULL;
     }
 
-    object->tagid = (U32) swf_parse_get_word (context);
-    object->depth = (U32) swf_parse_get_word (context);
+    object->tagid = (SWF_U32) swf_parse_get_word (context);
+    object->depth = (SWF_U32) swf_parse_get_word (context);
 
     return object;
 }
@@ -1077,7 +1080,7 @@ swf_parse_removeobject2(swf_parser * context, int * error)
 	return NULL;
     }
 
-    object->depth = (U32) swf_parse_get_word (context);
+    object->depth = (SWF_U32) swf_parse_get_word (context);
 
     return object;
 }
@@ -1243,7 +1246,7 @@ swf_parse_get_imageguts (swf_parser * context, int * error)
     }
 
 
-    if ((guts->data = (U8 *) calloc (size, sizeof (U8))) == NULL) {
+    if ((guts->data = (SWF_U8 *) calloc (size, sizeof (SWF_U8))) == NULL) {
         *error = SWF_EMallocFailure;
         goto FAIL;
     }
@@ -1252,7 +1255,7 @@ swf_parse_get_imageguts (swf_parser * context, int * error)
     while (swf_parse_tell (context) < context->next_tag_pos) {
         if ((count % SWF_IMAGE_GUTS_BLOCK_SIZE) == 0) {
             size+= SWF_IMAGE_GUTS_BLOCK_SIZE;
-            if ((guts->data = (U8 *) realloc (guts->data, sizeof(U8) * size)) == NULL) {
+            if ((guts->data = (SWF_U8 *) realloc (guts->data, sizeof(SWF_U8) * size)) == NULL) {
                 *error = SWF_EReallocFailure;
                 goto FAIL;
             }
@@ -1264,7 +1267,7 @@ swf_parse_get_imageguts (swf_parser * context, int * error)
     guts->nbytes = count;
 
     while ((count % SWF_IMAGE_GUTS_BLOCK_SIZE) != 0) {
-        guts->data [count++] = (U8) NULL;
+        guts->data [count++] = (SWF_U8) NULL;
     }
 
     return guts;
@@ -1400,7 +1403,7 @@ swf_parse_definebutton2 (swf_parser *  context, int * error)
 {
 
     swf_definebutton2 * button;
-    U32 track_as_menu, offset, next_action;
+    SWF_U32 track_as_menu, offset, next_action;
 
     if ((button = (swf_definebutton2 *) calloc (1, sizeof (swf_definebutton2))) == NULL)
     {
@@ -1495,7 +1498,7 @@ swf_parse_get_doaction (swf_parser * context, int * error)
 {
         swf_doaction * action;
         int len = 0;
-        S32 pos;
+        SWF_S32 pos;
 
         if ((action = (swf_doaction *) calloc (1, sizeof (swf_doaction))) == NULL)
         {
@@ -1689,8 +1692,8 @@ swf_parse_definefont2 (swf_parser * context, int * error)
 {
     swf_definefont2 * font;
     int i, n, data_pos;
-    U32 code_offset;
-    U32 * offset_table;
+    SWF_U32 code_offset;
+    SWF_U32 * offset_table;
 
     if ((font = (swf_definefont2 *) calloc (1, sizeof (swf_definefont))) == NULL) {
         *error = SWF_EMallocFailure;
@@ -1753,7 +1756,7 @@ swf_parse_definefont2 (swf_parser * context, int * error)
         /* Get the FontOffsetTable */
 
 
-        if ((offset_table = (U32 *) calloc (font->glyph_count, sizeof (U32))) == NULL)
+        if ((offset_table = (SWF_U32 *) calloc (font->glyph_count, sizeof (SWF_U32))) == NULL)
         {
 	        *error = SWF_EMallocFailure;
             goto FAIL;
@@ -1789,8 +1792,8 @@ swf_parse_definefont2 (swf_parser * context, int * error)
     	    swf_parse_initbits (context); /* reset bit counter */
 
     	    /* todo simon : do these really need to be set in the context? */
-            context->fill_bits = (U16) swf_parse_get_bits(context, 4);
-            context->line_bits = (U16) swf_parse_get_bits(context, 4);
+            context->fill_bits = (SWF_U16) swf_parse_get_bits(context, 4);
+            context->line_bits = (SWF_U16) swf_parse_get_bits(context, 4);
 
     	    font->glyphs[n] = (swf_shaperecord_list *) swf_parse_get_shaperecords(context, error);
 
@@ -1805,7 +1808,7 @@ swf_parse_definefont2 (swf_parser * context, int * error)
     	    swf_parse_seek(context, data_pos + code_offset);
         }
 
-    	if ((font->code_table = (U32 *) calloc (font->glyph_count, sizeof (U32))) == NULL) {
+    	if ((font->code_table = (SWF_U32 *) calloc (font->glyph_count, sizeof (SWF_U32))) == NULL) {
             *error = SWF_EMallocFailure;
             goto FAIL;
 	    }
@@ -1899,7 +1902,7 @@ swf_definemorphshape *
 swf_parse_definemorphshape (swf_parser * context, int * error)
 {
     swf_definemorphshape * shape;
-    U32 offset, end_shape_pos;
+    SWF_U32 offset, end_shape_pos;
     int with_alpha;
     int i, j;
 
@@ -2139,7 +2142,7 @@ swf_parse_get_mp3headers (swf_parser * context, int * error, int samples_per_fra
     int frame_count = 0;
     int header_store_size  = 0;
     swf_mp3header_list * header_list;
-    U8 hdr[4];
+    SWF_U8 hdr[4];
     int i;
 
 
@@ -2500,7 +2503,7 @@ swf_parse_get_textrecord (swf_parser * context, int * error, int has_alpha, int 
 {
     int g;
     swf_textrecord * record;
-    U8 flags = swf_parse_get_byte(context);
+    SWF_U8 flags = swf_parse_get_byte(context);
 
 
 
@@ -2708,7 +2711,7 @@ swf_buttonrecord_list *
 swf_parse_get_buttonrecords (swf_parser * context, int * error, int with_alpha)
 {
 
-    U32 button_end;
+    SWF_U32 button_end;
     swf_buttonrecord_list * list;
     swf_buttonrecord      * temp;
 
@@ -2739,7 +2742,7 @@ swf_parse_get_buttonrecords (swf_parser * context, int * error, int with_alpha)
 	     list->lastp = &(temp->next);
 
     }
-    while ((button_end = (U32) swf_parse_get_byte(context)) != 0);
+    while ((button_end = (SWF_U32) swf_parse_get_byte(context)) != 0);
 
     return list;
 
@@ -2755,7 +2758,7 @@ swf_buttonrecord *
 swf_parse_get_buttonrecord (swf_parser * context, int * error, int byte, int with_alpha)
 {
     swf_buttonrecord * button;
-    U32 pad;
+    SWF_U32 pad;
     int i;
 
     if ((button = (swf_buttonrecord *) calloc (1, sizeof (swf_buttonrecord))) == NULL) {
@@ -2819,7 +2822,7 @@ swf_parse_get_shaperecord (swf_parser * context, int * error, int * at_end, int 
 {
     /* Determine if this is an edge. */
     swf_shaperecord * record;
-    S16 nbits;
+    SWF_S16 nbits;
 
     if ((record = (swf_shaperecord *) calloc (1, sizeof (swf_shaperecord))) == NULL) {
         *error = SWF_EMallocFailure;
@@ -2846,7 +2849,7 @@ swf_parse_get_shaperecord (swf_parser * context, int * error, int * at_end, int 
 
         /* Process a move to. */
         if (record->flags & eflagsMoveTo) {
-            nbits = (U16) swf_parse_get_bits(context, 5);
+            nbits = (SWF_U16) swf_parse_get_bits(context, 5);
             record->x = swf_parse_get_sbits(context, nbits);
             record->y = swf_parse_get_sbits(context, nbits);
             xlast = record->x;
@@ -2873,8 +2876,8 @@ swf_parse_get_shaperecord (swf_parser * context, int * error, int * at_end, int 
             record->shapestyle = swf_parse_get_shapestyle(context, error, with_alpha);
 
             /* Reset. */
-            context->fill_bits = (U16) swf_parse_get_bits (context, 4);
-            context->line_bits = (U16) swf_parse_get_bits (context, 4);
+            context->fill_bits = (SWF_U16) swf_parse_get_bits (context, 4);
+            context->line_bits = (SWF_U16) swf_parse_get_bits (context, 4);
         }
 
         *at_end = record->flags & eflagsEnd ? TRUE : FALSE;
@@ -2885,7 +2888,7 @@ swf_parse_get_shaperecord (swf_parser * context, int * error, int * at_end, int 
 
         if (swf_parse_get_bits(context, 1)) {
             /* Handle a line */
-            nbits = (U16) swf_parse_get_bits(context, 4) + 2;   /* nbits is biased by 2 */
+            nbits = (SWF_U16) swf_parse_get_bits(context, 4) + 2;   /* nbits is biased by 2 */
 
             /* Save the deltas */
             if (swf_parse_get_bits(context, 1)) {
@@ -2912,7 +2915,7 @@ swf_parse_get_shaperecord (swf_parser * context, int * error, int * at_end, int 
             }
         } else {
             /* Handle a curve */
-            nbits = (U16) swf_parse_get_bits(context, 4) + 2;   /* nBits is biased by 2 */
+            nbits = (SWF_U16) swf_parse_get_bits(context, 4) + 2;   /* nBits is biased by 2 */
 
             /* Get the control */
             record->cx = swf_parse_get_sbits(context, nbits);
