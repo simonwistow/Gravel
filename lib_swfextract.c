@@ -16,6 +16,9 @@
  *
  *
  * $Log: lib_swfextract.c,v $
+ * Revision 1.11  2001/07/14 00:28:07  clampr
+ * spurious layout delta :)
+ *
  * Revision 1.10  2001/07/14 00:24:33  clampr
  * add file variables
  * quell a warning under debug
@@ -237,11 +240,8 @@ get_text (swf_extractor * swf, int * error)
     fprintf (stderr, "[get_text : mallocing strings]\n");
     #endif
 
-
-
     /* parse all the tags */
-    do
-    {
+    do {
         /* reset the error, just to be paranoid */
         error = SWF_ENoError;
 
@@ -264,41 +264,41 @@ get_text (swf_extractor * swf, int * error)
 
         switch (next_id)
 	    {
-	        case tagDoAction:
-                parse_doaction (swf, error);
-                break;
+		case tagDoAction:
+			parse_doaction (swf, error);
+			break;
+				
+		case tagDefineEditText:
+			parse_defineedittext (swf, error);
+			break;
+			
+		case tagDefineText:
+			parse_definetext (swf, error);
+			break;
 
-	        case tagDefineEditText:
-		        parse_defineedittext (swf, error);
-		        break;
+		case tagDefineText2:
+			parse_definetext2 (swf, error);
+			break;
 
-	        case tagDefineText:
-                parse_definetext (swf, error);
-                break;
+		case tagDefineButton:
+			parse_definebutton (swf, error);
+			break;
 
-	        case tagDefineText2:
-		        parse_definetext2 (swf, error);
-                break;
+		case tagDefineButton2:
+			parse_definebutton2 (swf, error);
+			break;
 
-	        case tagDefineButton:
-		        parse_definebutton (swf, error);
-            	break;
+		case tagDefineFont:
+			parse_definefont (swf, error);
+			break;
+			
+		case tagDefineFont2:
+			parse_definefont2 (swf, error);
+			break;
 
-	        case tagDefineButton2:
-            	parse_definebutton2 (swf, error);
-            	break;
-
-	        case tagDefineFont:
-		        parse_definefont (swf, error);
-		        break;
-
-	        case tagDefineFont2:
-		        parse_definefont2 (swf, error);
-		        break;
-
-	        case tagDefineFontInfo:
-		        parse_definefontinfo (swf, error);
-		        break;
+		case tagDefineFontInfo:
+			parse_definefontinfo (swf, error);
+			break;
         }
 
         /* if there's been an error, bug out */
@@ -307,8 +307,7 @@ get_text (swf_extractor * swf, int * error)
 	        return;
         }
 
-    }
-    while (next_id != 0);
+    } while (next_id != 0);
 
     #ifdef DEBUG
     fprintf (stderr, "[get_text: finished parsing ]\n");
@@ -321,7 +320,6 @@ get_text (swf_extractor * swf, int * error)
 void
 parse_doaction (swf_extractor * swf, int * error)
 {
-
     swf_doaction_list * list = swf_parse_get_doactions (swf->parser, error);
 
     #ifdef DEBUG
@@ -359,7 +357,6 @@ examine_doactions (swf_extractor * swf, int * error, swf_doaction_list * list)
 
     while (node != NULL)
     {
-
         if (node->code == sactionGetURL)
         {
             #ifdef DEBUG
