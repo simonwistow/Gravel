@@ -16,6 +16,10 @@
  *
  *
  * $Log: print_utils.c,v $
+ * Revision 1.17  2002/06/08 12:25:42  kitty_goth
+ * Modify swf_parse to pick out the define shapes only. Have a read of these
+ * changes when you get a minute, Simon.
+ *
  * Revision 1.16  2002/06/07 17:18:00  kitty_goth
  * Well, it is *producing* a defineShape - it's just a bit mangled.
  * We need to move away from icky SWF_U32 pretending to be colours
@@ -658,7 +662,23 @@ print_shapestyle (swf_shapestyle * style,const char * str)
 void
 print_shaperecords (swf_shaperecord_list * record,const char * str)
 {
-    //todo
+	int i;
+	swf_shaperecord *node, *temp;
+
+	node = record->first;
+	
+	while (node != NULL) {
+		temp = node;
+		node = node->next;
+    
+		printf("%s\tShape isEdge: %i ; Flags : %u\n", str, temp->is_edge, temp->flags);
+		if (temp->x | temp->y) {
+			printf("%s\tLine Found : x : %li ; y : %li\n", str, temp->x, temp->y);
+		}
+		if (temp->ax | temp->ay | temp->cx | temp->cy) {
+			printf("%s\tCurve Found : ax : %li ; ay : %li; cx : %li ; cy : %li\n", str, temp->ax, temp->ay, temp->cx, temp->cy);
+		}
+	}
 }
 
 

@@ -76,13 +76,23 @@ init_tags (void)
 void * 
 init_parser (void) {
     void (**parse)();
+    void (**masked)();
+	int i;
 
-	parse = calloc((1 + SWF_PARSER_MAX_TAG_ID), sizeof(void * ));
+	parse  = calloc((1 + SWF_PARSER_MAX_TAG_ID), sizeof(void * ));
+	masked = calloc((1 + SWF_PARSER_MAX_TAG_ID), sizeof(void * ));
 
 	/* CHECKME:
 	 * I'm not sure calloc'ing to the sizeof(void *) is 
 	 * totally correct here, but it works over here. --BE
 	 */
+
+	/* Set all the parse functions to dummy, then 
+	 * just add the ones we actually want...
+	 */
+	for (i=0; i <= 48; i++) {
+		masked[i] = dummy;
+	}
 
 	/* FIXME:
 	 * Replace the hard numerical constants here with
@@ -109,14 +119,14 @@ init_parser (void) {
 	parse[17] = parse_definebuttonsound;
 	parse[18] = parse_soundstreamhead;
 	parse[19] = parse_soundstreamblock;
-	parse[20] = dummy;         /* parse_definebitslossless */
+	parse[20] = dummy;         // parse_definebitslossless
 	parse[21] = parse_definebitsjpeg2;
 	parse[22] = parse_defineshape2;
 	parse[23] = parse_definebuttoncxform;
-	parse[24] = dummy;         /* parse_protect */
+	parse[24] = dummy;         // parse_protect
 	parse[25] = dummy; 
-    /*  These are the new tags for Flash 3. */
 
+    //  These are the new tags for Flash 3.
 	parse[26] = parse_placeobject2;
 	parse[27] = dummy; 
 	parse[28] = parse_removeobject2;
@@ -127,10 +137,10 @@ init_parser (void) {
 	parse[33] = parse_definetext2;
 	parse[34] = parse_definebutton2;
 	parse[35] = parse_definebitsjpeg3;
-	parse[36] = dummy;         /* parse_definebitslossless2 */
+	parse[36] = dummy;         // parse_definebitslossless2
 	parse[37] = parse_defineedittext;
 	parse[38] = dummy; 
-	parse[39] = dummy;         /* parse_definesprite */
+	parse[39] = dummy;         // parse_definesprite
 	parse[40] = parse_namecharacter;
 	parse[41] = dummy; 
 	parse[42] = dummy; 
@@ -139,9 +149,19 @@ init_parser (void) {
 	parse[45] = parse_soundstreamhead2;
 	parse[46] = parse_definemorphshape;
 	parse[47] = dummy; 
-	parse[48] = parse_definefont2;
+	parse[48] = parse_definefont2; 
+	
+	/* 
+	 * Now set up which tags we want to handle, based on some
+	 * criteria 
+	 */
 
-	return (void *) parse;
+	masked[tagDefineShape] = parse[tagDefineShape];
+	masked[tagDefineShape2] = parse[tagDefineShape2];
+	masked[tagDefineShape3] = parse[tagDefineShape3];
+
+	return (void *) masked;
+//	return (void *) parse;
 }
 
 

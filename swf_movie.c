@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.28 2002/06/07 17:18:01 kitty_goth Exp $	
+ * 	$Id: swf_movie.c,v 1.29 2002/06/08 12:25:42 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -331,6 +331,7 @@ swf_make_shaperecords_for_triangle(int * error)
 
 
     swf_add_shaperecord(list, error, record);
+    list->record_count++;
 
 /* Then we need three edges */
     record = swf_make_shaperecord(error, 1);
@@ -338,6 +339,7 @@ swf_make_shaperecords_for_triangle(int * error)
 
 
     swf_add_shaperecord(list, error, record);
+    list->record_count++;
 
     record = swf_make_shaperecord(error, 1);
     record->y = 75 * 20;
@@ -345,6 +347,7 @@ swf_make_shaperecords_for_triangle(int * error)
 
 
     swf_add_shaperecord(list, error, record);
+    list->record_count++;
 
     record = swf_make_shaperecord(error, 1);
     record->x = -50 * 20;
@@ -352,6 +355,7 @@ swf_make_shaperecords_for_triangle(int * error)
 
 
     swf_add_shaperecord(list, error, record);
+    list->record_count++;
 
 /* Then we need an end-of-shape edge */
     record = swf_make_shaperecord(error, 0);
@@ -360,6 +364,7 @@ swf_make_shaperecords_for_triangle(int * error)
 
 
     swf_add_shaperecord(list, error, record);
+    list->record_count++;
 
     return list;
 }
