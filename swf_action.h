@@ -20,3 +20,6 @@ extern void swf_action_put_play(swf_buffer * buffer, int * error);
 extern void swf_action_put_gotoframe(swf_buffer * buffer, int * error, SWF_U16 frame);
 
 
+extern swf_doaction * swf_make_action(int * error, SWF_U8 actionCode);
+extern swf_doaction * swf_make_action_play(int * error);
+extern swf_doaction * swf_make_action_gotoframe(int * error, int toFrame);

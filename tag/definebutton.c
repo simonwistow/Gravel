@@ -130,6 +130,28 @@ swf_add_definebutton (swf_movie * movie, int * error, SWF_U16 button_id, SWF_U16
 }
 
 
+void 
+swf_serialise_definebutton (swf_tagrecord * temp, int * error, SWF_U16 button_id, SWF_U16 char_id)
+{
+	if (temp->serialised) {
+		return;
+	}
+
+	swf_buffer_initbits(temp->buffer);
+	swf_buffer_put_word(temp->buffer, error, button_id);
+
+	
+	/*
+	 * foreach loop over button records....
+	 */
+	
+
+
+
+	temp->serialised = 1;
+	return;
+}
+
 
 void
 swf_destroy_definebutton (swf_definebutton * button)

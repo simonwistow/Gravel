@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.30  2002/06/05 21:29:06  kitty_goth
+ *  start doing some more action stuff
+ *
  * Revision 1.29  2002/05/31 10:08:20  muttley
  * Split file read and write stuff into a separate file.
  *
@@ -998,17 +1001,20 @@ struct swf_buttonrecord_list {
  * Can either be included in Definebutton2 or as its own tag 
  */
 struct swf_doaction {
+    swf_doaction * next;        /* next item in the list */ 
 
-    swf_doaction * next;        /* next item in the list */ /* todo simon : the rest of these are action records in the spec. Change it ? */
-    int   code;                 /* what type it is */
-    int   frame;                /* goto this frame index (code = 0x81 or 0x8A)*/
-    int   skip_count;           /* how many frames to skip if frame is not loaded (code = 0x8A) */
-    char* url;                  /* the url to jump to (code = 0x83) */
-    char* target;               /* the target window to open (code = 0x83) or target of action target (code = 0x8B) */
-    char* goto_label;           /* the frame label to to (code = 0x8C) */
+    int   code;       /* what type it is */
+    int   frame;      /* goto this frame index (0x81 or 0x8A)*/
+    int   skip_count; /* how many frames to skip if frame is
+						 not loaded (0x8A) */
+    char* url;        /* the url to jump to (0x83) */
+    char* target;     /* the target window to open (0x83) 
+						 or target of action target (0x8B) */
+    char* goto_label; /* the frame label to to (code = 0x8C) */
 
     /* none of the rest of these apear to be in the spec */
     SWF_U32   push_data_type;
+	/* FIXME: What the fuck's this for..? */
     union
     {
         SWF_U32 dw;
