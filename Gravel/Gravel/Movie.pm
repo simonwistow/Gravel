@@ -555,6 +555,12 @@ void _bake_edges(int * error, swf_defineshape * mytag, HV * h_sh)
 	}
 }
 
+void _bake_button(int * error, swf_definebutton * tag, HV * h_sh)
+{
+	
+
+}
+
 void _bake_library(SV* obj, SV* self) 
 {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
@@ -562,6 +568,8 @@ void _bake_library(SV* obj, SV* self)
 	HV* h = (HV *)SvRV(self); 
 	SV** p_lib;
 	SV** p_shape;
+	SV** p_butt;
+	SWF_U8 button;
 	AV* lib;
 	SV* shape;
 	HV* h_sh;
@@ -634,6 +642,23 @@ void _bake_library(SV* obj, SV* self)
 		if (SWF_ENoError != error) {
 			fprintf(stderr, "Non-zero error condition 10 detected\n");
 		}
+
+		p_butt = hv_fetch(h_sh, "_is_button", 10, 0);
+		if (NULL != p_butt) {
+			button = (SWF_U8)(SvIV(*p_butt));
+			if (button) {
+				tmp = swf_make_tagrecord(&error, tagDefineButton);
+				tmp_tag = (swf_definebutton *) tmp->tag;
+				_bake_button(&error, tmp_tag, h_sh);
+				swf_serialise_definebutton(tmp->buffer, &error, tmp_tag);
+				tmp->serialised = 1;
+				swf_dump_shape(m->movie, &error, tmp);
+				if (SWF_ENoError != error) {
+					fprintf(stderr, "Non-zero error condition 10a detected\n");
+				}
+			}
+		}		
+
 	}
 
 }

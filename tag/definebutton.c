@@ -48,6 +48,7 @@ swf_parse_definebutton (swf_parser * context, int * error)
 
 }
 
+
 /* FIXME: Test API while I knock this up */
 // For now, just pass in a char_id, and use the same shape twice,
 	// just reduce in size on MouseOver...
@@ -60,8 +61,8 @@ swf_add_definebutton (swf_movie * movie, int * error, SWF_U16 button_id, SWF_U16
 	SWF_U16 depth, frame;
 
     if ((m1 = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
-      *error = SWF_EMallocFailure;
-      return;
+		*error = SWF_EMallocFailure;
+		return;
     }
 
 	depth = 1;
@@ -131,24 +132,10 @@ swf_add_definebutton (swf_movie * movie, int * error, SWF_U16 button_id, SWF_U16
 
 
 void 
-swf_serialise_definebutton (swf_tagrecord * temp, int * error, SWF_U16 button_id, SWF_U16 char_id)
+swf_serialise_definebutton (swf_buffer * buffer, int * error, swf_definebutton * button)
 {
-	if (temp->serialised) {
-		return;
-	}
-
-	swf_buffer_initbits(temp->buffer);
-	swf_buffer_put_word(temp->buffer, error, button_id);
-
-	
-	/*
-	 * foreach loop over button records....
-	 */
-	
 
 
-
-	temp->serialised = 1;
 	return;
 }
 

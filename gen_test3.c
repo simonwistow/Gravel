@@ -276,15 +276,15 @@ int main (int argc, char *argv[]) {
 //	swf_add_doaction(movie, &error, sactionGotoFrame);
       }
       if (2 == i) {
-	swf_add_doaction(movie, &error, sactionPlay);
+		swf_add_doaction(movie, &error, sactionPlay);
       }
 
       swf_add_showframe(movie, &error);
 
       if (i < NUMFRAMES) {
-	swf_add_removeobject2(movie, &error, i);
-	swf_add_removeobject2(movie, &error, 1);
-	swf_add_removeobject(movie, &error, 14, 2);
+		swf_add_removeobject2(movie, &error, i);
+		swf_add_removeobject2(movie, &error, 1);
+		swf_add_removeobject(movie, &error, 14, 2);
       }
       matrix->tx += 5 * 20;
       matrix->a += 4 * 256;
