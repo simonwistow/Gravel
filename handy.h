@@ -15,10 +15,13 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#ifndef _TAG_HANDY_H
-#define _TAG_HANDY_H
-#include "handy.h"
-#include "swf_types.h"
-#include "swf_parse.h"
-#include "swf_destroy.h"
+#ifndef _HANDY_H
+#define _HANDY_H
+
+#ifdef DEBUG
+#define dprintf(...) (fprintf (stderr, __VA_ARGS__))
+#else
+#define dprintf(...)
+#endif
+
 #endif

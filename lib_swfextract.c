@@ -16,6 +16,9 @@
  *
  *
  * $Log: lib_swfextract.c,v $
+ * Revision 1.21  2001/07/20 01:50:03  clampr
+ * handy.h - bringing dprintf to reduce the amount of code
+ *
  * Revision 1.20  2001/07/20 01:20:28  clampr
  * ignore FSCommand: urls (lots in puyopuyo.swf)
  *
@@ -83,6 +86,7 @@
  */
 
 #include "lib_swfextract.h"
+#include "handy.h"
 #ifdef DEBUG
 #include <stdio.h>
 #include "swf_tags.h"
@@ -103,10 +107,7 @@ load_swf (char * file, int * error)
     int i;
     #endif
 
-
-    #ifdef DEBUG
-    fprintf (stderr, "[load_swf : mallocing]\n");
-    #endif
+    dprintf("[load_swf : mallocing]\n");
 
     /* instantiate the context */
     if ((swf = (swf_extractor *) calloc (1, sizeof (swf_extractor))) == NULL)
@@ -123,9 +124,7 @@ load_swf (char * file, int * error)
     swf->urls        = NULL;
 
 
-    #ifdef DEBUG
-    fprintf (stderr, "[load_swf : loading swf '%s']\n", file);
-    #endif
+    dprintf("[load_swf : loading swf '%s']\n", file);
 
     /* create the parser */
     swf->parser = swf_parse_create(file, error);
@@ -134,9 +133,7 @@ load_swf (char * file, int * error)
         goto FAIL;
     }
 
-    #ifdef DEBUG
-    fprintf (stderr, "[load_swf : parsing headers]\n");
-    #endif
+    dprintf("[load_swf : parsing headers]\n");
 
     /* check the headers */
     (void) swf_parse_header(swf->parser, error);
@@ -145,9 +142,7 @@ load_swf (char * file, int * error)
         goto FAIL;
     }
 
-    #ifdef DEBUG
-    fprintf (stderr, "[load_swf : getting text]\n");
-    #endif
+    dprintf("[load_swf : getting text]\n");
 
     /* parse the file and store the strings and urls in the context */
     (void) get_text (swf, error);
@@ -156,9 +151,7 @@ load_swf (char * file, int * error)
         goto FAIL;
     }
 
-    #ifdef DEBUG
-    fprintf (stderr, "[load_swf : success! destroying parser]\n");
-    #endif
+    dprintf ("[load_swf : success! destroying parser]\n");
 
     /* everything's gone OK! */
     /* so we kill the parser since we don't need it any more */
@@ -167,33 +160,32 @@ load_swf (char * file, int * error)
     swf->parser = NULL;
 
     #ifdef DEBUG
-    fprintf (stderr, "[load_swf : number of strings is %d]\n",swf->num_strings);
+    dprintf ("[load_swf : number of strings is %d]\n",swf->num_strings);
     for (i=0; i<swf->num_strings; i++)
     {
-        fprintf (stderr, "[load_swf : string %d = '%s']\n", i, (swf->strings)[i]);
+        dprintf ("[load_swf : string %d = '%s']\n", i, (swf->strings)[i]);
     }
 
-    fprintf (stderr, "\n[load_swf : number of urls is %d]\n",swf->num_urls);
+    dprintf ("\n[load_swf : number of urls is %d]\n",swf->num_urls);
     for (i=0; i<swf->num_urls; i++)
     {
-        fprintf (stderr, "[load_swf : url %d = '%s']\n", i, (swf->urls)[i]);
+        dprintf ("[load_swf : url %d = '%s']\n", i, (swf->urls)[i]);
     }
 
-    fprintf (stderr, "[load_swf : returning]\n");
+    dprintf ("[load_swf : returning]\n");
     #endif
 
     return swf;
 
 
     /* it's all gone horribly wrong */
-    FAIL:
-    #ifdef DEBUG
-    fprintf (stderr, "[load_swf : FAIL :( destroying context]\n");
-    #endif
+ FAIL:
+ 
+    dprintf ("[load_swf : FAIL :( destroying context]\n");
+
     /* clean up after ourselves */
     destroy_swf (swf);
     return NULL;
-
 }
 
 
@@ -202,13 +194,9 @@ load_swf (char * file, int * error)
 void
 destroy_swf (swf_extractor * swf)
 {
-
-
     int i;
 
-    #ifdef DEBUG
-    fprintf (stderr, "[destroy_swf : freeing %d strings]\n", swf->num_strings);
-    #endif
+    dprintf ("[destroy_swf : freeing %d strings]\n", swf->num_strings);
 
     /* delete each individual string */
     for (i=0; i< swf->num_strings; i++)
@@ -219,10 +207,7 @@ destroy_swf (swf_extractor * swf)
     /* delete the pointer to the strings */
     swf_free (swf->strings);
 
-
-    #ifdef DEBUG
-    fprintf (stderr, "[destroy_swf : freeing %d urls]\n", swf->num_urls);
-    #endif
+    fprintf ("[destroy_swf : freeing %d urls]\n", swf->num_urls);
 
     /* delete each individual url */
     for (i=0; i<swf->num_urls; i++)
@@ -234,16 +219,13 @@ destroy_swf (swf_extractor * swf)
     /* delete the pointer to the urls */
     swf_free (swf->urls);
 
-    #ifdef DEBUG
-    fprintf (stderr, "[destroy_swf : destroying parser]\n");
-    #endif
+    dprintf ("[destroy_swf : destroying parser]\n");
 
     /* destroy the parser, which may be NULL */
     swf_destroy_parser (swf->parser);
 
-    #ifdef DEBUG
-    fprintf (stderr, "[destroy_swf : destroying context]\n");
-    #endif
+    dprintf ("[destroy_swf : destroying context]\n");
+
     /* free the context */
     swf_free (swf);
 
@@ -261,28 +243,19 @@ get_text (swf_extractor * swf, int * error)
 {
     int next_id;
 
-    #ifdef DEBUG
-    fprintf (stderr, "[get_text : mallocing strings]\n");
-    #endif
+    dprintf ("[get_text : mallocing strings]\n");
 
     /* parse all the tags */
     do {
         /* reset the error, just to be paranoid */
         *error = SWF_ENoError;
 
-        #ifdef DEBUG
-        //fprintf (stderr, "[get_text : getting next_id]\n");
-        #endif
-
         /* get the next id */
         next_id = swf_parse_nextid(swf->parser, error);
         /* if there's been an error, bug out */
         if (*error != SWF_ENoError) return;
 
-        #ifdef DEBUG
-        fprintf (stderr, "[get_text : next_id is %s]\n", swf_tag_to_string(next_id));
-        #endif
-
+        dprintf ("[get_text : next_id is %s]\n", swf_tag_to_string(next_id));
 
         switch (next_id)
 	    {
@@ -324,9 +297,7 @@ get_text (swf_extractor * swf, int * error)
         }
     } while ((!*error) && next_id);
 
-    #ifdef DEBUG
-    fprintf (stderr, "[get_text: finished parsing ]\n");
-    #endif
+    dprintf ("[get_text: finished parsing ]\n");
 }
 
 
@@ -335,9 +306,7 @@ parse_doaction (swf_extractor * swf, int * error)
 {
     swf_doaction_list * list = swf_parse_get_doactions (swf->parser, error);
 
-    #ifdef DEBUG
-    fprintf (stderr, "[parse_doaction: list is %s ]\n", (list==NULL)?"NULL":"Ok");
-    #endif
+    dprintf ("[parse_doaction: list is %s ]\n", (list==NULL)?"NULL":"Ok");
 
     if (list == NULL || *error != SWF_ENoError)
     {
@@ -359,10 +328,7 @@ examine_doactions (swf_extractor * swf, int * error, swf_doaction_list * list)
         return;
     }
 
-    #ifdef DEBUG
-    fprintf (stderr, "[examine_doactions : list is not null]\n");
-    #endif
-
+    dprintf ("[examine_doactions : list is not null]\n");
 
     node = list->first;
 
@@ -371,9 +337,7 @@ examine_doactions (swf_extractor * swf, int * error, swf_doaction_list * list)
 		/* take urls that aren't internal FSCommand: calls */
         if (node->code == sactionGetURL && strncmp("FSCommand:", node->url, 10))
         {
-            #ifdef DEBUG
-            fprintf (stderr, "[examine_doactions : got a URL '%s']\n", node->url);
-            #endif
+            dprintf ("[examine_doactions : got a URL '%s']\n", node->url);
 
             add_url (swf, error, node->url);
         }
@@ -381,9 +345,7 @@ examine_doactions (swf_extractor * swf, int * error, swf_doaction_list * list)
         /* todo : is this necessary? */
         if ((node->code == sactionPushData) && (node->push_data_type == 0))
         {
-            #ifdef DEBUG
-            fprintf (stderr, "[examine_doactions : got a push_data_string '%s']\n", node->push_data_string);
-            #endif
+            dprintf ("[examine_doactions : got a push_data_string '%s']\n", node->push_data_string);
 
             add_string (swf, error, node->push_data_string);
         }
@@ -397,9 +359,7 @@ parse_defineedittext (swf_extractor * swf, int * error)
 {
     swf_defineedittext * text = swf_parse_defineedittext (swf->parser, error);
 
-    #ifdef DEBUG
-    fprintf (stderr, "[parse_defineedittext: text is %s ]\n", (text==NULL)?"NULL":"Ok");
-    #endif
+    dprintf ("[parse_defineedittext: text is %s ]\n", (text==NULL)?"NULL":"Ok");
 
     if (text == NULL || *error != SWF_ENoError)
     {
@@ -417,59 +377,42 @@ parse_defineedittext (swf_extractor * swf, int * error)
 void
 parse_definetext (swf_extractor * swf, int * error)
 {
-
     swf_definetext * text = text = swf_parse_definetext (swf->parser, error);
     char * string = NULL;
 
-    #ifdef DEBUG
-    fprintf (stderr, "[parse_definetext: text is %s ]\n", (text==NULL)?"NULL":"Ok");
-    #endif
-
+    dprintf ("[parse_definetext: text is %s ]\n", (text==NULL)?"NULL":"Ok");
 
     if (text == NULL || *error != SWF_ENoError)
     {
-        #ifdef DEBUG
-        fprintf (stderr, "[parse_definetext : fail! error was '%s']\n", swf_error_code_to_string (*error));
-        #endif
+        dprintf ("[parse_definetext : fail! error was '%s']\n", swf_error_code_to_string (*error));
         return;
     }
 
-
-    #ifdef DEBUG
-    fprintf (stderr, "[parse_definetext: getting text records ]\n");
-    #endif
+    dprintf ("[parse_definetext: getting text records ]\n");
     string = swf_parse_textrecords_to_text(swf->parser, error, text->records);
 
-    #ifdef DEBUG
-    fprintf (stderr, "[parse_definetext: got text record]\n");
-    #endif
+    dprintf ("[parse_definetext: got text record]\n");
 
     if (string==NULL)
     {
         goto FAIL;
     }
 
-    #ifdef DEBUG
-    fprintf (stderr, "[parse_definetext: text record is '%s']\n", string);
-    #endif
+    dprintf ("[parse_definetext: text record is '%s']\n", string);
 
     if (*error == SWF_ENoError)
     {
         add_string (swf, error, string);
     }
 
+    dprintf ("[parse_definetext: text record is '%s']\n", string);
 
-    #ifdef DEBUG
-    fprintf (stderr, "[parse_definetext: text record is '%s']\n", string);
-    #endif
     swf_free (string);
 
  FAIL:
     swf_destroy_definetext (text);
 
-    #ifdef DEBUG
-    fprintf (stderr, "[parse_definetext : have destroyed definetext]\n");
-    #endif
+    dprintf ("[parse_definetext : have destroyed definetext]\n");
 }
 
 void
@@ -501,20 +444,15 @@ parse_definebutton (swf_extractor * swf, int * error)
 {
     swf_definebutton * button = swf_parse_definebutton (swf->parser, error);
 
-    #ifdef DEBUG
-    fprintf (stderr, "[parse_definebutton : button is %s]\n", (button==NULL)?"NULL":"Ok");
-    #endif
-
+    dprintf ("[parse_definebutton : button is %s]\n", (button==NULL)?"NULL":"Ok");
 
     if (button == NULL || *error != SWF_ENoError)
     {
         return;
     }
 
+    dprintf ("[parse_definebutton : calling examine_doactions]\n");
 
-    #ifdef DEBUG
-    fprintf (stderr, "[parse_definebutton : calling examine_doactions]\n");
-    #endif
     examine_doactions (swf, error, button->actions);
 
     swf_destroy_definebutton (button);
@@ -527,24 +465,17 @@ parse_definebutton2 (swf_extractor * swf, int * error)
     swf_definebutton2 * button = swf_parse_definebutton2 (swf->parser, error);
     swf_button2action * node;
 
-    #ifdef DEBUG
-    fprintf (stderr, "[definebutton2 : checking to see if valid button2]\n");
-    #endif
+    dprintf ("[definebutton2 : checking to see if valid button2]\n");
 
     if (!button || !button->actions|| *error != SWF_ENoError)
     {
         return;
     }
 
-    #ifdef DEBUG
-    fprintf (stderr, "[definebutton2 : examining button2 actions]\n");
-    #endif
+    dprintf ("[definebutton2 : examining button2 actions]\n");
     node = button->actions->first;
 
-    #ifdef DEBUG
-    fprintf (stderr, "[definebutton2 : first button2action is %s NULL]\n",(node==NULL)?"":"not ");
-    #endif
-
+    dprintf ("[definebutton2 : first button2action is %s NULL]\n",(node==NULL)?"":"not ");
 
     while (node != NULL)
     {
@@ -602,9 +533,7 @@ parse_definefontinfo (swf_extractor * swf, int * error)
 void
 add_string (swf_extractor * swf, int * error, char * string)
 {
-    #ifdef DEBUG
-    fprintf (stderr, "[add_string : adding '%s']\n", string);
-    #endif
+    dprintf ("[add_string : adding '%s']\n", string);
 
     add_text (error, &swf->strings, &swf->num_strings, &current_max_strings, string);
 }
@@ -613,9 +542,7 @@ add_string (swf_extractor * swf, int * error, char * string)
 void
 add_url (swf_extractor * swf, int * error, char * string)
 {
-    #ifdef DEBUG
-    fprintf (stderr, "[add_url : adding '%s']\n", string);
-    #endif
+    dprintf ("[add_url : adding '%s']\n", string);
 
     add_text (error, &swf->urls, &swf->num_urls, &current_max_urls, string);
 }
@@ -623,17 +550,11 @@ add_url (swf_extractor * swf, int * error, char * string)
 void
 add_text (int * error, char *** list, int * num, int * max, char * string)
 {
-
-    #ifdef DEBUG
-    fprintf (stderr, "[add_text : adding text]\n");
-    #endif
+    dprintf ("[add_text : adding text]\n");
 
     if (*num>=*max)
     {
-		
-    	#ifdef DEBUG
-        fprintf (stderr, "[add_text : increasing maximum limit]\n");
-        #endif
+        dprintf ("[add_text : increasing maximum limit]\n");
 
         *max+=255;
         /* malloc space for the strings*/
@@ -641,17 +562,13 @@ add_text (int * error, char *** list, int * num, int * max, char * string)
 			*error = SWF_EMallocFailure;
 			return;
 		}
-        #ifdef DEBUG
-		fprintf (stderr, "[add_text : memory (re)allocation worked]\n");
-        #endif
+		dprintf ("[add_text : memory (re)allocation worked]\n");
     }
 
     (*list)[*num] = (char *) calloc (strlen(string) + 1, sizeof (char));
     strcpy ((*list)[*num], string);
 
-    #ifdef DEBUG
-    fprintf (stderr, "[add_text : added the text '%s' the count for this list now stands at %d]\n", (*list)[*num], (*num)+1);
-    #endif
+    dprintf ("[add_text : added the text '%s' the count for this list now stands at %d]\n", (*list)[*num], (*num)+1);
 
     (*num)++;
 }
