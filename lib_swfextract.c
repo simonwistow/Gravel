@@ -16,6 +16,9 @@
  *
  *
  * $Log: lib_swfextract.c,v $
+ * Revision 1.15  2001/07/16 00:37:14  clampr
+ * dereference error before it's tested
+ *
  * Revision 1.14  2001/07/16 00:02:37  clampr
  * pointer big
  *
@@ -415,7 +418,7 @@ parse_definetext (swf_extractor * swf, int * error)
     #endif
 
 
-    if (text == NULL || error != SWF_ENoError)
+    if (text == NULL || *error != SWF_ENoError)
     {
         #ifdef DEBUG
         fprintf (stderr, "[parse_definetext : fail! error was '%s']\n", swf_error_code_to_string (*error));
