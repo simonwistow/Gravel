@@ -5,8 +5,9 @@ use warnings;
 
 use lib '../../';
 
-use Gravel::Shape;
 use Gravel::Effect;
+use Gravel::Matrix;
+
 use Gravel::Frame;
 
 use base qw(Gravel::Effect);
@@ -76,6 +77,28 @@ sub frames {
 
 
 #
+
+sub matrices {
+	my $self = shift;
+	
+	my $ra_m = [];
+
+	my $numf = $self->{_end} - $self->{_start};
+	my ($x, $y) = ($self->{_startx}, $self->{_starty});
+
+	my $dx = ( $self->{_endx} - $self->{_startx} ) / $numf;
+	my $dy = ( $self->{_endy} - $self->{_starty} ) / $numf;
+
+	for (my $i = $self->{_start}; $i < $self->{_end}; ++$i) {
+		my $m = Gravel::Matrix->new(x => $x, y=> $y);
+
+		$ra_m->[$i] = $m;
+		$x += $dx;
+		$y += $dy;
+	}
+
+	return $ra_m;
+}
 
 
 
