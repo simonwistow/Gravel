@@ -2,11 +2,19 @@ INSTRUCTIONS:
 ----------------------
 compile using :
 
-make
-
+% ./configure
+% make
 
 run using :
-% ./swf_parse [filename here]
+% ./swf_parse [filename here] 
+this provides a dump of all information in an SWF file
+and can also be made on its own by using '% make swf_parse'
+
+%./text_extract [filename here]
+extracts all the text and urls from an SWF file
+and can also be made on its own by using '% make text_extract'
+
+
 
 MANIFEST:
 ----------------------
