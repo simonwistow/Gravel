@@ -277,6 +277,7 @@ swf_parse_nextid(swf_parser * context, int * error)
     }
 
     if (swf_parse_tell(context) != context->next_tag_pos) {
+	fprintf(stdout, "Errrrrrrrrk\n");
         swf_parse_seek(context, context->next_tag_pos);
     }
 
@@ -783,6 +784,9 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
 
 /*
  * $Log: swf_parse.c,v $
+ * Revision 1.54  2002/06/28 17:52:42  muttley
+ * Trying to get write_through to work
+ *
  * Revision 1.53  2002/06/26 21:36:45  kitty_goth
  * More changes. Still some minor oddnesses with writethrough
  *

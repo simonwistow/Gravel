@@ -17,7 +17,7 @@
 // 99.07.22:    Added code to parse Flash 4 ActionScripts,
 //              and switches to dump image/sound/tag data
 //              Thanks to Jason Schuchert!
-// 99.07.28:    More flash 4 actionscript.
+// 99.07.28:    More flash 4 actionscript.  
 //              Added GetUrl2 (thanks Olivier)
 //              Fixed callFrame (there's no arguments to print)
 //              Added WaitForFrameExpression
@@ -78,7 +78,7 @@ typedef struct SPOINT
     SCOORD y;
 } SPOINT, *P_SPOINT;
 
-typedef struct SRECT
+typedef struct SRECT 
 {
     SCOORD xmin;
     SCOORD xmax;
@@ -183,7 +183,7 @@ typedef struct CXFORM
     /*
     S32 flags;
     enum
-    {
+    { 
         needA=0x1,  // Set if we need the multiply terms.
         needB=0x2   // Set if we need the constant terms.
     };
@@ -203,7 +203,7 @@ CXFORM, *P_CXFORM;
 
 // Tag values that represent actions or data in a Flash script.
 enum
-{
+{ 
     stagEnd                 = 0,
     stagShowFrame           = 1,
     stagDefineShape         = 2,
@@ -243,7 +243,7 @@ enum
     stagFrameLabel          = 43,   // A string label for the current frame.
     stagSoundStreamHead2    = 45,   // For lossless streaming sound, should not have needed this...
     stagDefineMorphShape    = 46,   // A morph shape definition
-    stagDefineFont2         = 48,   //
+    stagDefineFont2         = 48,   // 
 };
 
 // PlaceObject2 Flags
@@ -305,7 +305,7 @@ enum
     sactionHasLength                = 0x80,
     sactionGotoFrame                = 0x81, // frame num (WORD)
     sactionGetURL                   = 0x83, // url (STR), window (STR)
-    sactionWaitForFrame             = 0x8A, // frame needed (WORD),
+    sactionWaitForFrame             = 0x8A, // frame needed (WORD), 
                                             // actions to skip (BYTE)
     sactionSetTarget                = 0x8B, // name (STR)
     sactionGotoLabel                = 0x8C, // name (STR)
@@ -323,9 +323,9 @@ enum
 // Input script object definition.
 //////////////////////////////////////////////////////////////////////
 
-// An input script object.  This object represents a script created from
+// An input script object.  This object represents a script created from 
 // an external file that is meant to be inserted into an output script.
-struct CInputScript
+struct CInputScript  
 {
     // Pointer to file contents buffer.
     U8 *m_fileBuf;
@@ -345,7 +345,7 @@ struct CInputScript
     U32 m_tagZero;
     U32 m_tagEnd;
     U32 m_tagLen;
-
+    
     // Parsing information.
     S32 m_nFillBits;
     S32 m_nLineBits;
@@ -356,10 +356,10 @@ struct CInputScript
     // if set to true will dump image guts (i.e. jpeg, zlib, etc. data)
     U32 m_dumpGuts;
 
-    // if set to true will dump sound guts
+    // if set to true will dump sound guts 
     U32 m_dumpSoundGuts;
-
-
+    
+    
     // Handle to output file.
     FILE *m_outputFile;
 
@@ -399,8 +399,8 @@ struct CInputScript
     void PrintRect(SRECT rect, char* str);
 
     // Routines for reading arbitrary sized bit fields from the stream.
-    // Always call start bits before gettings bits and do not intermix
-    // these calls with GetByte, etc...
+    // Always call start bits before gettings bits and do not intermix 
+    // these calls with GetByte, etc... 
     void InitBits();
     S32 GetSBits(S32 n);
     U32 GetBits(S32 n);
@@ -426,7 +426,7 @@ struct CInputScript
     void ParseSetBackgroundColor(char *str);                // 09: stagSetBackgroundColor
     void ParseDefineFont(char *str);         //x 10: stagDefineFont
     void ParseDefineText(char *str);         //x 11: stagDefineText
-    void ParseDoAction(char *str, BOOL fPrintTag=true);                          // 12: stagDoAction
+    void ParseDoAction(char *str, BOOL fPrintTag=true);                          // 12: stagDoAction    
     void ParseDefineFontInfo(char *str);     //x 13: stagDefineFontInfo
     void ParseDefineSound(char *str);                       // 14: stagDefineSound
     void ParseStartSound(char *str);                        // 15: stagStartSound
@@ -485,7 +485,7 @@ inline void CInputScript::SkipBytes(int n)
     m_filePos += n;
 }
 
-inline U8 CInputScript::GetByte(void)
+inline U8 CInputScript::GetByte(void) 
 {
     //printf("GetByte: filePos: %02x [%02x]\n", m_filePos, m_fileBuf[m_filePos]);
     InitBits();
@@ -824,17 +824,17 @@ void CInputScript::ParsePlaceObject(char *str)
 {
     U32 tagid = (U32) GetWord();
     U32 depth = (U32) GetWord();
-
+    
     printf("%stagPlaceObject \ttagid %-5u depth %-5u\n", str, tagid, depth);
-
+    
     if (!m_dumpAll)
         return;
-
+        
     MATRIX matrix;
     GetMatrix(&matrix);
     PrintMatrix(matrix, str);
 
-    if (m_filePos < m_tagEnd)
+    if (m_filePos < m_tagEnd) 
     {
         CXFORM cxform;
         GetCxform(&cxform, false);
@@ -875,24 +875,24 @@ void CInputScript::ParsePlaceObject2(char *str)
     }
 
     // Get the color transform if specified.
-    if (flags & splaceColorTransform)
+    if (flags & splaceColorTransform) 
     {
         CXFORM cxform;
         GetCxform(&cxform, true);
         PrintCxform(str, &cxform);
-    }
+    }        
 
     // Get the ratio if specified.
     if (flags & splaceRatio)
     {
         U32 ratio = GetWord();
-
+        
         INDENT;
         printf("%ratio %u\n", ratio);
-    }
+    }        
 
     // Get the clipdepth if specified.
-    if (flags & splaceDefineClip)
+    if (flags & splaceDefineClip) 
     {
         U32 clipDepth = GetWord();
         INDENT;
@@ -900,13 +900,13 @@ void CInputScript::ParsePlaceObject2(char *str)
     }
 
     // Get the instance name
-    if (flags & splaceName)
+    if (flags & splaceName) 
     {
         char* pszName = GetString();
         INDENT;
         printf("instance name %s\n", pszName);
     }
-
+        
     if (!m_dumpAll)
         return;
 }
@@ -916,7 +916,7 @@ void CInputScript::ParseRemoveObject(char *str)
 {
     U32 tagid = (U32) GetWord();
     U32 depth = (U32) GetWord();
-
+    
     printf("%stagRemoveObject \ttagid %-5u depth %-5u\n", str, tagid, depth);
 }
 
@@ -924,7 +924,7 @@ void CInputScript::ParseRemoveObject(char *str)
 void CInputScript::ParseRemoveObject2(char *str)
 {
     U32 depth = (U32) GetWord();
-
+    
     printf("%stagRemoveObject2 depth %-5u\n", str, depth);
 }
 
@@ -935,7 +935,7 @@ void CInputScript::ParseSetBackgroundColor(char *str)
     U32 g = GetByte();
     U32 b = GetByte();
     U32 color = (r << 16) | (g << 8) | b;
-
+    
     printf("%stagSetBackgroundColor \tRGB_HEX %06x\n", str, color);
 }
 
@@ -947,12 +947,12 @@ void CInputScript::ParseStartSound(char *str)
     U32 tagid = (U32) GetWord();
 
     printf("%stagStartSound \ttagid %-5u\n", str, tagid);
-
+    
     if (!m_dumpAll)
         return;
 
     U32 code = GetByte();
-    INDENT;
+    INDENT;   
     printf("%scode %-3u", str, code);
 
     if ( code & soundHasInPoint )
@@ -963,14 +963,14 @@ void CInputScript::ParseStartSound(char *str)
         printf(" loops %u", GetDWord());
 
     printf("\n");
-    if ( code & soundHasEnvelope )
+    if ( code & soundHasEnvelope ) 
     {
         int points = GetByte();
 
-        for ( int i = 0; i < points; i++ )
+        for ( int i = 0; i < points; i++ ) 
         {
             printf("\n");
-            INDENT;
+            INDENT;   
             printf("%smark44 %u", str, GetDWord());
             printf(" left chanel %u", GetWord());
             printf(" right chanel %u", GetWord());
@@ -1054,7 +1054,7 @@ BOOL CInputScript::ParseShapeRecord(char *str, int& xLast, int& yLast, BOOL fWit
         {
             printf("\tEnd of shape.\n\n");
         }
-
+  
         return flags & eflagsEnd ? true : false;
     }
     else
@@ -1197,7 +1197,7 @@ void CInputScript::ParseShapeStyle(char *str, BOOL fWithAlpha)
     {
         U16 width = GetWord();
         U32 color = GetColor(fWithAlpha);
-
+    
         printf("\tLine style %-5u width %g color RGB_HEX %06x\n", i, (double)width/20.0, color);
     }
 }
@@ -1250,15 +1250,15 @@ void CInputScript::ParseDefineShape3(char *str)
 
 void CInputScript::S_DumpImageGuts(char *str)
 {
-    U32 lfCount = 0;
-    INDENT;
+    U32 lfCount = 0;                
+    INDENT;        
     printf("%s----- dumping image details -----", str);
     while (m_filePos < m_tagEnd)
     {
         if ((lfCount % 16) == 0)
         {
             printf("\n");
-            INDENT;
+            INDENT;        
             printf("%s", str);
         }
         lfCount += 1;
@@ -1301,7 +1301,7 @@ void CInputScript::ParseDefineBitsJPEG3(char *str)
 
     if (!m_dumpGuts)
         return;
-
+        
     S_DumpImageGuts(str);
 }
 
@@ -1310,11 +1310,10 @@ void CInputScript::ParseDefineBitsLossless(char *str)
     U32 tagid = (U32) GetWord();
 
     printf("%stagDefineBitsLossless tagid %-5u\n", str, tagid);
-
-/*
+    
     if (!m_dumpAll)
         return;
-
+     
     int format = GetByte();
     int width  =  GetWord();
     int height = GetWord();
@@ -1323,7 +1322,7 @@ void CInputScript::ParseDefineBitsLossless(char *str)
     if (format == 3)
         tableSize = GetByte();
 
-    //INDENT;
+    //INDENT;        
     printf("%sformat %-3u width %-5u height %-5u tableSize %d\n", str, format, width, height, tableSize);
 
     tableSize += 1;
@@ -1406,10 +1405,8 @@ void CInputScript::ParseDefineBitsLossless(char *str)
 
     if (!m_dumpGuts)
         return;
-
+        
     S_DumpImageGuts(str);
-*/
-
 }
 
 void CInputScript::ParseDefineBitsLossless2(char *str)
@@ -1536,7 +1533,7 @@ void CInputScript::ParseDoAction(char *str, BOOL fPrintTag)
         printf("%stagDoAction\n",  str);
     }
 
-    for (;;)
+    for (;;) 
     {
         // Handle the action
         int actionCode = GetByte();
@@ -1550,15 +1547,15 @@ void CInputScript::ParseDoAction(char *str, BOOL fPrintTag)
         }
 
         int len = 0;
-        if (actionCode & sactionHasLength)
+        if (actionCode & sactionHasLength) 
         {
             len = GetWord();
             printf("has length %-5u ", len);
-        }
+        }        
 
         S32 pos = m_filePos + len;
 
-        switch ( actionCode )
+        switch ( actionCode ) 
         {
             case sactionNextFrame:
             {
@@ -1823,7 +1820,7 @@ void CInputScript::ParseDoAction(char *str, BOOL fPrintTag)
                 break;
             }
 
-            case sactionGotoLabel:
+            case sactionGotoLabel: 
             {
                 // swfparse used to crash here!
                 printf("gotoLabel %s\n", &m_fileBuf[m_filePos]);
@@ -1836,7 +1833,7 @@ void CInputScript::ParseDoAction(char *str, BOOL fPrintTag)
                 printf( "waitForFrameExpression skipCount %-5u\n", skipCount );
                 break;
             }
-
+                
             case sactionPushData:
             {
                 U8 dataType = GetByte();
@@ -1856,14 +1853,14 @@ void CInputScript::ParseDoAction(char *str, BOOL fPrintTag)
                 else
                 if ( dataType == 0 )
                 {
-                    printf(
+                    printf( 
                         "pushData (string): %s\n",
                         &m_fileBuf[ m_filePos ]
                     );
                 }
                 else
                 {
-                    printf(
+                    printf( 
                         "pushData invalid dataType: %02x\n",
                         dataType
                     );
@@ -1919,7 +1916,7 @@ void CInputScript::ParseDoAction(char *str, BOOL fPrintTag)
                 break;
             }
 
-            case sactionGotoExpression:
+            case sactionGotoExpression: 
             {
                 U8 stopFlag = GetByte();
                 if ( stopFlag == 0 )
@@ -1935,7 +1932,6 @@ void CInputScript::ParseDoAction(char *str, BOOL fPrintTag)
                 {
                     printf("gotoExpression invalid stopFlag: %d\n", stopFlag );
                 }
-
                 break;
             }
 
@@ -2179,7 +2175,7 @@ void CInputScript::ParseDefineFont2(char *str)
     for (int i=0; i<iNameLen; i++)
         szFontName[i] = GetByte();
     szFontName[i] = NULL;
-
+    
     // Get the number of glyphs.
     U16 nGlyphs = GetWord();
 
@@ -2245,7 +2241,7 @@ void CInputScript::ParseDefineFont2(char *str)
         //
         // Get the CodeTable
         //
-
+            
         m_filePos = iDataPos + iCodeOffset;
         printf("\n%sCodeTable:\n%s", str, str);
 
@@ -2385,7 +2381,7 @@ void CInputScript::ParseDefineMorphShape(char *str)
             U32 rgb2 = GetColor(fGetAlpha);
         }
     }
-
+    
     // Get the lines
     int nLines = GetByte();
     if ( nLines >= 255 )
@@ -2395,7 +2391,7 @@ void CInputScript::ParseDefineMorphShape(char *str)
     {
         U16 thick1, thick2;
         U32 rgb1, rgb2;
-
+            
         // get the thickness
         thick1 = GetWord();
         thick2 = GetWord();
@@ -2992,7 +2988,7 @@ void CInputScript::ParseDefineSound(char *str)
     U32 tagid = (U32) GetWord();
 
     printf("%stagDefineSound: ", str);
-
+        
     int iCompression = GetBits(4);      // uncompressed, ADPCM or MP3
     int iSampleRate  = GetBits(2);
     int iSampleSize  = GetBits(1);
@@ -3045,34 +3041,34 @@ void CInputScript::ParseDefineButtonSound(char *str)
     U32 tagid = (U32) GetWord();
 
     printf("%stagDefineButtonSound \ttagid %-5u\n", str, tagid);
-
+    
     if (!m_dumpAll)
         return;
-
+        
     // step through for button states
     for (int i = 0; i < 3; i++)
     {
         U32 soundTag = GetWord();
         switch (i)
         {
-            case 0:
-                INDENT;
+            case 0:         
+                INDENT;   
                 printf("%supState \ttagid %-5u\n", str, soundTag);
                 break;
-            case 1:
-                INDENT;
+            case 1:            
+                INDENT;   
                 printf("%soverState \ttagid %-5u\n", str, soundTag);
                 break;
-            case 2:
-                INDENT;
+            case 2:            
+                INDENT;   
                 printf("%sdownState \ttagid %-5u\n", str, soundTag);
                 break;
         }
-
+         
         if (soundTag)
         {
             U32 code = GetByte();
-            INDENT;
+            INDENT;   
             printf("%ssound code %u", str, code);
 
             if ( code & soundHasInPoint )
@@ -3083,14 +3079,14 @@ void CInputScript::ParseDefineButtonSound(char *str)
                 printf(" loops %u", GetDWord());
 
             printf("\n");
-            if ( code & soundHasEnvelope )
+            if ( code & soundHasEnvelope ) 
             {
                 int points = GetByte();
 
-                for ( int i = 0; i < points; i++ )
+                for ( int i = 0; i < points; i++ ) 
                 {
                     printf("\n");
-                    INDENT;
+                    INDENT;   
                     printf("%smark44 %u", str, GetDWord());
                     printf(" left chanel %u", GetWord());
                     printf(" right chanel %u", GetWord());
@@ -3099,7 +3095,7 @@ void CInputScript::ParseDefineButtonSound(char *str)
             }
         }
     }
-
+        
 }
 
 
@@ -3164,10 +3160,10 @@ void CInputScript::ParseDefineButtonCxform(char *str)
     U32 tagid = (U32) GetWord();
 
     printf("%stagDefineButtonCxform \ttagid %-5u\n", str, tagid);
-
+    
     if (!m_dumpAll)
         return;
-
+        
     while (m_filePos < m_tagEnd)
     {
         CXFORM cxform;
@@ -3210,16 +3206,16 @@ void CInputScript::ParseTags(BOOL sprite, U32 tabs)
 {
 
     char str[33];   // indent level
-
+    
     {
         U32 i = 0;
-
+    
         for (i = 0; i < tabs && i < 32; i++)
         {
             str[i] = '\t';
         }
         str[i] = 0;
-    }
+    }        
 
     if (sprite)
     {
@@ -3229,13 +3225,13 @@ void CInputScript::ParseTags(BOOL sprite, U32 tabs)
         printf("%stagDefineSprite \ttagid %-5u \tframe count %-5u\n", str, tagid, frameCount);
     }
     else
-    {
+    {        
         printf("\n%s<----- dumping frame %d file offset 0x%04x ----->\n", str, 0, m_filePos);
-
+        
         // Set the position to the start position.
         m_filePos = m_fileStart;
-    }
-
+    }        
+    
     // Initialize the end of frame flag.
     BOOL atEnd = false;
 
@@ -3270,7 +3266,7 @@ void CInputScript::ParseTags(BOOL sprite, U32 tabs)
                 atEnd = true;
 
                 break;
-
+        
             case stagShowFrame:
                 ParseShowFrame(str, frame, tagEnd);
 
@@ -3314,7 +3310,7 @@ void CInputScript::ParseTags(BOOL sprite, U32 tabs)
                 ParseProtect(str);
                 break;
 
-            case stagDefineShape:
+            case stagDefineShape: 
                 ParseDefineShape(str);
                 break;
 
@@ -3448,12 +3444,12 @@ BOOL CInputScript::ParseFile(char * pInput)
     }
 
     //printf("***** Dumping SWF File Information *****\n");
-
+    
     // Open the file for reading.
     inputFile = fopen(pInput, "rb");
 
     // Did we open the file?
-    if (inputFile == NULL)
+    if (inputFile == NULL) 
     {
         sts = false;
         printf("ERROR: Can't open file %s\n", pInput);
@@ -3492,7 +3488,7 @@ BOOL CInputScript::ParseFile(char * pInput)
             printf("File version \t%u\n", m_fileVersion);
         }
     }
-
+        
     // Are we OK?
     if (sts)
     {
@@ -3522,7 +3518,7 @@ BOOL CInputScript::ParseFile(char * pInput)
             sts = false;
         }
     }
-
+        
     // Are we OK?
     if (sts)
     {
@@ -3548,7 +3544,7 @@ BOOL CInputScript::ParseFile(char * pInput)
     if (sts)
     {
         SRECT rect;
-
+        
         // Set the file position past the header and size information.
         m_filePos = 8;
 
@@ -3564,7 +3560,7 @@ BOOL CInputScript::ParseFile(char * pInput)
         printf("Frame count \t%u\n", frameCount);
 
         // Set the start position.
-        m_fileStart = m_filePos;
+        m_fileStart = m_filePos;    
 
         printf("\n----- Reading movie details -----\n");
         fflush(stdout);
@@ -3653,7 +3649,7 @@ int main (int argc, char *argv[])
                         }
                         default:
                         {
-                            fprintf( stderr,
+                            fprintf( stderr, 
                                         "Ignoring invalid option: %c\n",
                                         &str[ 1 ] );
                         }
@@ -3668,7 +3664,7 @@ int main (int argc, char *argv[])
         }
     }
 
-
+            
     // Parse the file passed in.
     pInputScript->ParseFile(fileName);
 

@@ -16,6 +16,9 @@
  *
  *
  * $Log: print_utils.h,v $
+ * Revision 1.13  2002/06/28 17:52:42  muttley
+ * Trying to get write_through to work
+ *
  * Revision 1.12  2001/07/14 00:17:55  clampr
  * added emacs file variables to avoid clashing with existing style (now I know what it is)
  *
@@ -50,6 +53,7 @@
 
 
 
+extern void swf_print_header            (swf_header *, int *);
 extern void print_cxform                (swf_cxform *, const char *);
 extern void print_matrix                (swf_matrix *, const char *);
 extern void print_rect                  (swf_rect   *  , const char *);

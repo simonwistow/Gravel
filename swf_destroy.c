@@ -95,20 +95,22 @@ swf_destroy_fillstyle (swf_fillstyle * style)
         return;
     }
 
+   
+
     for (i=0; i<style->ncolours && style->colours != NULL; i++) {
 		if (style->colours[i] != NULL) {
 			swf_free (style->colours[i]);
 		} 
     }
 
-	if (*style->colours != NULL) {
+	if (style->colours != NULL) {
 		swf_free (style->colours);
 	}
 	if (style->col != NULL) {
 		swf_free (style->col);
 	}
 
-	swf_free (style->matrix);
+    swf_free (style->matrix);
 
     swf_free (style);
 }

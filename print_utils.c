@@ -16,6 +16,9 @@
  *
  *
  * $Log: print_utils.c,v $
+ * Revision 1.20  2002/06/28 17:52:42  muttley
+ * Trying to get write_through to work
+ *
  * Revision 1.19  2002/06/20 17:02:15  kitty_goth
  * Coloured fills work properly. Got rid of the SWF_U32 nasty representation
  * of colours.
@@ -669,7 +672,6 @@ print_shapestyle (swf_shapestyle * style,const char * str)
 void
 print_shaperecords (swf_shaperecord_list * record,const char * str)
 {
-	int i;
 	swf_shaperecord *node, *temp;
 
 	node = record->first;
@@ -696,10 +698,12 @@ print_shaperecords (swf_shaperecord_list * record,const char * str)
 		}
 
 		if (temp->x | temp->y) {
-			printf("%s\tLine Found : x : %li ; y : %li\n", str, temp->x, temp->y);
+			//printf("%s\tLine Found : x : %li ; y : %li\n", str, temp->x, temp->y);
+			printf("%s\tLine Found : x : %"pSWF_S32" ; y : %"pSWF_S32"\n", str, temp->x, temp->y);
+	                
 		}
 		if (temp->ax | temp->ay | temp->cx | temp->cy) {
-			printf("%s\tCurve Found : ax : %li ; ay : %li; cx : %li ; cy : %li\n", str, temp->ax, temp->ay, temp->cx, temp->cy);
+			printf("%s\tCurve Found : ax : %"pSWF_S32" ; ay : %"pSWF_S32"; cx : %"pSWF_S32" ; cy : %"pSWF_S32"\n", str, temp->ax, temp->ay, temp->cx, temp->cy);
 		}
 	}
 }

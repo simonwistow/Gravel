@@ -160,7 +160,7 @@ init_parser (void) {
 	masked[tagDefineShape2] = parse[tagDefineShape2];
 	masked[tagDefineShape3] = parse[tagDefineShape3];
 
-	return (void *) masked;
+	return (void *) parse;
 }
 
 
@@ -194,7 +194,7 @@ main (int argc, char *argv[])
 
     swf = swf_parse_create(argv[1], &error);
 
-	parse = init_parser();
+     parse = init_parser();
 
     if (swf == NULL) {
 		fprintf (stderr, "Failed to create SWF context\n");
@@ -226,6 +226,7 @@ main (int argc, char *argv[])
     /* parse all the tags */
     do
     {
+
         next_id = swf_parse_nextid(swf, &error);
         if (error != SWF_ENoError) {
 	        fprintf (stderr, "ERROR: There was an error parsing the next id  : '%s'\n",  swf_error_code_to_string(error));
@@ -233,9 +234,10 @@ main (int argc, char *argv[])
 
         error = SWF_ENoError;
 
-        /* printf ("%s [%"pSWF_U32"]\n", tag[next_id], next_id);*/
+                // printf ("%s [%"pSWF_U32"]\n", tag[next_id], next_id);
 		if (next_id <= SWF_PARSER_MAX_TAG_ID) {
 			parse[next_id](swf, str);
+			
 		}
 		
 		/* FIXME: 
