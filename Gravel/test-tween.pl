@@ -12,6 +12,7 @@ use Gravel::Effect::Tween;
 use Data::Dumper qw/DumperX/;
 
 my $m = Gravel::Movie->new();
+#my $m = Gravel::Movie->new({bgcol => '#ff0000'});
 
 $m->name('foo.swf');
 $m->size(0, 0, 10000, 10000);

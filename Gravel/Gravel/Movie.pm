@@ -157,6 +157,7 @@ sub bake_movie {
 
 	$b->_bake_frames($self);
 
+#	print STDERR DumperX $self->{_library};
 	print STDERR DumperX $self;
 
 	$b->_bake_end($self);
@@ -177,6 +178,7 @@ __C__
 #include "swf_movie.h"
 #include "swf_parse.h"
 #include "swf_destroy.h"
+#include "gravel/util.h"
 
 #define swf_free(x)       if( (x) ) free( (x) )
 #define swf_realloc(x, y) ( (x) ? realloc( (x), (y) ) : calloc( 1, (y) ) )
@@ -189,7 +191,6 @@ typedef struct {
 U16 _count_frames(SV* obj, SV* self) {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
 	int error = SWF_ENoError;
-	HV* h = (HV *)SvRV(self); 
 	swf_tagrecord *temp, *node;
 	U16 num = 0;
 	
@@ -249,7 +250,6 @@ void _bake_preamble(SV* obj, SV* self, U32 protect) {
 	SV** p_col;
 	swf_colour * col = NULL;
 
-	// FIXME: Need to do with the case of no bgcol better...
 	p_col = hv_fetch(h, "_bgcol", 6, 0);
 
 	if (NULL != p_col) {
@@ -677,47 +677,92 @@ SWF_U16 _shape_id(int * error, SV* shape) {
 	return 0;
 }
 
-void _bake_place(swf_movie * movie, int * error, HV * h_place) {
+swf_matrix* _matrix_from_frame(int * error, HV * h_frame) {
 	swf_matrix * matrix;
-	SWF_U16 depth, obj_id;
-	SV** ph_details;
-	HV*  h_details;
-	SV** p_shape;
-	SV*  shape;
+	SV** ph_matrix;
+	HV*  h_matrix;
+	SV** p_num;
+	SV*  num;
 
-	obj_id = 0;
-
-	/* test code */
+	if (*error) {
+		return;
+	}
 
     if ((matrix = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
 		*error = SWF_EMallocFailure;
 		return;
     }
 
-    matrix->a  = matrix->d  = 512 * 1000;
-	matrix->tx = matrix->ty = 100 * 20;
+	/* Need to check what we need to scale up by so that a=1 in perl
+     * translates up properly here
+	 */
+	ph_matrix = hv_fetch(h_frame, "_matrix", 7, 0);	
+	if (NULL != ph_matrix) {
+		h_matrix = (HV *)SvRV(*ph_matrix);
 
-
-	ph_details = hv_fetch(h_place, "_contents", 9, 0);	
-	if (NULL != ph_details) {  
-		h_details = (HV *)SvRV(*ph_details); 
-
-		p_shape = hv_fetch(h_details, "shape", 5, 0);	
-		if (NULL != p_shape) {  
-			obj_id = _shape_id(error, *p_shape);
+		p_num = hv_fetch(h_matrix, "_a", 2, 0);
+		if (NULL != p_num) {
+			matrix->a = MATRIX_SCALE * (SFIXED)(SvIV(*p_num));
+		}
+		p_num = hv_fetch(h_matrix, "_b", 2, 0);
+		if (NULL != p_num) {
+			matrix->b = MATRIX_SCALE * (SFIXED)(SvIV(*p_num));
+		}
+		p_num = hv_fetch(h_matrix, "_c", 2, 0);
+		if (NULL != p_num) {
+			matrix->c = MATRIX_SCALE * (SFIXED)(SvIV(*p_num));
+		}
+		p_num = hv_fetch(h_matrix, "_d", 2, 0);
+		if (NULL != p_num) {
+			matrix->d = MATRIX_SCALE * (SFIXED)(SvIV(*p_num));
 		}
 
-		/* Paranoia */
-		*error = 0;
-		swf_add_placeobject(movie, error, matrix, obj_id, 1);
+		p_num = hv_fetch(h_matrix, "_x", 2, 0);
+		if (NULL != p_num) {
+			matrix->tx = (SCOORD)(SvIV(*p_num));
+		}
+		p_num = hv_fetch(h_matrix, "_y", 2, 0);
+		if (NULL != p_num) {
+			matrix->ty = (SCOORD)(SvIV(*p_num));
+		}
+
 	}
+
+	return matrix;
+}
+
+void _bake_place(swf_movie * movie, int * error, HV * h_place) {
+	swf_matrix * matrix;
+	SWF_U16 depth, obj_id;
+	SV** p_shape;
+	SV*  shape;
+
+	obj_id = 0;
+
+	// When do we actually want to throw an exception?
+	if (*error) {
+		fprintf(stderr, "non-zero error code on entry to _bake_place\n");
+		return;
+	}
+
+	matrix = _matrix_from_frame(error, h_place);
+
+	p_shape = hv_fetch(h_place, "_shape", 6, 0);	
+	if (NULL != p_shape) {  
+		obj_id = _shape_id(error, *p_shape);
+	}
+
+	/* Paranoia */
+	*error = 0;
+	swf_add_placeobject(movie, error, matrix, obj_id, 1);
+
 	return;
 }
 
 void _bake_frames(SV* obj, SV* self) {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
 	HV* h_tl = (HV *)SvRV(self); 
-    int error;
+    int error = 0;
 	SV** pa_frames;
 	AV*  a_frames;
 	SV** pa_frame;
