@@ -16,6 +16,11 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.16  2001/07/12 11:27:08  muttley
+ * Remove all the tags and put them in swf_tags
+ * Add comments for every type
+ * Put in lots of TODOs :P
+ *
  * Revision 1.15  2001/07/09 15:48:54  acme
  * Renamed U32 to SWF_U32 and so on
  *
@@ -311,46 +316,49 @@ typedef struct swf_soundstreamhead swf_soundstreamhead;
 
 
 struct swf_header {
-    SWF_U32 size;
-    SWF_U32 version;
-    SWF_U32 rate;
-    SWF_U32 count;
-    swf_rect * bounds;
+    SWF_U32 size;      /* size of file in bytes */
+    SWF_U32 version;   /* single byte file version */
+    SWF_U32 rate;      /* frame rate. delay in 8.8 fixed number of frames per second */
+    SWF_U32 count;     /* total number of frames in a movie*/
+    swf_rect * bounds; /* the xmin, xmax, ymin and ymax of the movie */
 };
 
 
 struct swf_parser {
-    FILE * file;
-    char * name;
-    swf_header * header;
+    FILE * file;          /* The file handle of the SWF file we're parsing */
+    char * name;          /* the name of the file we're handling */
+    swf_header * header;  /* the headers of this swf */
 
-    int headers_parsed;
+    int headers_parsed;   /* have the headers been parsed yet */
 
-    SWF_U32 cur_tag_len;
-    SWF_U32 filepos;
-    SWF_U32 next_tag_pos;
-    SWF_U32 frame;
+    SWF_U32 cur_tag_len;  /* the length of the current tag we're parsing */
+    /* SWF_U32 filepos;   */
+    SWF_U32 next_tag_pos; /* what the position of the next tag is */
+    SWF_U32 frame;        /* what the current frame we're on is */
 
     /* Bit Handling. */
-    SWF_S32 bitpos;
-    SWF_U32 bitbuf;
+    SWF_S32 bitpos;       /* what position we're at in the bit buffer */
+    SWF_U32 bitbuf;       /* the bit buffer, used for storing bits */
 
     /* Tag parsing information. */
+/*
     SWF_U32 tagstart;
     SWF_U32 tagzero;
     SWF_U32 tagend;
 
     SWF_U32 taglen;
-
-    int fill_bits;
-    int line_bits;
+*/
+    int fill_bits;       /* the current number of fill bits we're using */
+    int line_bits;       /* the current number of fill bits we're using */
+                         /* todo simon : not sure these should be in the context */
 
     /* Font glyph counts (gotta save it somewhere!) */
-    int glyph_counts [256];
+    int glyph_counts [256]; /* how many glyphs are in each font */
+                            /* todo simon : stop hard coding it to 256*/
 
-    SWF_U8* src_adpcm;
-    SWF_U32 bitbuf_adpcm;       /* this should always contain at least 24 bits of data */
-    SWF_S32 bitpos_adpcm;
+    SWF_U8* src_adpcm;          /* the src of the adpcm we're parsing*? ?* todo simon: should this be in the context?*/
+    SWF_U32 bitbuf_adpcm;       /* adpcm bit buffer : this should always contain at least 24 bits of data */
+    SWF_S32 bitpos_adpcm;       /* the current position in the adpcm bit buffer */
     SWF_U32 n_samples_adpcm;    /* number of samples decompressed so far */
 
     /* Streaming sound info from SoundStreamHead tag */
@@ -361,77 +369,94 @@ struct swf_parser {
     int n_stream_samples;
 
 
-    char ** font_chars; /* the actual characters defined by font and font info tags */
-    int  number_of_fonts;
+    char ** font_chars;         /* the actual characters defined by font and font info tags */
+    int  number_of_fonts;       /* how many fonts we've parsed so far */
+                                /* todo : this might get out of sync with the id of the font
+                                 * i.e font_id 6 might be only the thrid font - probably
+                                 * ought to fix that */
+
 };
 
+/* a raw swf tag */
+/* todo simon : this should have the raw data in as well */
 struct swf_tag {
-    SWF_U16 id;
-    SWF_U32 len;
+    SWF_U16 id;   /* the id of the tag */
+    SWF_U32 len;  /* how long it is */
 };
 
+/* just holds the bounds of a rectangle */
 struct swf_rect {
-    SCOORD xmin;
+    SCOORD xmin;  /* these are fairly self explanatory */
     SCOORD xmax;
     SCOORD ymin;
     SCOORD ymax;
 };
 
+/* structure for holding a colour */
 struct swf_colour {
-    SWF_U32 r;
-    SWF_U32 g;
-    SWF_U32 b;
-    SWF_U32 a;
+    SWF_U32 r; /* red */
+    SWF_U32 g; /* green */
+    SWF_U32 b; /* blue */
+    SWF_U32 a; /* alpha/transparency */
 };
 
+
+
+/*
+ * A colour transform
+ * a is multiply factor ...
+ * ... b is addition factor
+ */
 struct swf_cxform {
-    SWF_S32 flags;
-    SWF_S16 aa;    /* a is multiply factor ... */
-    SWF_S16 ab;    /* ... b is addition factor */
-    SWF_S16 ra;
+    SWF_S32 flags; /* todo simon: is this necessary ?*/
+    SWF_S16 ra;    /* red */
     SWF_S16 rb;
-    SWF_S16 ga;
+    SWF_S16 ga;    /* green */
     SWF_S16 gb;
-    SWF_S16 ba;
+    SWF_S16 ba;    /* blue */
     SWF_S16 bb;
-
+    SWF_S16 aa;    /* alpha */
+    SWF_S16 ab;
 };
 
+/* a transformation matrix */
 struct swf_matrix {
-    SFIXED a;
-    SFIXED b;
-    SFIXED c;
-    SFIXED d;
-    SCOORD tx;
-    SCOORD ty;
+    SFIXED a;  /* scale  x */  /* todo simon : check these, possibly rename ? */
+    SFIXED b;  /* scale  y */
+    SFIXED c;  /* rotate x */
+    SFIXED d;  /* rotate y */
+    SCOORD tx; /* transform x */
+    SCOORD ty; /* transform y */
 };
 
+/* set the back ground colour */
 struct swf_setbackgroundcolour {
     swf_colour * colour;
 };
 
 
+/* define a font */
 struct swf_definefont {
-    SWF_U32 fontid;
-    int offset;
-    int glyph_count;
-    swf_shaperecord_list ** shape_records;
+    SWF_U32 fontid;  /* the font we're defining */
+    int offset;      /* its offset in the glyph tables */ /* todo simon : check this */
+    int glyph_count; /* the number of glyphs it has */ /* todo simon : is this necessary */
+    swf_shaperecord_list ** shape_records; /* an array of shapes which define how the glyphs look*/
 };
 
 
 struct swf_definefontinfo {
-    SWF_U32 fontid;
-    SWF_U8 flags;
-    int namelen;
-    int * code_table;
-    char * fontname;
+    SWF_U32 fontid;   /* the id of the font this is referring to */
+    SWF_U8 flags;     /* some flags to set whether it's wide, italic, bold etc etc */ /* todo simon : is this necessary */
+    int namelen;      /* how long the name of the font is */ /* todo simon: is this necessary ? */
+    int * code_table; /* the ascii values of each of the glyphs defined */
+    char * fontname;  /* the name of the font */
 };
 
 struct swf_placeobject {
-    SWF_U32 tagid;
-    SWF_U32 depth;
-    swf_matrix * matrix;
-    swf_cxform * cxform;
+    SWF_U32 tagid;        /* the id of the object to place */ /* todo simon : should this be renamed */
+    SWF_U32 depth;        /* the depth to place it with */
+    swf_matrix * matrix;  /* the transformation matrix to place it with */
+    swf_cxform * cxform;  /* the colour transformation matrix to place this with */
 
 };
 
@@ -442,144 +467,185 @@ struct swf_placeobject {
  */
 
 struct swf_placeobject2 {
-    SWF_U8 flags;
-    SWF_U32 depth;
-    SWF_U32 tag;
-    swf_matrix * matrix;
-    swf_cxform * cxform;
-    SWF_U32 ratio;
-    SWF_U32 clip_depth;
-    char * name;
+    SWF_U8 flags;           /* flags defning whther or not it has a matrix, name etc etc */ /* todo simon : is this necessary?*/
+    SWF_U32 depth;          /* the depth that we place the object at */
+    SWF_U32 tag;            /* the id of the object we're placing c.f comment from BE above */
+    swf_matrix * matrix;    /* the transformation matrix to palce it with */
+    swf_cxform * cxform;    /* the colour transformation matrix to place it with */
+    SWF_U32 ratio;          /* Used in tweening. Indicates the amount of target shape in an intermediate tween shape */
+    SWF_U32 clip_depth;     /* todo simon : whatis this? it doesn't seem to be in the specs */
+    char * name;            /* name of the character */
 };
 
 struct swf_defineshape {
-    SWF_U32 tagid;
-    swf_rect * rect;
-    swf_shapestyle * style;
-    swf_shaperecord_list * record;
+    SWF_U32 tagid;                   /* the id of the object we're creating */
+    swf_rect * rect;                 /* the bounds of the shape */
+    swf_shapestyle * style;          /* the style of the shape */
+    swf_shaperecord_list * record;   /* the records defining the shape */
 
 };
 
 struct swf_shapestyle {
-    SWF_U16 nfills;
-    swf_fillstyle ** fills;
+    SWF_U16 nfills;                  /* the number of fills it has */
+    swf_fillstyle ** fills;          /* the styles of thos fills */
 
-    SWF_U16 nlines;
-    swf_linestyle ** lines;
+    SWF_U16 nlines;                  /* the number of lines it has */
+    swf_linestyle ** lines;          /* the style of those lines */
 };
 
 struct swf_fillstyle {
-    SWF_U16 fill_style;
-    SWF_U16 ncolours;
-    SWF_U16 bitmap_id;
-    swf_matrix * matrix;
-    swf_rgba_pos ** colours;
-    SWF_U32 colour;
+    SWF_U16 fill_style;              /* the type : 0x00 = solid fill,
+                                                   0x10 = linear gradient fill,
+                                                   0x12 = radial gradient fill,
+                                                   0x40 = tiled bitmap fill,
+                                                   0x41 = clipped bitmap fill
+                                      */
+    SWF_U16 ncolours;                 /* the number of colours used in a gradient fill */
+    SWF_U16 bitmap_id;                /* the id of bitmap used in a bitmap fill */
+    swf_matrix * matrix;              /* the transformation matrix for the bitmap */
+    swf_rgba_pos ** colours;          /* the colours used in the gradient fill and the positions they're in*/
+    SWF_U32 colour;                   /* the colour used in the solid fill */
 };
 
 struct swf_linestyle {
-    SWF_U16 width;
-    SWF_U32 colour;
+    SWF_U16 width;                    /* the width of the line */
+    SWF_U32 colour;                   /* the colour fo the line */
 };
 
 struct swf_rgba_pos {
-    SWF_U32 rgba;
-    SWF_U8 pos;
+    SWF_U32 rgba;                    /* an rgba value */ /* todo simon : shoudl this be a swf_colour type? */
+    SWF_U8 pos;                      /* the position of the colour */
+                                     /* todo simon : I'm not sure, looking at the spec, that this is correct. */
 };
 
 
 struct swf_freecharacter {
-    SWF_U32 tagid;
+    SWF_U32 tagid;                   /* the id of the object we're freeing */
 };
 
 
 struct swf_removeobject {
-    SWF_U32 tagid;
-    SWF_U32 depth;
+    SWF_U32 tagid;                   /* the id of the object we're removing from the screen */
+    SWF_U32 depth;                   /* the depth of the object we're removing */
 };
 
 struct swf_removeobject2 {
-    SWF_U32 depth;
+    SWF_U32 depth;                   /* the depth of the object we're removing */
 };
 
 struct swf_startsound {
-    SWF_U32 tagid;
-    SWF_U32 code;
-    SWF_U32 inpoint;
-    SWF_U32 outpoint;
-    SWF_U32 loops;
-    SWF_U8  npoints;
-    swf_soundpoint ** points;
+    SWF_U32 tagid;                   /* the id of the sound to start*/
+    SWF_U32 code;                    /* flags to deteremine the what this has */ /* todo simon : is this necessary? */
+    SWF_U32 inpoint;                 /* sound in point value */
+    SWF_U32 outpoint;                /* sound out point value */ /* todo simon : I ahve NO idea what these actually are */
+    SWF_U32 loops;                   /* how many loops this has */
+    SWF_U8  npoints;                 /* how many points this has */
+    swf_soundpoint ** points;        /* the sound points */
 };
 
 struct swf_soundpoint {
-    SWF_U32 mark;
-    SWF_U32 lc;
-    SWF_U32 rc;
+    SWF_U32 mark;                    /* mark 44 information */
+    SWF_U32 lc;                      /* level 0 info */
+    SWF_U32 rc;                      /* level 1 info */ /* todo simon : this differes from the spec */
 };
+
+
+/* Defines a bitmap character with JPEG compression.
+ * This tag contains only the JPEG compressed image data
+ * (as defined by the Independent JPEG Group). JPEGTables
+ * contains the JPEG encoding data used to encode this image.
+ */
 
 struct swf_definebits {
-    SWF_U32 tagid;
-    swf_imageguts * guts;
+    SWF_U32 tagid;                  /* the id */
+    swf_imageguts * guts;           /* the JPEG compressed image */
 
 };
+
+/* Defines a bitmap character with JPEG compression.
+ * This tag differs from DefineBits in that the record
+ * contains both the JPEG encoding table and the JPEG image data
+ *
+ * Note: The JPEG encoding data and image data contained within
+ * this record are in two separate JPEG streams. Each JPEG stream
+ * has a beginning of stream tag (0xFF, 0xD8) and an end of stream
+ * tag (0xFF, 0xD9). This differs from a standard JPEG image which
+ * combines the encoding data and image data into a single stream
+ */
 
 struct swf_definebitsjpeg2 {
-    SWF_U32 tagid;
-    swf_imageguts * guts;
+    SWF_U32 tagid;              /* the id of this image */
+    swf_imageguts * guts;       /* the image data */
 
 };
 
+/*
+ * Defines a bitmap character with JPEG compression.
+ * This tag differs from DefineBitsJPEG2 because it
+ * contains alpha channel data. This record allows
+ * multiple JPEG images with differing compression
+ * ratios to be defined within a single SWF file.
+ *
+ * The streams are delimited in the same way as DefineBitsJPEG2
+ */
 struct swf_definebitsjpeg3 {
-    SWF_U32 tagid;
-    swf_imageguts * guts;
+    SWF_U32 tagid;              /* the id of this image */
+    swf_imageguts * guts;       /* the image data */
 
 };
 
 struct swf_imageguts {
-    SWF_U32 nbytes;
-    SWF_U8  * data;
+    SWF_U32 nbytes;             /* the number of bytes of data */
+    SWF_U8  * data;             /* the data */
 };
 
+/*
+ * the jpeg encoding table for definbits -
+ * there should only ever be one of these
+ * all the other definebits use it
+ */
 struct swf_jpegtables {
-    swf_imageguts * guts;
-
+    swf_imageguts * guts;       /* the encoding table */
 };
+
 
 struct swf_definetext {
-    SWF_U32 tagid;
-    swf_rect    * rect;
-    swf_matrix  * matrix;
-    swf_textrecord_list * records;
+    SWF_U32 tagid;                  /* the id of this text */
+    swf_rect    * rect;             /* the bounds of the text */
+    swf_matrix  * matrix;           /* the transformation matrix of this text */
+    swf_textrecord_list * records;  /* the list of text records - duh! */
 };
 
 
+/*
+ * this only differs from definetext in that it
+ * can have alpha transparency values in the text records
+ */
 struct swf_definetext2 {
-    SWF_U32 tagid;
-    swf_rect    * rect;
-    swf_matrix  * matrix;
-    swf_textrecord_list  * records;
+    SWF_U32 tagid;                  /* the id of this text */
+    swf_rect    * rect;             /* the bounds of this text */
+    swf_matrix  * matrix;           /* the transformation matrix of this text */
+    swf_textrecord_list  * records; /* the list of text records */
 };
 
 
 struct swf_definebutton {
-    SWF_U32 tagid;
-    swf_buttonrecord_list * records;
-    swf_doaction_list     * actions;
+    SWF_U32 tagid;                      /* the id for this button */
+    swf_buttonrecord_list * records;    /* a list of button records */
+    swf_doaction_list     * actions;    /* a list of actions */
 };
 
 
 struct swf_definebutton2 {
-    SWF_U32 tagid;
-    swf_buttonrecord_list * records;
-    //swf_doaction_list     * actions;
-    swf_button2action_list * actions;
+    SWF_U32 tagid;                      /* the id for this button */
+    swf_buttonrecord_list * records;    /* the button records */
+    swf_button2action_list * actions;   /* the button2 action conditions */
 };
 
 
 
 struct swf_defineedittext {
-    SWF_U32 tagid;
+    SWF_U32 tagid;          /* todo simon */
     swf_rect * bounds;
     SWF_U16 flags;
     SWF_U16 font_id;
@@ -595,86 +661,103 @@ struct swf_defineedittext {
     char * initial_text;
 };
 
+/*
+ * Defines the mapping from a font object to a device font
+ * so that the player can optionally use a TrueType or ATM font
+ * that may be installed on the computer instead of the stored glyph outlines.
+ */
 struct swf_definefont2 {
-	SWF_U32 fontid;
-	SWF_U16 flags;
-	int name_len;
-	char * name;
-	SWF_U16 glyph_count;
-	swf_shaperecord_list ** glyphs;
-	SWF_U32 * code_table;
-	SWF_S16 ascent;
-	SWF_S16 descent;
-	SWF_S16 leading;
-	swf_rect ** bounds;
-	SWF_S16 nkerning_pairs;
-	swf_kerningpair ** kerning_pairs;
+	SWF_U32 fontid;                   /* the font id for this information */
+	SWF_U16 flags;                    /* various flags for whether it has layout/is unicode etc etc. */ /* todo simon: is this necessary ?*/
+	int name_len;                     /* the length of the name */ /* todo simon : is this necessary ? */
+	char * name;                      /* the font name */
+	SWF_U16 glyph_count;              /* the number of glyphs */ /* todo simon  is this necessary ? */
+	swf_shaperecord_list ** glyphs;   /* the glyphs */
+	SWF_U32 * code_table;             /* the code table */
+	SWF_S16 ascent;                   /* the ascent of this font */
+	SWF_S16 descent;                  /* the descent */
+	SWF_S16 leading;                  /* the leading of this font */
+	swf_rect ** bounds;               /* the bounds of each glyph of the font */
+	SWF_S16 nkerning_pairs;           /* the number of kerning pairs */
+	swf_kerningpair ** kerning_pairs; /* the pairs them selves */
+    /* todo simon - the spec has offset tables but no kerning tables ... hmmm */
 
 };
 
 struct swf_kerningpair {
 
-	SWF_U16 code1;
+	SWF_U16 code1;  /* todo simon : not sure exactly what these mean */
 	SWF_U16 code2;
 	SWF_S16 adjust;
 };
 
 
-
+/* Defines the metamorphosis of one shape (Shape1) into another (Shape2) */
 struct swf_definemorphshape  {
-    SWF_U32 tagid;
-    swf_rect * r1;
-    swf_rect * r2;
-    int nfills;
-    swf_fillstyle2 ** fills;
-    int nlines;
-    swf_linestyle2 ** lines;
-    swf_shaperecord_list * records1;
-    swf_shaperecord_list * records2;
+    SWF_U32 tagid;                      /* the id of this morph shape */
+    swf_rect * r1;                      /* bounds of shape 1 */
+    swf_rect * r2;                      /* bounds of shape 2 */
+    int nfills;                         /* the number of fills */
+    swf_fillstyle2 ** fills;            /* the fills themselves */   /* todo simon :  should these be morph fill/line styles ?*/
+    int nlines;                         /* the number of lines */
+    swf_linestyle2 ** lines;            /* the lines themselves */
+    swf_shaperecord_list * records1;    /* shape 1 */
+    swf_shaperecord_list * records2;    /* shape 2 */
 };
 
+/* todo simon : maybe this should renamed */
 struct swf_gradcolour {
 
-    SWF_U8 r1;
-    SWF_U8 r2;
-    SWF_U32 c1;
-    SWF_U32 c2;
+
+    SWF_U8 r1;      /* ratio for first shape */
+    SWF_U8 r2;      /* ratio for the second shape */
+    SWF_U32 c1;     /* colour for first shape */
+    SWF_U32 c2;     /* colour for second shape */
 };
 
+/* todo simon : maybe this should be renamed */
 struct swf_fillstyle2 {
-    int style;
-    swf_matrix * matrix1;
-    swf_matrix * matrix2;
-    int ncolours;
-    swf_gradcolour ** colours;
-    SWF_U16 tag;
-    SWF_U32 rgb1;
-    SWF_U32 rgb2;
+    int style;                  /* the style of the fill
+                                 * 0x00 = solid fill
+                                 * 0x10 = linear gradient fill
+                                 * 0x12 = radial gradient fill
+                                 * 0x41 = clipped bitmap fill
+                                 */
+
+    swf_matrix * matrix1;       /* matrix for the gradient of the first shape */
+    swf_matrix * matrix2;       /* matrix for the gradient of the second shape */
+    int ncolours;               /* the number of colours */ /* todo simon : is this always 2 ? */
+    swf_gradcolour ** colours;  /* grad colours */ /* todo simon : check this, not sure if it's right */
+    SWF_U16 tag;                /* the bitmap for a bitmap fill */
+    SWF_U32 rgb1;               /* colour for first shape (if solid fill) */
+    SWF_U32 rgb2;               /* colour for second shape (if solid fill) */
 };
 
+/* should this be renamed ?*/
 struct swf_linestyle2 {
-    SWF_U16 thick1;
-    SWF_U16 thick2;
-    SWF_U32 rgb1;
-    SWF_U32 rgb2;
+    SWF_U16 thick1;             /* thickness of the first line in twips*/
+    SWF_U16 thick2;             /* thickness of the second line in twips */
+    SWF_U32 rgb1;               /* colour of the first line with alpha */
+    SWF_U32 rgb2;               /* colour of the second line with alpha */
 
 };
 
 
 
 struct swf_definesound {
-    SWF_U32 tagid;
-    int compression;
-    int sample_rate;
-    int sample_size;
-    int stereo_mono;
-    int sample_count;
-    int delay;
-    swf_adpcm * adpcm;
-    swf_mp3header_list * mp3header_list;
+    SWF_U32 tagid;              /*  the id for this sound */ /* todo should this be renamed ? */
+    int compression;            /* how is it compressed 0 = None 1 = ADPCM */
+    int sample_rate;            /* sample rate 0=5k, 1 =11k, 2=22k, 3=44k */
+    int sample_size;            /* the sample size 0 = 8 bit, 1 = 16 bit */
+    int stereo_mono;            /* is it stereo or mono ? 0 = Mono, 1 = Stereo */
+    int sample_count;           /* the number of samples */
+    int delay;                  /* the delay */  /*  todo simon : this is not in the spec */
+    swf_adpcm * adpcm;          /* adpcm data */ /*  todo simon : this is not in the spec */
+    swf_mp3header_list * mp3header_list; /* the mp3 headers */ /*  todo simon : this is not in the spec */
 
 };
 
+/* todo simon */
 struct  swf_adpcm {
     SWF_U32 tagid;
 
@@ -682,11 +765,12 @@ struct  swf_adpcm {
 
 struct swf_framelabel {
 
-    char * label;
+    char * label;   /* label this frame with a word */
 
 };
 
 
+/* todo simon : not in spec ? */
 struct swf_namecharacter {
 
     SWF_U32 tagid;
@@ -694,14 +778,20 @@ struct swf_namecharacter {
 
 };
 
+/*
+ * Defines the color transform for each shape and text
+ * character in a button. Not used for DefineButton2
+ */
 struct swf_definebuttoncxform {
 
-    SWF_U32 tagid;
-    int ncxforms;
-    swf_cxform ** cxforms;
+    SWF_U32 tagid;          /* the button Id for this information */
+    int ncxforms;           /* the number of cxforms */
+    swf_cxform ** cxforms;  /* the cxforms */
+    /* todo simon : according to the spec there is only one cxform for each button record */
 };
 
 
+/* todo simon : I think this is all wrong */
 struct swf_soundstreamblock {
 
     SWF_U32 tagid;
@@ -718,36 +808,39 @@ struct swf_soundstreamblock {
 
 };
 
+
 struct swf_definebuttonsound {
-    SWF_U32 tagid;
-    swf_startsound * up_state;
-    swf_startsound * over_state;
-    swf_startsound * down_state;
+    SWF_U32 tagid;                  /* the id of the button this refers to */
+    swf_startsound * up_state;      /* the sound that plays in the UP state */
+    swf_startsound * over_state;    /* the sound that plays in the OVER state */
+    swf_startsound * down_state;    /* the sound that plays in the DOWN state */
 };
 
 struct swf_soundstreamhead {
 
-    SWF_U32 tagid;
-    int mix_format;
-    int stream_compression;
-    int stream_sample_rate;
-    int stream_sample_size;
-    int stream_sample_stereo_mono;
-    int n_stream_samples;
+    SWF_U32 tagid;                  /* todo simon : not in spec */
+    int mix_format;                 /* reccomended mix format */
+    int stream_compression;         /* compression format : always 1 for ADPCM */
+    int stream_sample_rate;         /* sample rate  : not in spec*/ /* todo simon : check this */
+    int stream_sample_size;         /* sample size  : always 1 for 16 bit */
+    int stream_sample_stereo_mono;  /* stereo or mono sound 0 = mono, 1 = stereo */
+    int n_stream_samples;           /* the number of samples */
 
 };
 
+/* Defines a loss-less bitmap character that contains raw ZLIB compressed image data. */
 struct swf_definebitslossless {
 
-    SWF_U32 tagid;
-    int format;
-    int width;
-    int height;
-    int colourtable_size;
-    SWF_U8  * data;
+    SWF_U32 tagid;          /* the bitmap id for this character */
+    int format;             /* the format 3 = 8 bit data, 4 = 16 bit data, 5 = 32 bit data */
+    int width;              /* width of the image */
+    int height;             /* height of the image */
+    int colourtable_size;   /* the size of the data */
+    SWF_U8  * data;         /* the ZLib compressed data */
 
 };
 
+/* todo simon : doesn't appear to be in spec :( */
 struct swf_mp3header {
 
     int ver;
@@ -768,61 +861,67 @@ struct swf_mp3header_list {
 
 struct swf_textrecord {
 
-    swf_textrecord * next;
-    SWF_U8 flags;
-    long font_id;
-    SWF_U32 colour;
-    int xoffset;
-    int yoffset;
-    int font_height;
-    int glyph_count;
-    int ** glyphs;
+    swf_textrecord * next;  /* pointer to the next text record in the linked list */
+    SWF_U8 flags;           /* the flags for this text record /* /* todo simon : is this necessary */
+    long font_id;           /* the id of the font we use */ /* todo simon : long? */
+    SWF_U32 colour;         /* the colour of this text */
+    int xoffset;            /* the xoffset of this text */
+    int yoffset;            /* the yoffset of this text */
+    int font_height;        /* the height of the text */
+    int glyph_count;        /* the number of glyphs */
+    int ** glyphs;          /* all the glyphs */
+    /* not all these get set at the same time */
 
 
 };
 
 
 struct swf_textrecord_list {
-        swf_textrecord * first;
-        swf_textrecord ** lastp;
+        swf_textrecord * first;     /* pointer to the first element in the list */
+        swf_textrecord ** lastp;    /* pointer to the last element in the list */
 };
 
 struct swf_buttonrecord {
 
-    swf_buttonrecord * next;
+    swf_buttonrecord * next;        /* the next element in the list */
 
-    SWF_U32 state_hit_test;
-    SWF_U32 state_down;
-    SWF_U32 state_over;
-    SWF_U32 state_up;
-    SWF_U32 character;
-    SWF_U32 layer;
+    SWF_U32 state_hit_test;         /* hit test flag */
+    SWF_U32 state_down;             /* state down flag */
+    SWF_U32 state_over;             /* state over flag */
+    SWF_U32 state_up;               /* state up flag */
+    SWF_U32 character;              /* button character id */
+    SWF_U32 layer;                  /* button character layer */
 
 
-    swf_matrix * matrix;
-    int ncharacters;
-    swf_cxform ** characters;
+    swf_matrix * matrix;            /* button charcetr matrix */
+
+    int ncharacters;                /* todo simon : */
+    swf_cxform ** characters;       /* hmm, thse aren't in the spec */
+
 };
 
 
 
 struct swf_buttonrecord_list {
-        swf_buttonrecord * first;
-        swf_buttonrecord ** lastp;
+        swf_buttonrecord * first;   /* the first element in the list */
+        swf_buttonrecord ** lastp;  /* pointer to the last element in the list */
 };
 
 
+/* Flags that the specified actions should be performed when the frame is complete */
+/* can either be included in Defienbutton2 or as its own tag */
 struct swf_doaction {
 
-    swf_doaction * next;
-    int   code;
-    int   frame;
-    int   skip_count;
-    char* url;
-    char* target;
-    char* goto_label;
+    swf_doaction * next;        /* next item in the list */ /* todo simon : the rest of these are action records in the spec. Change it ? */
+    int   code;                 /* what type it is */
+    int   frame;                /* goto this frame index (code = 0x81 or 0x8A)*/
+    int   skip_count;           /* how many frames to skip if frame is not loaded (code = 0x8A) */
+    char* url;                  /* the url to jump to (code = 0x83) */
+    char* target;               /* the target window to open (code = 0x83) or target of action target (code = 0x8B) */
+    char* goto_label;           /* the frame label to to (code = 0x8C) */
+
+    /* none of the rest of these apear to be in the spec */
     SWF_U32   push_data_type;
-    //SWF_U32   push_data_float;
     union
     {
         SWF_U32 dw;
@@ -840,43 +939,45 @@ struct swf_doaction {
 };
 
 struct swf_doaction_list {
-        swf_doaction * first;
-        swf_doaction ** lastp;
+        swf_doaction * first;   /* the first element in the list */
+        swf_doaction ** lastp;  /* pointer to the last element in the list */
 };
 
 
 struct swf_shaperecord {
 
-    int is_edge;
-    SWF_U16 flags;
-    SWF_S32 x;
-    SWF_S32 y;
-    int fillstyle0;
-    int fillstyle1;
-    int linestyle;
-    swf_shapestyle * shapestyle;
-    SWF_S32 ax;
-    SWF_S32 ay;
-    SWF_S32 cx;
-    SWF_S32 cy;
+    int is_edge;                 /* is this an edge? 1 = yes, 0 = no */
+    SWF_U16 flags;               /* some flags */ /* todo simon - is this necessary? */
+    SWF_S32 x;                   /* move to X value, relative to shape origin i.e draw line from last point to here */
+    SWF_S32 y;                   /* move to Y value, relative to shape origin */
+    int fillstyle0;              /* fill style 0 change flag */
+    int fillstyle1;              /* fill style 1 change flag */
+    int linestyle;               /* line style change flag */
+    swf_shapestyle * shapestyle; /* the stle of the shape */
+    SWF_S32 ax;                  /* the x anchor for a curve */
+    SWF_S32 ay;                  /* the y anchor for a curve */
+    SWF_S32 cx;                  /* the x end point for a curve */
+    SWF_S32 cy;                  /* the y end point for a curve */
 
-    swf_shaperecord * next;
+    swf_shaperecord * next;      /* next element in the list */
+
+    /* todo simon : this is extremley b0rked at the moment I think */
 };
 
 struct swf_shaperecord_list {
     int record_count;
 
-    swf_shaperecord * first;
+    swf_shaperecord * first;    /* todo simon : this needs to be fixed */
     swf_shaperecord ** lastp;
 };
 
 struct swf_button2action {
 
-	SWF_U32 tagid;
+	SWF_U32 tagid;      /* todo simon */
 };
 
 struct swf_button2action_list {
-        swf_button2action ** actions;
+        swf_button2action ** actions;   /* todo simon : this needs to be turned into a linked list */
         int action_count;
 };
 
