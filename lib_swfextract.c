@@ -16,6 +16,9 @@
  *
  *
  * $Log: lib_swfextract.c,v $
+ * Revision 1.13  2001/07/15 23:07:20  clampr
+ * gargh, make a null pointer?
+ *
  * Revision 1.12  2001/07/14 00:42:35  clampr
  * swf_realloc - does the 'right' thing for realloc(NULL, n)
  *
@@ -244,7 +247,7 @@ get_text (swf_extractor * swf, int * error)
     /* parse all the tags */
     do {
         /* reset the error, just to be paranoid */
-        error = SWF_ENoError;
+        *error = SWF_ENoError;
 
         #ifdef DEBUG
         //fprintf (stderr, "[get_text : getting next_id]\n");
