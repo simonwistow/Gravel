@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 #include "swf_types.h"
+#include "swf_file.h"
 
 /* 
  * Have never seen a movie in the wild with a frame rate > 15. 
@@ -81,18 +82,3 @@ void swf_dump_shape (swf_movie * movie, int * error, swf_tagrecord * temp);
 swf_linestyle * swf_make_linestyle(int * error);
 swf_fillstyle * swf_make_fillstyle(int * error);
 
-void swf_movie_initbits(swf_movie * movie);
-void swf_movie_flush_bits (swf_movie * context);
-
-void swf_movie_seek (swf_movie * context, int pos);
-
-void swf_movie_put_byte(swf_movie * context, int * error, SWF_U8 byte);
-void swf_movie_put_bytes (swf_movie * context, int * error, int nbytes, SWF_U8 * bytes);
-
-void swf_movie_put_bits (swf_movie * context, SWF_U8 n, SWF_U32 bits);
-void swf_movie_put_sbits (swf_movie * context, SWF_U8 n, SWF_S32 bits);
-
-void swf_movie_put_word(swf_movie * context, int * error, SWF_U16 word);
-void swf_movie_put_dword(swf_movie * context, int * error, SWF_U32 dword);
-
-void swf_movie_put_string(swf_movie * context, int * error, char * mystring);

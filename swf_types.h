@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.29  2002/05/31 10:08:20  muttley
+ * Split file read and write stuff into a separate file.
+ *
  * Revision 1.28  2002/05/28 17:12:21  kitty_goth
  * start doing some lowlevel stuff (I was bored...)
  *
@@ -417,7 +420,11 @@ struct swf_parser {
     int stream_sample_stereo_mono;
     int n_stream_samples;
 
-	swf_font_extra *font_extras;
+    swf_font_extra *font_extras;
+
+    /* stuff for chunk parsing */
+    SWF_U8* chunk;
+
 };
 
 struct swf_tagrecord {
