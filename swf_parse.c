@@ -16,6 +16,11 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.16  2001/07/04 17:03:18  uid56115
+ * Minor change to actually parse the glyphs through the
+ * shaperecord parser. Might need some cleanup and checking code.
+ * Some TODO's removed (Closed) -- Kitty
+ *
  * Revision 1.15  2001/06/30 12:33:18  kitty_goth
  * Move to a linked list representation of shaperecords - I was getting
  * SEGFAULT due to not large enough free chunk's. Seems much faster now.
@@ -759,8 +764,7 @@ swf_parse_definefont (swf_parser * context, int * error)
         xlast = 0;
         ylast = 0;
 
-        font->shape_records[n] = NULL; 
-/* TODO swf_parse_get_shaperecords(context, error);*/
+        font->shape_records[n] = swf_parse_get_shaperecords(context, error);
     }
 
     free (offset_table);
@@ -981,7 +985,6 @@ swf_parse_defineshape_aux (swf_parser * context, int * error, int with_alpha)
     context->fill_bits = (U16) swf_parse_get_bits (context, 4);
     context->line_bits = (U16) swf_parse_get_bits (context, 4);
 
-/* TODO simon */
     if ((shape->record = swf_parse_get_shaperecords (context,error)) == NULL) {
         goto FAIL;
     }
@@ -1862,10 +1865,11 @@ swf_parse_definemorphshape (swf_parser * context, int * error)
 
 
     /* Parse the start shape */
-    if ((shape->records1 = swf_parse_get_shaperecords (context, error)) == NULL) { goto FAIL; }
+    if ((shape->records1 = swf_parse_get_shaperecords (context, error)) == NULL) { 
+	goto FAIL; 
+    }
 
-    if (swf_parse_tell(context) != end_shape_pos)
-    {
+    if (swf_parse_tell(context) != end_shape_pos) {
     	/* todo simon : probably should handle this after I've written get_shaperecords */
     }
 
@@ -1880,7 +1884,6 @@ swf_parse_definemorphshape (swf_parser * context, int * error)
     context->line_bits = swf_parse_get_bits(context, 4); /* there are no styles so none of this make sense. */
 
 
-
     /*
      * Parse the end shape
      */
@@ -1890,7 +1893,7 @@ swf_parse_definemorphshape (swf_parser * context, int * error)
 
     return shape;
 
-    FAIL:
+ FAIL:
     swf_destroy_definemorphshape (shape);
     return NULL;
 }
@@ -2395,7 +2398,7 @@ swf_parse_get_textrecord (swf_parser * context, int * error, int has_alpha, int 
 
     return record;
 
-    FAIL:
+ FAIL:
     swf_destroy_textrecord (record);
     return NULL;
 
@@ -2438,15 +2441,12 @@ swf_parse_get_textrecords (swf_parser * context, int * error, int has_alpha, int
 swf_shaperecord_list *
 swf_parse_get_shaperecords (swf_parser * context, int * error)
 {
-    /* TODO */
-
     int xlast = 0;
     int ylast = 0;
     int at_end = FALSE;
 
     swf_shaperecord_list * list;
     swf_shaperecord * temp;
-
 
     if ((list = (swf_shaperecord_list *) calloc (1, sizeof (swf_shaperecord_list))) == NULL) {
         *error = SWF_EMallocFailure;
