@@ -19,9 +19,7 @@ our $VERSION = '0.10';
 
 sub new {
     my $class = shift;
-    my $g = shift;
-
-    my $self = $class->SUPER::new($g, @_);
+    my $self = $class->SUPER::new(@_);
 
     my $cf = ref($_[0]);
     my %conf;
@@ -36,8 +34,8 @@ sub new {
     $self->{_end} = $conf{end};
     $self->{_depth} = $conf{depth} || 1;
 
-    $self->{_stang} = $conf{start_ang};
-    $self->{_endang} = $conf{end_ang};
+    $self->{_stang} = $conf{start_ang} * 2 * 3.142 / 360;
+    $self->{_endang} = $conf{end_ang} * 2 * 3.142 / 360;
 
     return $self;
 }
@@ -59,7 +57,11 @@ sub matrices {
 	my $theta = $self->{_stang};
 	for (my $i = $self->{_start}; $i < $self->{_end}; ++$i) {
 
-		my $m = Gravel::Matrix->new();
+		my $cos = cos $theta;
+		my $sin = sin $theta;
+
+		my $m = Gravel::Matrix->new(a => $cos, b => -$sin,
+									c => $sin, d => $cos );
 
 		$theta += $dth;
 		$ra_m->[$i] = $m;

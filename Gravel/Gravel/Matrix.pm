@@ -54,10 +54,30 @@ sub new {
 
 #
 
+sub combine {
+	my $self = shift;
+	my $comb = shift;
+
+	$self->{_x} += $comb->{_x};
+	$self->{_y} += $comb->{_y};
+
+	my ($a, $b, $c, $d);
+
+	$a = $self->{_a} * $comb->{_a} + $self->{_b} * $comb->{_c};
+	$b = $self->{_a} * $comb->{_b} + $self->{_b} * $comb->{_d};
+
+	$c = $self->{_c} * $comb->{_a} + $self->{_d} * $comb->{_c};
+	$d = $self->{_c} * $comb->{_b} + $self->{_d} * $comb->{_d};
+
+	($self->{_a}, $self->{_b}) = ($a, $b);
+	($self->{_c}, $self->{_d}) = ($c, $d);
+}
+
+#
+
 sub add {
 	my $self = shift;
 }
-
 
 #
 

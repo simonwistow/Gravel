@@ -196,7 +196,7 @@ sub set_fill {
 sub action {
     my $self = shift;
 	my $e = shift;
-	return Gravel::Actor->new({shape => $self, effect => $e, });
+	return Gravel::Actor->new({shape => $self, effect => $e, start => $e->start, end => $e->end,});
 }
 
 

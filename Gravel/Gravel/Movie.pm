@@ -682,7 +682,7 @@ swf_matrix* _matrix_from_frame(int * error, HV * h_frame) {
 	SV** ph_matrix;
 	HV*  h_matrix;
 	SV** p_num;
-	SV*  num;
+	double num;
 
 	if (*error) {
 		return;
@@ -702,19 +702,23 @@ swf_matrix* _matrix_from_frame(int * error, HV * h_frame) {
 
 		p_num = hv_fetch(h_matrix, "_a", 2, 0);
 		if (NULL != p_num) {
-			matrix->a = MATRIX_SCALE * (SFIXED)(SvIV(*p_num));
+			num = (double)(SvNV(*p_num));
+			matrix->a = (SFIXED)(MATRIX_SCALE * num);
 		}
 		p_num = hv_fetch(h_matrix, "_b", 2, 0);
 		if (NULL != p_num) {
-			matrix->b = MATRIX_SCALE * (SFIXED)(SvIV(*p_num));
+			num = (double)(SvNV(*p_num));
+			matrix->b = (SFIXED)(MATRIX_SCALE * num);
 		}
 		p_num = hv_fetch(h_matrix, "_c", 2, 0);
 		if (NULL != p_num) {
-			matrix->c = MATRIX_SCALE * (SFIXED)(SvIV(*p_num));
+			num = (double)(SvNV(*p_num));
+			matrix->c = (SFIXED)(MATRIX_SCALE * num);
 		}
 		p_num = hv_fetch(h_matrix, "_d", 2, 0);
 		if (NULL != p_num) {
-			matrix->d = MATRIX_SCALE * (SFIXED)(SvIV(*p_num));
+			num = (double)(SvNV(*p_num));
+			matrix->d = (SFIXED)(MATRIX_SCALE * num);
 		}
 
 		p_num = hv_fetch(h_matrix, "_x", 2, 0);

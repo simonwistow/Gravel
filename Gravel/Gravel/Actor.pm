@@ -38,6 +38,9 @@ sub new {
 	$self->{_shape} = $conf{shape};
 	$self->{_effects} = [$conf{effect}];
 
+	$self->{_start} = $conf{start};
+	$self->{_end} = $conf{end};
+
     bless $self => $class;
 
     return $self;
@@ -99,8 +102,61 @@ sub end {
 
 #
 
+sub merge_matrix {
+	my $self = shift;
+	my $ra_m = shift;
+	my $j = shift;
+
+	my $m = Gravel::Matrix->new();
+	my $num_fx = scalar(@{$self->{_effects}});
+
+	for (my $i = 0; $i < $num_fx; ++$i) {
+		$m->combine($ra_m->[$i]->[$j]) if defined $ra_m->[$i]->[$j];
+	}
+
+	return $m;
+}
+
+
 # FIXME: Multiple effects
 sub frames {
+	my $self = shift;
+
+	my $m = [];
+	my $ra_m = [];
+
+	my $num_fx = scalar(@{$self->{_effects}});
+
+	return $self->frames_single if $num_fx == 1;
+
+	for (my $i = 0; $i < $num_fx; ++$i ) {
+		$ra_m->[$i] = $self->{_effects}->[$i]->matrices();
+	}
+
+	my $start = $self->start;
+	my $end = $self->end;
+
+	# FIXME: Depth merging...
+	my $depth = $self->{_effects}->[0]->depth;
+
+#	print STDERR DumperX $ra_m;
+
+	for (my $j = $start; $j < $end; ++$j ) {
+		my $mx = $self->merge_matrix($ra_m, $j);
+		my $f = Gravel::Frame->new({matrix => $mx, shape => $self->{_shape},
+								    depth => $depth, });
+
+#		print STDERR DumperX $f;
+
+		$m->[$j] = $f;
+	}
+
+	return $m;
+}
+
+#
+
+sub frames_single {
 	my $self = shift;
 
 	my $m = [];
