@@ -16,6 +16,9 @@
  *
  *
  * $Log: parser.c,v $
+ * Revision 1.21  2001/07/19 03:34:01  clampr
+ * insomnia-led layout delta o' the day
+ *
  * Revision 1.20  2001/07/16 15:05:15  clampr
  * get rid of glib due to randomness (I suspect it may have been a dynamic linking issue)
  *
@@ -146,8 +149,8 @@ main (int argc, char *argv[])
     swf = swf_parse_create(argv[1], &error);
 
     if (swf == NULL) {
-	fprintf (stderr, "Failed to create SWF context\n");
-	return -1;
+		fprintf (stderr, "Failed to create SWF context\n");
+		return -1;
     }
     printf ("Name of file is '%s'\n", swf->name);
 
@@ -179,7 +182,6 @@ main (int argc, char *argv[])
         if (error != SWF_ENoError)
         {
 	        fprintf (stderr, "ERROR: There was an error parsing the next id  : '%s'\n",  swf_error_code_to_string(error));
-
         }
 
         error = SWF_ENoError;
@@ -187,154 +189,154 @@ main (int argc, char *argv[])
         printf ("%s [%ld]\n",tag[next_id], next_id);
         switch (next_id)
         {
-		    case tagEnd :
-			            parse_end (swf, str);
-			            break;
+		case tagEnd :
+			parse_end (swf, str);
+			break;
+			
+		case tagShowFrame:
+			parse_frame (swf, str);
+			break;
 
-		    case tagShowFrame:
-			            parse_frame (swf, str);
-			            break;
+		case tagSetBackgroundColour:
+			parse_setbackgroundcolour (swf, str);
+			break;
 
-		    case tagSetBackgroundColour:
-			            parse_setbackgroundcolour (swf, str);
-			            break;
+		case tagDefineFont:
+			parse_definefont (swf, str);
+			break;
 
-		    case tagDefineFont:
-			            parse_definefont (swf, str);
-			            break;
+		case tagDefineFont2:
+			parse_definefont2 (swf, str);
+			break;
 
-        	case tagDefineFont2:
-			            parse_definefont2 (swf, str);
-			            break;
+		case tagDefineFontInfo:
+			parse_definefontinfo (swf, str);
+			break;
 
-		    case tagDefineFontInfo:
-			            parse_definefontinfo (swf, str);
-			            break;
+		case tagPlaceObject:
+			parse_placeobject (swf, str);
+			break;
 
-		    case tagPlaceObject:
-			            parse_placeobject (swf, str);
-			            break;
+		case tagPlaceObject2:
+			parse_placeobject2 (swf, str);
+			break;
 
-		    case tagPlaceObject2:
-			            parse_placeobject2 (swf, str);
-        			    break;
+		case tagRemoveObject:
+			parse_removeobject (swf, str);
+			break;
 
-		    case tagRemoveObject:
-			            parse_removeobject (swf, str);
-			            break;
+		case tagRemoveObject2:
+			parse_removeobject2 (swf, str);
+			break;
 
-		    case tagRemoveObject2:
-            			parse_removeobject2 (swf, str);
-			            break;
+		case tagDefineShape:
+			parse_defineshape (swf, str);
+			break;
 
-		    case tagDefineShape:
-            	    	parse_defineshape (swf, str);
-            	    	break;
+		case tagDefineShape2:
+			parse_defineshape2 (swf, str);
+			break;
 
-		    case tagDefineShape2:
-            	    	parse_defineshape2 (swf, str);
-            	    	break;
+		case tagDefineShape3:
+			parse_defineshape3 (swf, str);
+			break;
 
-		    case tagDefineShape3:
-            	    	parse_defineshape3 (swf, str);
-            	    	break;
+		case tagDefineMorphShape:
+			parse_definemorphshape (swf, str);
+			break;
+			
+		case tagFreeCharacter:
+			parse_freecharacter (swf, str);
+			break;
+			
+		case tagNameCharacter:
+			parse_namecharacter (swf, str);
+			break;
 
-		    case tagDefineMorphShape:
-			            parse_definemorphshape (swf, str);
-			            break;
+		case tagProtect:
+			/* Ignore.
+			 * Its presence says that we should
+			 * not be examining this file. Pah
+			 */
+			break;
 
-		    case tagFreeCharacter:
-            	    	parse_freecharacter (swf, str);
-            	    	break;
+		case tagStartSound:
+			parse_startsound (swf, str);
+			break;
 
-		    case tagNameCharacter:
-            	    	parse_namecharacter (swf, str);
-            	    	break;
+		case tagDefineBits:
+			parse_definebits (swf, str);
+			break;
 
-		    case tagProtect:
-            	    	/* Ignore.
-             	    	 * Its presence says that we should
-              	    	 * not be examining this file. Pah
-             	    	 */
-            	    	break;
+		case tagJPEGTables:
+			parse_jpegtables (swf, str);
+			break;
+						
+		case tagDefineBitsJPEG2:
+			parse_definebitsjpeg2 (swf, str);
+			break;
 
-		    case tagStartSound:
-            	        parse_startsound (swf, str);
-            	        break;
+		case tagDefineBitsJPEG3:
+			parse_definebitsjpeg3 (swf, str);
+			break;
 
-		    case tagDefineBits:
-			            parse_definebits (swf, str);
-			            break;
+		case tagDefineText:
+			parse_definetext (swf, str);
+			break;
 
-		    case tagJPEGTables:
-            	        parse_jpegtables (swf, str);
-            	        break;
+		case tagDefineText2:
+			parse_definetext2 (swf, str);
+			break;
 
-		    case tagDefineBitsJPEG2:
-            	        parse_definebitsjpeg2 (swf, str);
-            	        break;
+		case tagDefineButton:
+			parse_definebutton (swf, str);
+			break;
 
-		    case tagDefineBitsJPEG3:
-            	        parse_definebitsjpeg3 (swf, str);
-            	        break;
+		case tagDefineButton2:
+			parse_definebutton2 (swf, str);
+			break;
 
-		    case tagDefineText:
-            	        parse_definetext (swf, str);
-            	        break;
+		case tagDefineButtonSound:
+			parse_definebuttonsound (swf, str);
+			break;
 
-		    case tagDefineText2:
-            	        parse_definetext2 (swf, str);
-            	        break;
+		case tagDefineEditText:
+			parse_defineedittext (swf, str);
+			break;
 
-		    case tagDefineButton:
-            	        parse_definebutton (swf, str);
-            	        break;
+		case tagDefineSound:
+			parse_definesound (swf, str);
+			break;
 
-		    case tagDefineButton2:
-            	        parse_definebutton2 (swf, str);
-            	        break;
+		case tagFrameLabel:
+			parse_framelabel (swf, str);
+			break;
 
-		    case tagDefineButtonSound:
-                        parse_definebuttonsound (swf, str);
-                        break;
+		case tagDefineButtonCxform:
+			parse_definebuttoncxform (swf, str);
+			break;
+			
+		case tagSoundStreamBlock:
+			parse_soundstreamblock (swf, str);
+			break;
+			
+		case tagSoundStreamHead:
+			parse_soundstreamhead (swf, str);
+			break;
 
-		    case tagDefineEditText:
-			            parse_defineedittext (swf, str);
-			            break;
+		case tagSoundStreamHead2:
+			parse_soundstreamhead2 (swf, str);
+			break;
 
-		    case tagDefineSound:
-                        parse_definesound (swf, str);
-                        break;
+		case tagDoAction:
+			parse_doaction (swf, str);
+			break;
 
-		    case tagFrameLabel:
-                        parse_framelabel (swf, str);
-                        break;
-
-		    case tagDefineButtonCxform:
-                        parse_definebuttoncxform (swf, str);
-                        break;
-
-		    case tagSoundStreamBlock:
-			            parse_soundstreamblock (swf, str);
-			            break;
-
-		    case tagSoundStreamHead:
-                        parse_soundstreamhead (swf, str);
-                        break;
-
-		    case tagSoundStreamHead2:
-                        parse_soundstreamhead2 (swf, str);
-                        break;
-
-            case tagDoAction:
-                        parse_doaction (swf, str);
-                        break;
-
-		    default:
+		default:
 			printf ("%s%s [%ld]\n", str, tag[next_id], next_id);
 			break;
         }
-
+		
         if (error != SWF_ENoError)
         {
 	        fprintf (stderr, "ERROR: There was an error parsing the last tag : '%s'  : '%s'\n", tag[next_id], swf_error_code_to_string(error));
@@ -352,7 +354,7 @@ main (int argc, char *argv[])
 
     return 0;
 
-    FAIL:
+ FAIL:
     swf_destroy_parser(swf);
     return -1;
 }
@@ -367,14 +369,12 @@ parse_frame (swf_parser * context, const char * str)
     context->frame++;
     printf("%stagShowFrame\n", str);
     printf("\n<----- dumping frame %ld file offset 0x%04x ----->\n", context->frame, swf_parse_tell(context));
-
 }
 
 void
 parse_end (swf_parser * context, const char * str)
 {
 	printf("%stagEnd\n", str);
-
 }
 
 void
@@ -393,10 +393,9 @@ parse_setbackgroundcolour (swf_parser * context, const char * str)
 
 	colour = (back->colour->r << 16) | (back->colour->g << 8) | back->colour->b;
 
-    	printf("%stagSetBackgroundColor \tRGB_HEX %06lx\n", str, colour);
+	printf("%stagSetBackgroundColor \tRGB_HEX %06lx\n", str, colour);
 
     swf_destroy_setbackgroundcolour (back);
-
 }
 
 
@@ -405,7 +404,6 @@ parse_setbackgroundcolour (swf_parser * context, const char * str)
 void
 parse_definefont (swf_parser * context, const char * str)
 {
-
     int error = SWF_ENoError;
     int n=0;
 
@@ -427,7 +425,6 @@ parse_definefont (swf_parser * context, const char * str)
     }
 
 	swf_destroy_definefont (font);
-	return;
 }
 
 
@@ -453,6 +450,7 @@ parse_definefontinfo (swf_parser * context, const char * str)
     printf("%s\tNameLen: '%i'\n", str, info->namelen);
   	printf("%s\tFontName: '%s'\n", str, info->fontname);
 	printf("%s\t", str);
+
 	for(n=0; n < extra->n; n++)
 	{
         	printf("[%d,'%c'] ", info->code_table[n], (char) info->code_table[n]);
@@ -461,7 +459,6 @@ parse_definefontinfo (swf_parser * context, const char * str)
 	printf("\n\n");
 
     swf_destroy_definefontinfo (info);
-	return;
 }
 
 
@@ -489,7 +486,6 @@ parse_placeobject (swf_parser * context, const char * str)
     }
 
     swf_destroy_placeobject (place);
-    return;
 }
 
 
@@ -517,7 +513,6 @@ parse_placeobject2 (swf_parser * context, const char * str)
     /* Get the tag if specified. */
     if (place->flags & splaceCharacter)
     {
-
         printf("tag %-5lu\n", place->tag);
     }
     else
@@ -527,8 +522,7 @@ parse_placeobject2 (swf_parser * context, const char * str)
 
     /* Get the matrix if specified. */
     if (place->flags & splaceMatrix)
-    {
-
+	{
         print_matrix(place->matrix, str);
     }
 
@@ -559,12 +553,7 @@ parse_placeobject2 (swf_parser * context, const char * str)
         printf("instance name %s\n", place->name);
     }
 
-
-
-
     swf_destroy_placeobject2 (place);
-
-    return;
 }
 
 
@@ -596,21 +585,13 @@ parse_defineshape_aux (swf_parser * context, int with_alpha, const char * str)
 
     print_shapestyle (shape->style, str);
 
-
     swf_destroy_defineshape (shape);
-
-
-    return;
-
-
 }
 
 void
 parse_defineshape (swf_parser * context, const char * str)
 {
     parse_defineshape_aux (context, FALSE, str);
-    return;
-
 }
 
 void
@@ -618,7 +599,6 @@ parse_defineshape2 (swf_parser * context, const char * str)
 {
     printf("%stagDefineShape2 -> ", str);
     parse_defineshape_aux (context, FALSE, str);
-
 }
 
 void
@@ -626,7 +606,6 @@ parse_defineshape3 (swf_parser * context, const char * str)
 {
     printf("%stagDefineShape3 -> ", str);
     parse_defineshape_aux (context, TRUE, str);
-
 }
 
 void
@@ -642,13 +621,9 @@ parse_freecharacter (swf_parser * context, const char * str)
     }
 
 
-
     printf("%stagFreeCharacter \ttagid %-5lu\n", str, character->tagid);
 
     swf_destroy_freecharacter (character);
-
-    return;
-
 }
 
 void
@@ -667,15 +642,11 @@ parse_removeobject (swf_parser * context, const char * str)
     printf("%stagRemoveObject \ttagid %-5lu depth %-5lu\n", str, object->tagid, object->depth);
 
     swf_destroy_removeobject (object);
-
-    return;
-
 }
 
 void
 parse_removeobject2 (swf_parser * context, const char * str)
 {
-
     int error = SWF_ENoError;
     swf_removeobject2 * object = swf_parse_removeobject2 (context, &error);
 
@@ -689,8 +660,6 @@ parse_removeobject2 (swf_parser * context, const char * str)
     printf("%stagRemoveObject2 depth %-5lu\n", str, object->depth);
 
     swf_destroy_removeobject2 (object);
-    return;
-
 }
 
 void
@@ -704,7 +673,6 @@ parse_startsound (swf_parser *  context, const char * str)
     print_startsound (sound, str);
 
     swf_destroy_startsound (sound);
-
 }
 
 
@@ -712,7 +680,6 @@ void
 parse_stopsound (swf_parser * context, const char * str)
 {
     printf("%stagStopSound\n", str);
-    return;
 }
 
 void
@@ -720,7 +687,6 @@ parse_definebits (swf_parser * context, const char * str)
 {
     int error = SWF_ENoError;
     swf_definebits * bits  = swf_parse_definebits (context, &error);
-
 
     if (bits == NULL) {
         fprintf (stderr, "ERROR : couldn't parse DefineBits : '%s'\n", swf_error_code_to_string(error));
@@ -731,8 +697,6 @@ parse_definebits (swf_parser * context, const char * str)
 
     print_imageguts (bits->guts, str);
     swf_destroy_definebits (bits);
-
-    return;
 }
 
 void
@@ -751,9 +715,6 @@ parse_definebitsjpeg2 (swf_parser * context, const char * str)
     print_imageguts (bits->guts, str);
 
     swf_destroy_definebitsjpeg2 (bits);
-
-    return;
-
 }
 
 void
@@ -772,8 +733,6 @@ parse_definebitsjpeg3 (swf_parser * context, const char * str)
     print_imageguts (bits->guts, str);
 
     swf_destroy_definebitsjpeg3 (bits);
-
-    return;
 }
 
 void
@@ -790,14 +749,7 @@ parse_jpegtables (swf_parser * context, const char * str)
     printf("%stagJPEGTables\n", str);
     print_imageguts (tables->guts, str);
 
-
-
     swf_destroy_jpegtables (tables);
-
-
-
-    return;
-
 }
 
 void
@@ -813,13 +765,9 @@ parse_definetext (swf_parser * context, const char * str)
 
     printf("%stagDefineText \t\ttagid %-5lu\n", str, text->tagid);
 
-
-
     print_rect(text->rect, str);
 
     print_matrix(text->matrix, str);
-
-
 
     printf("%s\tnGlyphBits: nAdvanceBits:\n", str);
 
@@ -827,9 +775,6 @@ parse_definetext (swf_parser * context, const char * str)
     printf("\n");
 
     swf_destroy_definetext (text);
-
-    return;
-
 }
 
 void
@@ -849,18 +794,12 @@ parse_definetext2 (swf_parser * context, const char * str)
 
     print_matrix(text->matrix, str);
 
-
-
     printf("%s\tnGlyphBits: nAdvanceBits:\n", str);
-
 
     print_textrecords (text->records, str, context);
     printf("\n");
 
     swf_destroy_definetext2 (text);
-
-    return;
-
 }
 
 void
@@ -880,7 +819,6 @@ parse_definebutton (swf_parser * context, const char * str)
     print_doactions (button->actions, str);
 
     swf_destroy_definebutton (button);
-    return;
 }
 
 
@@ -901,7 +839,6 @@ parse_definebutton2 (swf_parser * context, const char * str)
     print_button2actions (button->actions, str);
 
     swf_destroy_definebutton2 (button);
-    return;
 }
 
 
@@ -940,7 +877,6 @@ parse_defineedittext (swf_parser * context, const char * str)
     printf("\n");
 
     swf_destroy_defineedittext (text);
-    return;
 }
 
 
@@ -960,9 +896,6 @@ parse_definefont2 (swf_parser * context, const char * str)
 
     if (font->glyph_count > 0)
     {
-
-
-
         /* Get the Glyphs */
         for(n=0; n<font->glyph_count; n++)
         {
@@ -979,20 +912,20 @@ parse_definefont2 (swf_parser * context, const char * str)
         {
             if (font->flags & sfontFlagsWideOffsets) {
                 printf("%02x:[%04lx] ", i, font->code_table[i]);
-            } else {
+            } 
+			else {
                 printf("%02x:[%c] ", i, (char) font->code_table[i]);
-	    }
+			}
 
             if ((i & 7) == 7) {
                 printf("\n%s", str);
-	    }
+			}
         }
         printf("\n");
     }
 
     if (font->flags & sfontFlagsHasLayout)
     {
-
         /* Get "layout" fields */
         printf("\n%sHasLayout: iAscent:%d iDescent:%d iLeading:%d\n", str, font->ascent, font->descent, font->leading);
 
@@ -1013,7 +946,6 @@ parse_definefont2 (swf_parser * context, const char * str)
     }
 
     swf_destroy_definefont2 (font);
-    return;
 }
 
 
@@ -1043,8 +975,6 @@ parse_definemorphshape (swf_parser * context, const char * str)
     print_shape_records (shape->records2);
 
     swf_destroy_definemorphshape (shape);
-    return;
-
 }
 
 
@@ -1072,16 +1002,12 @@ parse_definesound (swf_parser * context, const char * str)
     const char* StereoMono        = (sound->stereo_mono == 0 ? "mono" : "stereo");
 
 
-
     if (sound == NULL) {
         fprintf (stderr, "ERROR : couldn't parse DefineSound : '%s'\n", swf_error_code_to_string(error));
         return;
     }
 
     printf("%stagDefineSound: ", str);
-
-
-
 
 
     printf("%s %skHz %s-bit %s NumberOfSamples:%d (%08x)\n",
@@ -1108,9 +1034,8 @@ parse_definesound (swf_parser * context, const char * str)
     printf ("\n");
 
     swf_destroy_definesound (sound);
-
-    return;
 }
+
 
 void
 parse_framelabel (swf_parser * context, const char * str)
@@ -1125,8 +1050,6 @@ parse_framelabel (swf_parser * context, const char * str)
     printf("%stagFrameLabel lable \"%s\"\n", str, label->label);
 
     swf_destroy_framelabel (label);
-
-    return;
 }
 
 
@@ -1144,8 +1067,6 @@ parse_namecharacter (swf_parser * context, const char * str)
     printf("%stagNameCharacter \ttagid %-5lu label '%s'\n", str, name->tagid, name->label);
 
     swf_destroy_namecharacter(name);
-
-    return;
 }
 
 
@@ -1165,9 +1086,7 @@ parse_definebuttoncxform (swf_parser * context, const char * str)
         print_cxform(button->cxforms[i], str);
     }
 
-
     swf_destroy_definebuttoncxform (button);
-    return;
 }
 
 void
@@ -1194,7 +1113,6 @@ parse_definebuttonsound (swf_parser * context, const char * str)
     if (button->down_state->tagid) { print_startsound (button->down_state, str); }
 
     swf_destroy_definebuttonsound (button);
-    return;
 }
 
 void
@@ -1212,19 +1130,18 @@ parse_soundstreamblock (swf_parser * context, const char * str)
 
     switch (block->stream_compression)
     {
-        case 0:
-            printf("%s  uncompressed samples\n", str);
-            break;
-
-        case 1:
-            print_adpcm (block->adpcm, str);
-            break;
-
-        case 2:
-            printf("%s  MP3: SamplesPerFrame:%d Delay:%d\n", str, block->samples_per_frame, block->delay);
-			print_mp3header_list (block->mp3header_list, str);
+	case 0:
+		printf("%s  uncompressed samples\n", str);
+		break;
+		
+	case 1:
+		print_adpcm (block->adpcm, str);
+		break;
+		
+	case 2:
+		printf("%s  MP3: SamplesPerFrame:%d Delay:%d\n", str, block->samples_per_frame, block->delay);
+		print_mp3header_list (block->mp3header_list, str);
     }
-
 
     swf_destroy_soundstreamblock (block);
 }
@@ -1243,8 +1160,6 @@ parse_soundstreamhead (swf_parser * context, const char * str)
     print_soundstreamhead (head, str, FALSE);
 
     swf_destroy_soundstreamhead (head);
-    return;
-
 }
 
 
@@ -1261,9 +1176,6 @@ parse_soundstreamhead2 (swf_parser * context, const char * str)
 
     print_soundstreamhead (head, str, TRUE);
     swf_destroy_soundstreamhead (head);
-
-    return;
-
 }
 
 void parse_doaction (swf_parser * context, const char * str)
@@ -1280,7 +1192,6 @@ void parse_doaction (swf_parser * context, const char * str)
     print_doactions (actions, str);
 
     swf_destroy_doaction_list (actions);
-
 }
 
 
