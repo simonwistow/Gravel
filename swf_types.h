@@ -16,8 +16,8 @@
  *
  *
  * $Log: swf_types.h,v $
- * Revision 1.8  2001/06/22 17:16:51  muttley
- * Fixed get_textrecords and get_textrecord and associated destructors and printers
+ * Revision 1.9  2001/06/26 13:45:58  muttley
+ * Change swf_text_records
  *
  */
 
@@ -465,7 +465,7 @@ struct swf_definetext {
     U32 tagid;
     swf_rect    * rect;
     swf_matrix  * matrix;
-    swf_textrecord * records;
+    swf_textrecord_list * records;
 };
 
 
@@ -473,7 +473,7 @@ struct swf_definetext2 {
     U32 tagid;
     swf_rect    * rect;
     swf_matrix  * matrix;
-    swf_textrecord  * records;
+    swf_textrecord_list  * records;
 };
 
 
@@ -699,8 +699,8 @@ struct swf_textrecord {
 
 
 struct swf_textrecord_list {
-        swf_textrecord ** records;
-        int record_count;
+        swf_textrecord * first;
+        swf_textrecord ** lastp;
 };
 
 struct swf_buttonrecord {
