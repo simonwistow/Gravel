@@ -1,7 +1,7 @@
 ==============
   MISCELLANY
 ==============
-* convert records (shape, button) to being linked lists rather than the kludges they are now
+* convert records (shape) to being linked lists rather than the kludges they are now
 * get the records to actually work. At the moment they don't
 * ... then write the stuff to print them out
 * sound viz context stuff
@@ -10,40 +10,35 @@
 * wrap in XS
 * go through and check for memory leaks and stuff
 * make it a proper shared library
-* go through and take out all the 'todos' (27 of them I think)
+* go through and take out all the 'todos' (22 of them I think)
 
-/home/simon/libswfparse % cat  *.c | grep todo | wc -l
-      27
+[home/simon/gravel/libswfparse]$ grep todo *.[ch]|  perl -ne 's!^\s*(/.\s*)*!!; s!(.+?)\*\/!$1!; print $_ unless (/^\s*\*/)' | wc -l
+      22
 
-/home/simon/libswfparse % cat  *.c | grep todo | perl -npe 's!^\s*(/.\s*)*!!'
-todo simon : printshaperecords */
-todo simon : no info is shown here - hmmm */
-todo simon */
-todo simon : change sample_stereo_mono */
-todo simon */
-todo simon
-todo simon
-todo simon
-todo
-todo : pass back errors ?*/
-todo : h-h-h-hack?
-font->shape_records [n] = NULL; // todo simon swf_parse_get_shaperecords(context, error);
-todo simon
-todo simon
-todo simon : do these really need to be set in the context? */
-todo simon : should I return NULL here? */
-todo simon : does this need to be done ???*/
-todo simon : fills bits in context? Not convinced */
-todo simon : probably should handle this after I've written get_shaperecords */
-todo simon : fills bits in context? Not convinced */
-todo simon : check for null returns and panic */
-todo Simon
-todo simon?
-return list; //todo simon list;
-todo simon
-todo simon
-swf_parse_get_shaperecord (swf_parser * context, int * error, int at_end, int xlast, int ylast, int with_alpha) // todo simon
-
+[home/simon/gravel/libswfparse]$ grep -n todo *.[ch] |  perl -ne 'chomp;($name, $_) = split (/: /,$_);s!^\s*(/.\s*)*
+!!; s!(.+?)\*\/!$1!; print "$name: $_\n" unless (/^\s*\*/)'
+parser.c:954: todo simon
+parser.c:1020: todo simon
+parser.c:1039: todo simon
+parser.h:42:extern void parse_defineshape_aux       (swf_parser *, int, const char *); //todo make more consistent:
+print_utils.c:43: todo simon
+print_utils.c:80: todo simon
+print_utils.c:540:      //todo simon:
+print_utils.c:790: todo
+swf_parse.c:65://todo : since these are exported do they need to be declared final?
+swf_parse.c:219: todo
+swf_parse.c:666: todo
+swf_parse.c:718: todo :
+swf_parse.c:1729: todo :
+swf_parse.c:1788: todo simon
+swf_parse.c:1801:               /* todo simon : should I return NULL here?
+swf_parse.c:1830:       /* todo simon : does this need to be done ???
+swf_parse.c:2029: todo simon
+swf_parse.c:2040: todo simon
+swf_parse.c:2048: todo simon
+swf_parse.c:2060: todo simon
+swf_parse.c:2235: todo Simon
+swf_parse.c:2355: todo simon?
 
 
 
@@ -101,7 +96,7 @@ ParseDefineButton          | x |
 ---------------------------+---+
 ParseDefineButton2         | x |
 ---------------------------+---+
-ParseDoAction              |   |
+ParseDoAction              | x |
 ---------------------------+---+
 ParseDefineFont            | x |
 ---------------------------+---+

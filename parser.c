@@ -16,6 +16,11 @@
  *
  *
  * $Log: parser.c,v $
+ * Revision 1.11  2001/07/05 12:02:51  muttley
+ * Fixed parsing of ButtonRecords and DoActions
+ * Updated the types, destroy and print functions to cope with this
+ * Updated the todo, readme and manifest files to reflect this
+ *
  * Revision 1.10  2001/06/29 15:10:11  muttley
  * The printing of the actual text of a DefineText (and DefineText2 now)
  * is no longer such a big hack. Font information is kept in the swf_parser
@@ -293,6 +298,10 @@ main (int argc, char *argv[])
 
 		    case tagSoundStreamHead2:
                         parse_soundstreamhead2 (swf, str);
+                        break;
+
+            case tagDoAction:
+                        parse_doaction (swf, str);
                         break;
 
 		    default:
@@ -1257,5 +1266,19 @@ parse_soundstreamhead2 (swf_parser * context, const char * str)
 
 }
 
+void parse_doaction (swf_parser * context, const char * str)
+{
+    int error = SWF_ENoError;
+    swf_doaction_list * actions = swf_parse_get_doactions (context, &error);
 
+    if (actions == NULL) {
+        fprintf (stderr, "ERROR : couldn't parse DoAction : '%s'\n", swf_error_code_to_string(error));
+        return;
+    }
 
+    printf("%stagDoAction\n",  str);
+    print_doactions (actions, str);
+
+    swf_destroy_doaction_list (actions);
+
+}

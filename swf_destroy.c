@@ -16,6 +16,11 @@
  *
  *
  * $Log: swf_destroy.c,v $
+ * Revision 1.13  2001/07/05 12:02:51  muttley
+ * Fixed parsing of ButtonRecords and DoActions
+ * Updated the types, destroy and print functions to cope with this
+ * Updated the todo, readme and manifest files to reflect this
+ *
  * Revision 1.12  2001/06/30 12:33:18  kitty_goth
  * Move to a linked list representation of shaperecords - I was getting
  * SEGFAULT due to not large enough free chunk's. Seems much faster now.
@@ -177,7 +182,7 @@ swf_destroy_textrecord_list (swf_textrecord_list * list)
 
 	swf_destroy_textrecord(tmp);
     }
-    
+
     return;
 }
 
@@ -200,7 +205,7 @@ swf_destroy_shaperecord_list (swf_shaperecord_list * list)
 
 	swf_destroy_shaperecord(tmp);
     }
-    
+
     return;
 }
 
@@ -480,28 +485,43 @@ swf_destroy_buttonrecord (swf_buttonrecord * record)
 void
 swf_destroy_buttonrecord_list (swf_buttonrecord_list * list)
 {
-    int i=0;
 
-    if (list==NULL) {
-        return;
+
+    swf_buttonrecord *tmp, *node;
+
+    if (list==NULL)
+    {
+	    return;
     }
 
-    for (i=0; i<list->record_count; i++) {
-        swf_destroy_buttonrecord(list->records[i]);
+    *(list->lastp) = NULL;
+    node = list->first;
+
+    while (node != NULL)
+    {
+        tmp = node;
+        node = node->next;
+
+	    swf_destroy_buttonrecord(tmp);
     }
-    free (list->records);
 
     free (list);
-
     return;
 }
 
 void
 swf_destroy_doaction (swf_doaction * action)
 {
-    if (action==NULL) {
+    if (action==NULL)
+    {
         return;
     }
+
+    free (action->url);
+    free (action->target);
+    free (action->goto_label);
+    free (action->push_data_string);
+
     free (action);
 
     return;
@@ -510,19 +530,25 @@ swf_destroy_doaction (swf_doaction * action)
 void
 swf_destroy_doaction_list (swf_doaction_list * list)
 {
-    int i=0;
+    swf_doaction *tmp, *node;
 
-    if (list==NULL){
-        return;
+    if (list==NULL)
+    {
+	    return;
     }
 
-    for (i=0; i<list->action_count; i++) {
-        swf_destroy_doaction(list->actions[i]);
+    *(list->lastp) = NULL;
+    node = list->first;
+
+    while (node != NULL)
+    {
+        tmp = node;
+        node = node->next;
+
+	    swf_destroy_doaction(tmp);
     }
-    free (list->actions);
 
     free (list);
-
     return;
 }
 

@@ -16,6 +16,11 @@
  *
  *
  * $Log: print_utils.c,v $
+ * Revision 1.9  2001/07/05 12:02:51  muttley
+ * Fixed parsing of ButtonRecords and DoActions
+ * Updated the types, destroy and print functions to cope with this
+ * Updated the todo, readme and manifest files to reflect this
+ *
  * Revision 1.8  2001/06/29 15:10:11  muttley
  * The printing of the actual text of a DefineText (and DefineText2 now)
  * is no longer such a big hack. Font information is kept in the swf_parser
@@ -85,36 +90,47 @@ print_adpcm (swf_adpcm * adpcm,const char * str) {
 void
 print_buttonrecords (swf_buttonrecord_list * list,const char * str)
 {
-    int i, j;
+
+    swf_buttonrecord * node;
+    int j;
+
 
     if (list==NULL){
         return;
     }
 
-    for (i=0; i<list->record_count; i++) {
-
-            printf("%s\tParseButtonRecord: char:%ld layer:%ld ", str, list->records[i]->character, list->records[i]->layer);
 
 
-            if (list->records[i]->state_hit_test != 0)  printf("HIT ");
-            if (list->records[i]->state_down != 0)      printf("DOWN ");
-            if (list->records[i]->state_over != 0)      printf("OVER ");
-            if (list->records[i]->state_up != 0)        printf("UP ");
+
+
+    node = list->first;
+
+    while (node != NULL)
+    {
+
+
+            printf("%s\tParseButtonRecord: char:%ld layer:%ld ", str, node->character, node->layer);
+
+
+            if (node->state_hit_test != 0)  printf("HIT ");
+            if (node->state_down != 0)      printf("DOWN ");
+            if (node->state_over != 0)      printf("OVER ");
+            if (node->state_up != 0)        printf("UP ");
 
 
             printf("\n");
 
 
-            print_matrix (list->records[i]->matrix, str);
+            print_matrix (node->matrix, str);
 
-            for (j=0; j<list->records[i]->ncharacters; j++)
+            for (j=0; j<node->ncharacters; j++)
             {
 
-                    //print_cxform(list->records[i]->characters[j], str);
+                    print_cxform(node->characters[j], str);
 
             }
 
-
+            node = node->next;
 
     }
 
@@ -122,10 +138,404 @@ print_buttonrecords (swf_buttonrecord_list * list,const char * str)
 }
 
 void
-print_doactions (swf_doaction_list * actions,const char * str)
+print_doactions (swf_doaction_list * list, const char * str)
 {
-    //todo simon
+    swf_doaction * node;
+
+    if (list==NULL)
+    {
+        return;
+    }
+
+    node = list->first;
+
+    while (node != NULL)
+    {
+        print_doaction (node, str);
+        node = node->next;
+    }
+
     return;
+
+}
+
+void
+print_doaction (swf_doaction * action, const char * str)
+{
+
+        INDENT;
+        printf("%saction code 0x%02x ", str, action->code);
+        if (action->code == 0)
+        {
+            /* Action code of zero indicates end of actions */
+            printf("\n");
+            return;
+        }
+
+        switch ( action->code )
+        {
+            case sactionNextFrame:
+            {
+                printf( "gotoNextFrame\n" );
+                break;
+            }
+
+            case sactionPrevFrame:
+            {
+                printf( "gotoPrevFrame\n" );
+                break;
+            }
+
+            case sactionPlay:
+            {
+                printf( "play\n" );
+                break;
+            }
+
+            case sactionStop:
+            {
+                printf( "stop\n" );
+                break;
+            }
+
+            case sactionToggleQuality:
+            {
+                printf( "toggleQuality\n" );
+                break;
+            }
+
+            case sactionStopSounds:
+            {
+                printf( "stopSounds\n" );
+                break;
+            }
+
+            case sactionAdd:
+            {
+                printf( "add\n" );
+                break;
+            }
+
+            case sactionSubtract:
+            {
+                printf( "subtract\n" );
+                break;
+            }
+
+            case sactionMultiply:
+            {
+                printf( "multiply\n" );
+                break;
+            }
+
+            case sactionDivide:
+            {
+                printf( "divide\n" );
+                break;
+            }
+
+            case sactionEqual:
+            {
+                printf( "equal\n" );
+                break;
+            }
+
+            case sactionLessThan:
+            {
+                printf( "lessThan\n" );
+                break;
+            }
+
+            case sactionLogicalAnd:
+            {
+                printf( "logicalAnd\n" );
+                break;
+            }
+
+            case sactionLogicalOr:
+            {
+                printf( "logicalOr\n" );
+                break;
+            }
+
+            case sactionLogicalNot:
+            {
+                printf( "logicalNot\n" );
+                break;
+            }
+
+            case sactionStringEqual:
+            {
+                printf( "stringEqual\n" );
+                break;
+            }
+
+            case sactionStringLength:
+            {
+                printf( "stringLength\n" );
+                break;
+            }
+
+            case sactionSubString:
+            {
+                printf( "subString\n" );
+                break;
+            }
+
+            case sactionInt:
+            {
+                printf( "int\n" );
+                break;
+            }
+
+            case sactionEval:
+            {
+                printf( "eval\n" );
+                break;
+            }
+
+            case sactionSetVariable:
+            {
+                printf( "setVariable\n" );
+                break;
+            }
+
+            case sactionSetTargetExpression:
+            {
+                printf( "setTargetExpression\n" );
+                break;
+            }
+
+            case sactionStringConcat:
+            {
+                printf( "stringConcat\n" );
+                break;
+            }
+
+            case sactionGetProperty:
+            {
+                printf( "getProperty\n" );
+                break;
+            }
+
+            case sactionSetProperty:
+            {
+                printf( "setProperty\n" );
+                break;
+            }
+
+            case sactionDuplicateClip:
+            {
+                printf( "duplicateClip\n" );
+                break;
+            }
+
+            case sactionRemoveClip:
+            {
+                printf( "removeClip\n" );
+                break;
+            }
+
+            case sactionTrace:
+            {
+                printf( "trace\n" );
+                break;
+            }
+
+            case sactionStartDragMovie:
+            {
+                printf( "startDragMovie\n" );
+                break;
+            }
+
+            case sactionStopDragMovie:
+            {
+                printf( "stopDragMovie\n" );
+                break;
+            }
+
+            case sactionStringLessThan:
+            {
+                printf( "stringLessThan\n" );
+                break;
+            }
+
+            case sactionRandom:
+            {
+                printf( "random\n" );
+                break;
+            }
+
+            case sactionMBLength:
+            {
+                printf( "mbLength\n" );
+                break;
+            }
+
+            case sactionOrd:
+            {
+                printf( "ord\n" );
+                break;
+            }
+
+            case sactionChr:
+            {
+                printf( "chr\n" );
+                break;
+            }
+
+            case sactionGetTimer:
+            {
+                printf( "getTimer\n" );
+                break;
+            }
+
+            case sactionMBSubString:
+            {
+                printf( "mbSubString\n" );
+                break;
+            }
+
+            case sactionMBOrd:
+            {
+                printf( "mbOrd\n" );
+                break;
+            }
+
+            case sactionMBChr:
+            {
+                printf( "mbChr\n" );
+                break;
+            }
+
+            case sactionGotoFrame:
+            {
+                printf("gotoFrame %5u\n",action->frame);
+                break;
+            }
+
+            case sactionGetURL:
+            {
+                printf("getUrl %s target %s\n", action->url, action->target);
+                break;
+            }
+
+            case sactionWaitForFrame:
+            {
+                printf("waitForFrame %-5u skipCount %-5u\n", action->frame, action->skip_count);
+                break;
+            }
+
+            case sactionSetTarget:
+            {
+
+                printf("setTarget %s\n", action->target);
+                break;
+            }
+
+            case sactionGotoLabel:
+            {
+                // swfparse used to crash here!
+                printf("gotoLabel %s\n", action->goto_label);
+                break;
+            }
+
+            case sactionWaitForFrameExpression:
+            {
+                printf( "waitForFrameExpression skipCount %-5u\n", action->skip_count );
+                break;
+            }
+
+            case sactionPushData:
+            {
+
+
+                /* property ids are pushed as floats for some reason */
+                if ( action->push_data_type == 1 )
+                {
+                    printf("pushData (float): %08lx %.1f\n", action->push_data_float.dw, action->push_data_float.f);
+                }
+                else
+                if ( action->push_data_type == 0 )
+                {
+                    printf("pushData (string): %s\n", action->push_data_string);
+                }
+                else
+                {
+                    printf( "pushData invalid dataType: %02lx\n", action->push_data_type);
+                }
+
+
+                break;
+            }
+
+            case sactionBranchAlways:
+            {
+
+                printf("branchAlways offset: %-5u\n",action->branch_offset);
+                break;
+            }
+
+            case sactionGetURL2:
+            {
+
+
+                if ( action->url2_flag == 1 )
+                {
+                    printf( "getUrl2 sendvars=GET\n" );
+                }
+                else
+                if ( action->url2_flag == 2 )
+                {
+                    printf( "getUrl2 sendvars=POST\n" );
+                }
+                else
+                {
+                    printf( "getUrl2 sendvars=Don't send\n" );
+                }
+                break;
+            }
+
+            case sactionBranchIfTrue:
+            {
+
+                printf("branchIfTrue offset: %-5u\n", action->branch_offset);
+                break;
+            }
+
+            case sactionCallFrame:
+            {
+                printf( "callFrame\n" );
+                break;
+            }
+
+            case sactionGotoExpression:
+            {
+
+                if ( action->stop_flag == 0 )
+                {
+                    printf("gotoExpression and Stop\n" );
+                }
+                else
+                if ( action->stop_flag == 1 )
+                {
+                    printf("gotoExpression and Play\n" );
+                }
+                else
+                {
+                    printf("gotoExpression invalid stopFlag: %d\n", action->stop_flag );
+                }
+
+                break;
+            }
+
+            default:
+            {
+                printf("UNKNOWN?\n");
+                break;
+            }
+
+       }
 
 }
 

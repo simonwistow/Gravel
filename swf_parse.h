@@ -16,6 +16,11 @@
  *
  *
  * $Log: swf_parse.h,v $
+ * Revision 1.10  2001/07/05 12:02:51  muttley
+ * Fixed parsing of ButtonRecords and DoActions
+ * Updated the types, destroy and print functions to cope with this
+ * Updated the todo, readme and manifest files to reflect this
+ *
  * Revision 1.9  2001/06/29 15:10:11  muttley
  * The printing of the actual text of a DefineText (and DefineText2 now)
  * is no longer such a big hack. Font information is kept in the swf_parser
@@ -97,6 +102,7 @@ extern swf_shaperecord_list    * swf_parse_get_shaperecords    (swf_parser * , i
 extern swf_shaperecord         * swf_parse_get_shaperecord     (swf_parser * , int *, int *, int, int, int);
 
 extern swf_doaction_list       * swf_parse_get_doactions       (swf_parser * , int *);
+extern swf_doaction            * swf_parse_get_doaction        (swf_parser * , int *);
 extern swf_button2action_list  * swf_parse_get_button2actions  (swf_parser * , int *);
 
 extern swf_definebitslossless  * swf_parse_definebitslossless  (swf_parser * , int *);

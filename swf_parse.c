@@ -16,6 +16,11 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.17  2001/07/05 12:02:51  muttley
+ * Fixed parsing of ButtonRecords and DoActions
+ * Updated the types, destroy and print functions to cope with this
+ * Updated the todo, readme and manifest files to reflect this
+ *
  * Revision 1.16  2001/07/04 17:03:18  uid56115
  * Minor change to actually parse the glyphs through the
  * shaperecord parser. Might need some cleanup and checking code.
@@ -67,7 +72,7 @@ const int swf_MPEG_RateTab[2][3][16]=
     {  0,  8, 16, 24, 32, 40, 48, 56, 64, 80, 96,112,128,144,160,  0},
   },
 };
-//todo : since these are exported do they need to be decalred final?
+//todo : since these are exported do they need to be declared final?
 const char * swf_MPEG_Ver[4] = {"1","2","2.5","3?"};
 
 
@@ -764,7 +769,12 @@ swf_parse_definefont (swf_parser * context, int * error)
         xlast = 0;
         ylast = 0;
 
+<<<<<<< swf_parse.c
+        font->shape_records[n] = NULL;
+/* TODO swf_parse_get_shaperecords(context, error);*/
+=======
         font->shape_records[n] = swf_parse_get_shaperecords(context, error);
+>>>>>>> 1.16
     }
 
     free (offset_table);
@@ -1369,23 +1379,27 @@ swf_parse_definebutton (swf_parser * context, int * error)
 {
     swf_definebutton * button;
 
-    if ((button = (swf_definebutton *) calloc (1, sizeof (swf_definebutton))) == NULL) {
+    if ((button = (swf_definebutton *) calloc (1, sizeof (swf_definebutton))) == NULL)
+    {
         *error = SWF_EMallocFailure;
         return NULL;
     }
 
     button->tagid   = swf_parse_get_word (context);
-    if ((button->records = swf_parse_get_buttonrecords (context, error, FALSE)) == NULL) {
+
+    if ((button->records = swf_parse_get_buttonrecords (context, error, FALSE)) == NULL)
+    {
         goto FAIL;
     }
 
-    if ((button->actions = swf_parse_get_doactions (context, error)) == NULL) {
+    if ((button->actions = swf_parse_get_doactions (context, error)) == NULL)
+    {
         goto FAIL;
     }
 
     return button;
 
- FAIL:
+    FAIL:
     swf_destroy_definebutton (button);
     return NULL;
 
@@ -1398,7 +1412,9 @@ swf_parse_definebutton2 (swf_parser *  context, int * error)
     swf_definebutton2 * button;
     U32 track_as_menu, offset, next_action;
 
-    if ((button = (swf_definebutton2 *) calloc (1, sizeof (swf_definebutton2))) == NULL) {
+    if ((button = (swf_definebutton2 *) calloc (1, sizeof (swf_definebutton2))) == NULL)
+    {
+        *error = SWF_EMallocFailure;
         return NULL;
     }
 
@@ -1422,35 +1438,200 @@ swf_parse_definebutton2 (swf_parser *  context, int * error)
     swf_parse_seek(context, next_action);
     button->actions = swf_parse_get_button2actions (context, error);
 
-/*    if ((button->actions = swf_parse_get_button2actions (context, error)) == NULL) {
-	goto FAIL;
-	} */
+    if ((button->actions = swf_parse_get_button2actions (context, error)) == NULL)
+    {
+	    goto FAIL;
+	}
 
     return button;
 
-/*
+
  FAIL:
-    swf_destroy_definebutton2 (button);
-    return NULL;
-*/
+ swf_destroy_definebutton2 (button);
+ return NULL;
 }
 
 /*
  * ActionScript handler. Currently unimplemented.
  * TODO
  */
-
 swf_doaction_list *
 swf_parse_get_doactions (swf_parser * context, int * error)
 {
+
+    swf_doaction_list * list;
+    swf_doaction      * temp;
+
+    if ((list = (swf_doaction_list *) calloc (1, sizeof (swf_doaction_list))) == NULL)
+    {
+        *error = SWF_EMallocFailure;
+        goto FAIL;
+    }
+
+    list->first = NULL;
+    list->lastp = &(list->first);
+
+
+
+    do
+    {
+
+
+        if ((temp = swf_parse_get_doaction(context, error)) == NULL)
+        {
+            goto FAIL;
+
+        }
+
+
+         *(list->lastp) = temp;
+	     list->lastp = &(temp->next);
+
+
+    } while (temp->code != 0x00);
+
+
+    return list;
+
+    FAIL:
+    swf_destroy_doaction_list (list);
     return NULL;
+
 }
+
+
+swf_doaction *
+swf_parse_get_doaction (swf_parser * context, int * error)
+{
+        swf_doaction * action;
+        int len = 0;
+        S32 pos;
+
+        if ((action = (swf_doaction *) calloc (1, sizeof (swf_doaction))) == NULL)
+        {
+            *error = SWF_EMallocFailure;
+            return NULL;
+        }
+
+        action->next = NULL;
+        action->url  = NULL;
+        action->target = NULL;
+        action->goto_label = NULL;
+        action->push_data_string = NULL;
+
+
+        /* Handle the action */
+        action->code = swf_parse_get_byte(context);
+        if (action->code == 0)
+        {
+
+            return action;
+        }
+
+
+        if (action->code & sactionHasLength)
+        {
+            len = swf_parse_get_word (context);
+        }
+
+        pos = swf_parse_tell (context) + len;
+
+        switch ( action->code )
+        {
+
+
+            case sactionGotoFrame:
+            {
+                action->frame = swf_parse_get_word(context);
+                break;
+            }
+
+            case sactionGetURL:
+            {
+                action->url    = swf_parse_get_string(context, error);
+                action->target = swf_parse_get_string(context, error);
+                break;
+            }
+
+            case sactionWaitForFrame:
+            {
+                action->frame      = swf_parse_get_word(context);
+                action->skip_count = swf_parse_get_byte(context);
+                break;
+            }
+
+            case sactionSetTarget:
+            {
+                action->target = swf_parse_get_string (context, error);
+                break;
+            }
+
+            case sactionGotoLabel:
+            {
+
+                action->goto_label = swf_parse_get_string (context, error);
+                break;
+            }
+
+            case sactionWaitForFrameExpression:
+            {
+                action->skip_count = swf_parse_get_byte(context);
+                break;
+            }
+
+            case sactionPushData:
+            {
+                action->push_data_type = swf_parse_get_byte (context);
+
+                /* property ids are pushed as floats for some reason */
+                if ( action->push_data_type == 1 )
+                {
+
+                    action->push_data_float.dw = swf_parse_get_dword (context);
+                }
+                else
+                if ( action->push_data_type == 0 )
+                {
+                    action->push_data_string = swf_parse_get_string (context, error);
+                }
+                break;
+            }
+
+            case sactionBranchAlways:
+            {
+                action->branch_offset = swf_parse_get_word(context);
+                break;
+            }
+
+            case sactionGetURL2:
+            {
+                action->url2_flag = swf_parse_get_byte(context);
+                break;
+            }
+
+            case sactionBranchIfTrue:
+            {
+                action->branch_offset = swf_parse_get_word(context);
+                break;
+            }
+
+
+            case sactionGotoExpression:
+            {
+                action->stop_flag = swf_parse_get_byte(context);
+            }
+        }
+
+        swf_parse_seek(context, pos);
+
+        return action;
+}
+
 
 /*
  * ActionScript handler. Currently unimplemented.
  * TODO
  */
-
 swf_button2action_list *
 swf_parse_get_button2actions (swf_parser * context, int * error)
 {
@@ -2410,29 +2591,33 @@ swf_parse_get_textrecords (swf_parser * context, int * error, int has_alpha, int
     swf_textrecord_list * list;
     swf_textrecord * temp;
 
-    if ((list = (swf_textrecord_list *) calloc (1, sizeof (swf_textrecord_list))) == NULL) {
+    if ((list = (swf_textrecord_list *) calloc (1, sizeof (swf_textrecord_list))) == NULL)
+    {
         goto FAIL;
     }
 
     list->first = NULL;
     list->lastp = &(list->first);
 
-    while (1) {
-	if ((temp = swf_parse_get_textrecord(context, error, has_alpha, glyph_bits, advance_bits)) == NULL) {
-            if (*error != SWF_ENoError) {
-                goto FAIL;
-            }
-            break;
-	 }
+    while (1)
+    {
+	        if ((temp = swf_parse_get_textrecord(context, error, has_alpha, glyph_bits, advance_bits)) == NULL)
+            {
+                if (*error != SWF_ENoError)
+                {
+                    goto FAIL;
+                }
+                break;
+	        }
 
-         *(list->lastp) = temp;
-	 list->lastp = &(temp->next);
+            *(list->lastp) = temp;
+	        list->lastp = &(temp->next);
     }
 
 
     return list;
 
- FAIL:
+    FAIL:
     swf_destroy_textrecord_list (list);
     return NULL;
 }
@@ -2456,23 +2641,26 @@ swf_parse_get_shaperecords (swf_parser * context, int * error)
     list->first = NULL;
     list->lastp = &(list->first);
 
-    while (!at_end) {
-	if ((temp = swf_parse_get_shaperecord(context, error, &at_end, xlast, ylast, FALSE) ) == NULL) {
-            if (*error != SWF_ENoError) {
-                goto FAIL;
-            }
-            break;
-	}
-	
-	*(list->lastp) = temp;
-	list->lastp = &(temp->next);
+    while (!at_end)
+    {
+	        if ((temp = swf_parse_get_shaperecord(context, error, &at_end, xlast, ylast, FALSE) ) == NULL)
+            {
+                if (*error != SWF_ENoError)
+                {
+                    goto FAIL;
+                }
+                break;
+	        }
 
-	list->record_count++;
+	        *(list->lastp) = temp;
+	        list->lastp = &(temp->next);
+
+	        list->record_count++;
     }
 
     return list;
 
- FAIL:
+    FAIL:
     swf_destroy_shaperecord_list (list);
     return NULL;
 }
@@ -2481,19 +2669,18 @@ swf_parse_get_shaperecords (swf_parser * context, int * error)
 swf_buttonrecord_list *
 swf_parse_get_buttonrecords (swf_parser * context, int * error, int with_alpha)
 {
-    int block_size = 0;
+
     U32 button_end;
     swf_buttonrecord_list * list;
+    swf_buttonrecord      * temp;
 
     if ((list = (swf_buttonrecord_list *) calloc (1, sizeof (swf_buttonrecord_list))) == NULL)
     {
-        *error = SWF_EMallocFailure;
-        return NULL;
+        goto FAIL;
     }
 
-    list->record_count = 0;
-    list->records      = NULL;
-
+    list->first = NULL;
+    list->lastp = &(list->first);
 
     button_end = swf_parse_get_byte (context);
 
@@ -2502,23 +2689,16 @@ swf_parse_get_buttonrecords (swf_parser * context, int * error, int with_alpha)
     do
     {
 
-        if (list->record_count==block_size)
+
+        if ((temp = swf_parse_get_buttonrecord(context, error, button_end, with_alpha)) == NULL)
         {
-            block_size += 10;
-            if ((list->records = (swf_buttonrecord **) realloc (list->records, sizeof (swf_buttonrecord *) * block_size)) == NULL) {
-                *error = SWF_EMallocFailure;
-                goto FAIL;
-            }
-
-        }
-        list->records[list->record_count+1] = NULL;
-
-        if ((list->records[list->record_count++] = swf_parse_get_buttonrecord(context, error, button_end, with_alpha)) == NULL) {
             goto FAIL;
 
         }
 
 
+         *(list->lastp) = temp;
+	     list->lastp = &(temp->next);
 
     }
     while ((button_end = (U32) swf_parse_get_byte(context)) != 0);

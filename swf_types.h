@@ -16,6 +16,11 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.13  2001/07/05 12:02:51  muttley
+ * Fixed parsing of ButtonRecords and DoActions
+ * Updated the types, destroy and print functions to cope with this
+ * Updated the todo, readme and manifest files to reflect this
+ *
  * Revision 1.12  2001/06/30 12:33:19  kitty_goth
  * Move to a linked list representation of shaperecords - I was getting
  * SEGFAULT due to not large enough free chunk's. Seems much faster now.
@@ -161,6 +166,65 @@
 #define textHasColour  (0x04)
 #define textHasYOffset (0x02)
 #define textHasXOffset (0x01)
+
+
+/* Action Codes */
+#define sactionNone                     (0x00)
+#define sactionNextFrame                (0x04)
+#define sactionPrevFrame                (0x05)
+#define sactionPlay                     (0x06)
+#define sactionStop                     (0x07)
+#define sactionToggleQuality            (0x08)
+#define sactionStopSounds               (0x09)
+#define sactionAdd                      (0x0A)
+#define sactionSubtract                 (0x0B)
+#define sactionMultiply                 (0x0C)
+#define sactionDivide                   (0x0D)
+#define sactionEqual                    (0x0E)
+#define sactionLessThan                 (0x0F)
+#define sactionLogicalAnd               (0x10)
+#define sactionLogicalOr                (0x11)
+#define sactionLogicalNot               (0x12)
+#define sactionStringEqual              (0x13)
+#define sactionStringLength             (0x14)
+#define sactionSubString                (0x15)
+#define sactionInt                      (0x18)
+#define sactionEval                     (0x1C)
+#define sactionSetVariable              (0x1D)
+#define sactionSetTargetExpression      (0x20)
+#define sactionStringConcat             (0x21)
+#define sactionGetProperty              (0x22)
+#define sactionSetProperty              (0x23)
+#define sactionDuplicateClip            (0x24)
+#define sactionRemoveClip               (0x25)
+#define sactionTrace                    (0x26)
+#define sactionStartDragMovie           (0x27)
+#define sactionStopDragMovie            (0x28)
+#define sactionStringLessThan           (0x29)
+#define sactionRandom                   (0x30)
+#define sactionMBLength                 (0x31)
+#define sactionOrd                      (0x32)
+#define sactionChr                      (0x33)
+#define sactionGetTimer                 (0x34)
+#define sactionMBSubString              (0x35)
+#define sactionMBOrd                    (0x36)
+#define sactionMBChr                    (0x37)
+#define sactionHasLength                (0x80)
+#define sactionGotoFrame                (0x81) /* frame num (WORD)        */
+#define sactionGetURL                   (0x83) /* url (STR)) window (STR) */
+#define sactionWaitForFrame             (0x8A) /* frame needed (WORD))    */
+                                               /* actions to skip (BYTE)  */
+#define sactionSetTarget                (0x8B) /* name (STR)              */
+#define sactionGotoLabel                (0x8C) /* name (STR)              */
+#define sactionWaitForFrameExpression   (0x8D) /* frame needed on stack)  */
+                                               /* actions to skip (BYTE)  */
+#define sactionPushData                 (0x96)
+#define sactionBranchAlways             (0x99)
+#define sactionGetURL2                  (0x9A)
+#define sactionBranchIfTrue             (0x9D)
+#define sactionCallFrame                (0x9E)
+#define sactionGotoExpression           (0x9F)
+
 
 /* Global Types*/
 typedef unsigned long U32, *P_U32, **PP_U32;
@@ -724,6 +788,7 @@ struct swf_textrecord_list {
 
 struct swf_buttonrecord {
 
+    swf_buttonrecord * next;
 
     U32 state_hit_test;
     U32 state_down;
@@ -741,20 +806,41 @@ struct swf_buttonrecord {
 
 
 struct swf_buttonrecord_list {
-        swf_buttonrecord ** records;
-        int record_count;
+        swf_buttonrecord * first;
+        swf_buttonrecord ** lastp;
 };
 
 
 struct swf_doaction {
 
-    U32 tagid;
+    swf_doaction * next;
+    int   code;
+    int   frame;
+    int   skip_count;
+    char* url;
+    char* target;
+    char* goto_label;
+    U32   push_data_type;
+    //U32   push_data_float;
+    union
+    {
+        U32 dw;
+        float f;
+    } push_data_float;
+
+
+    char* push_data_string;
+    U16   branch_offset;
+    U8    url2_flag;
+    U8    stop_flag;
+
+
 
 };
 
 struct swf_doaction_list {
-        swf_doaction ** actions;
-        int action_count;
+        swf_doaction * first;
+        swf_doaction ** lastp;
 };
 
 

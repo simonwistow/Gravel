@@ -16,6 +16,11 @@
  *
  *
  * $Log: print_utils.h,v $
+ * Revision 1.9  2001/07/05 12:02:51  muttley
+ * Fixed parsing of ButtonRecords and DoActions
+ * Updated the types, destroy and print functions to cope with this
+ * Updated the todo, readme and manifest files to reflect this
+ *
  * Revision 1.8  2001/06/29 15:10:11  muttley
  * The printing of the actual text of a DefineText (and DefineText2 now)
  * is no longer such a big hack. Font information is kept in the swf_parser
@@ -48,6 +53,7 @@ extern void print_textrecord            (swf_textrecord *, const char *);
 extern void print_textrecords           (swf_textrecord_list *, const char *, swf_parser *);
 extern void print_buttonrecords         (swf_buttonrecord_list *, const char *);
 extern void print_doactions             (swf_doaction_list *, const char *);
+extern void print_doaction              (swf_doaction *, const char *);
 extern void print_imageguts             (swf_imageguts *, const char *);
 extern void print_button2actions        (swf_button2action_list *, const char *);
 extern void print_shape_records         (swf_shaperecord_list *);

@@ -26,7 +26,7 @@ gpl.txt           : the Gnu General Public licence
 todo              : stuff left todo
 dos.pl		  : a Perl script which turns DOS into Unix style line
 		  : endings
-
+swfs/*            : a directory full of test swfs
 
 PROBLEMS:
 ----------------------

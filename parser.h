@@ -16,6 +16,11 @@
  *
  *
  * $Log: parser.h,v $
+ * Revision 1.8  2001/07/05 12:02:51  muttley
+ * Fixed parsing of ButtonRecords and DoActions
+ * Updated the types, destroy and print functions to cope with this
+ * Updated the todo, readme and manifest files to reflect this
+ *
  * Revision 1.7  2001/06/26 13:43:56  muttley
  * Store info from DefineFont, DefineFontInfo and DefineText to extract text properly
  *
@@ -39,7 +44,7 @@ extern void parse_placeobject2          (swf_parser *, const char *);
 extern void parse_removeobject          (swf_parser *, const char *);
 extern void parse_removeobject2         (swf_parser *, const char *);
 
-extern void parse_defineshape_aux       (swf_parser *, int, const char *); //todo make more consisten
+extern void parse_defineshape_aux       (swf_parser *, int, const char *); //todo make more consistent
 extern void parse_defineshape           (swf_parser *, const char *);
 extern void parse_defineshape2          (swf_parser *, const char *);
 extern void parse_defineshape3          (swf_parser *, const char *);
@@ -64,6 +69,7 @@ extern void parse_framelabel            (swf_parser *, const char *);
 extern void parse_soundstreamblock      (swf_parser *, const char *);
 extern void parse_soundstreamhead       (swf_parser *, const char *);
 extern void parse_soundstreamhead2      (swf_parser *, const char *);
+extern void parse_doaction              (swf_parser *, const char *);
 
 
 
