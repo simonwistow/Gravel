@@ -56,10 +56,7 @@ swf_add_removeobject2 (swf_movie * movie, int * error, SWF_U16 depth)
 	swf_buffer_put_word(temp->buffer, error, depth);
     temp->buffer->size = 2;
 
-/* Footer ... */
-
-    *(movie->lastp) = temp;
-    movie->lastp = &(temp->next);
+    swf_dump_shape(movie, error, temp);
 
     return;
 }

@@ -84,8 +84,7 @@ swf_add_setbackgroundcolour(swf_movie * movie, int * error, SWF_U8 red, SWF_U8 g
     temp->serialised = 1;
     temp->buffer->size = 4;
 
-    *(movie->lastp) = temp;
-    movie->lastp = &(temp->next);
+    swf_dump_shape(movie, error, temp);
 
     return;
 }

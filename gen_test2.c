@@ -35,16 +35,6 @@ usage (char * name)
     fprintf (stderr, "Usage: %s <filename> <object number>\n", name);
 }
 
-
-void  swf_dump_shape (swf_movie * movie, int * error, swf_tagrecord * temp);
-
-void 
-swf_dump_shape (swf_movie * movie, int * error, swf_tagrecord * temp) 
-{
-    *(movie->lastp) = temp;
-    movie->lastp = &(temp->next);
-}
-
 SWF_U16 swf_get_object_id(swf_tagrecord * mytag, int * error);
 
 SWF_U16 

@@ -12,8 +12,7 @@ swf_add_showframe(swf_movie * movie, int * error)
 
     temp->serialised = 1;
 
-    *(movie->lastp) = temp;
-    movie->lastp = &(temp->next);
+    swf_dump_shape(movie, error, temp);
 
     return;
 }

@@ -149,8 +149,7 @@ swf_add_placeobject2 (swf_movie * movie, int * error, swf_matrix * mym, SWF_U16 
 	
 /* Footer ... */
 
-    *(movie->lastp) = temp;
-    movie->lastp = &(temp->next);
+    swf_dump_shape(movie, error, temp);
 
     return;
 }

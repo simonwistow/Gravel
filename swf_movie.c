@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.19 2002/05/27 11:56:36 muttley Exp $	
+ * 	$Id: swf_movie.c,v 1.20 2002/05/27 21:58:45 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -173,6 +173,17 @@ swf_make_tagrecord (int * error, SWF_U16 myid)
 
     return tag;
 }
+
+/* add a tagrecord to a movie */
+
+void 
+swf_dump_shape (swf_movie * movie, int * error, swf_tagrecord * temp) 
+{
+    *(movie->lastp) = temp;
+    movie->lastp = &(temp->next);
+}
+
+
 
 /* destroy a tag record */
 void

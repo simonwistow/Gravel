@@ -81,10 +81,7 @@ swf_add_placeobject (swf_movie * movie, int * error, swf_matrix * mym, SWF_U16 c
 
     temp->serialised = 1;
 	
-/* Footer ... */
-
-    *(movie->lastp) = temp;
-    movie->lastp = &(temp->next);
+    swf_dump_shape(movie, error, temp);
 
     return;
 }

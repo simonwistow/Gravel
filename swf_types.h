@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.27  2002/05/27 21:58:45  kitty_goth
+ * Make tags use the swf_movie function swf_dump_shape
+ *
  * Revision 1.26  2002/05/10 17:07:51  kitty_goth
  * Right, this leaks like a son of a bitch, and I've only tested it against
  * gen_test1, but the buffer delta should work now.
@@ -271,7 +274,7 @@
 /* Global Types*/
 
 /*
- * Hmm, this trhwos up lots of warnings so revoke to having
+ * Hmm, this throws up lots of warnings so revoke to having
  * everything
  */
 #include "swf_memory.h"
@@ -704,7 +707,7 @@ struct swf_definebutton {
     swf_doaction_list     * actions;    /* a list of actions */
 };
 
-
+/* FIXME: Doesn't this need actions as well? */
 struct swf_definebutton2 {
     SWF_U32 tagid;                      /* the id for this button */
     swf_buttonrecord_list * records;    /* the button records */
@@ -977,8 +980,10 @@ struct swf_buttonrecord_list {
 };
 
 
-/* Flags that the specified actions should be performed when the frame is complete */
-/* can either be included in Defienbutton2 or as its own tag */
+/* Flags that the specified actions should be performed
+ * when the frame is complete 
+ * Can either be included in Definebutton2 or as its own tag 
+ */
 struct swf_doaction {
 
     swf_doaction * next;        /* next item in the list */ /* todo simon : the rest of these are action records in the spec. Change it ? */
@@ -1008,8 +1013,8 @@ struct swf_doaction {
 };
 
 struct swf_doaction_list {
-        swf_doaction * first;   /* the first element in the list */
-        swf_doaction ** lastp;  /* pointer to the last element in the list */
+	swf_doaction * first;   /* the first element in the list */
+	swf_doaction ** lastp;  /* pointer to the last element in the list */
 };
 
 

@@ -38,15 +38,6 @@ usage (char * name)
 }
 
 
-void  swf_dump_shape (swf_movie * movie, int * error, swf_tagrecord * temp);
-
-void 
-swf_dump_shape (swf_movie * movie, int * error, swf_tagrecord * temp) 
-{
-    *(movie->lastp) = temp;
-    movie->lastp = &(temp->next);
-}
-
 SWF_U16 swf_get_object_id(swf_tagrecord * mytag, int * error);
 
 SWF_U16 
@@ -216,11 +207,7 @@ int main (int argc, char *argv[]) {
     m3->tx = 100 * 20;
     m3->ty = 100 * 20;
 
-    fprintf(stderr, "foo A\n");
-
     for (i=1; i<=NUMFRAMES; i++) {
-      fprintf(stderr, "foo B\n");
-      fprintf(stderr, "foo C\n");
       swf_add_placeobject2(movie, &error, matrix, obj_id, i, mycx, NULL);
       swf_add_placeobject2(movie, &error, m2, obj_id, 1, cx2, myname);
       swf_add_placeobject(movie, &error, m3, 14, 2);

@@ -23,21 +23,18 @@ swf_parse_definebutton (swf_parser * context, int * error)
 {
     swf_definebutton * button;
 
-    if ((button = (swf_definebutton *) calloc (1, sizeof (swf_definebutton))) == NULL)
-    {
+    if ((button = (swf_definebutton *) calloc (1, sizeof (swf_definebutton))) == NULL) {
         *error = SWF_EMallocFailure;
         return NULL;
     }
 
     button->tagid   = swf_parse_get_word (context);
 
-    if ((button->records = swf_parse_get_buttonrecords (context, error, FALSE)) == NULL)
-    {
+    if ((button->records = swf_parse_get_buttonrecords (context, error, FALSE)) == NULL) {
         goto FAIL;
     }
 
-    if ((button->actions = swf_parse_get_doactions (context, error)) == NULL)
-    {
+    if ((button->actions = swf_parse_get_doactions (context, error)) == NULL) {
         goto FAIL;
     }
 
@@ -123,8 +120,7 @@ swf_add_definebutton (swf_movie * movie, int * error, SWF_U16 button_id, SWF_U16
 
     temp->serialised = 1;
 
-    *(movie->lastp) = temp;
-    movie->lastp = &(temp->next);
+	swf_dump_shape(movie, error, temp);
 
 	swf_free(m1);
 
