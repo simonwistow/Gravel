@@ -214,7 +214,7 @@ main (int argc, char *argv[])
 
         error = SWF_ENoError;
 
-        printf ("%s [%"pSWF_U32"]\n", tag[next_id], next_id);
+        /* printf ("%s [%"pSWF_U32"]\n", tag[next_id], next_id);*/
 		if (next_id <= SWF_PARSER_MAX_TAG_ID) {
 			parse[next_id](swf, str);
 		}
