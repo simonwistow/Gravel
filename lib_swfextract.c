@@ -16,6 +16,9 @@
  *
  *
  * $Log: lib_swfextract.c,v $
+ * Revision 1.6  2001/07/12 23:00:06  clampr
+ * another test before free
+ *
  * Revision 1.5  2001/07/12 22:21:29  clampr
  * do the inital calloc rather than realloc(NULL, x)
  *
@@ -171,7 +174,7 @@ destroy_swf (swf_extractor * swf)
     }
     swf->num_strings = 0;
     /* delete the pointer to the strings */
-    free (swf->strings);
+    if (swf->strings) free (swf->strings);
 
 
     #ifdef DEBUG
@@ -186,7 +189,7 @@ destroy_swf (swf_extractor * swf)
     swf->num_urls = 0;
 
     /* delete the pointer to the urls */
-    free (swf->urls);
+    if (swf->urls) free (swf->urls);
 
     #ifdef DEBUG
     fprintf (stderr, "[destroy_swf : destroying parser]\n");
