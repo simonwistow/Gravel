@@ -44,6 +44,58 @@ swf_parse_setbackgroundcolour (swf_parser * context, int * error)
 }
 
 
+void 
+swf_add_setbackgroundcolor(swf_movie * movie, int * error) 
+{
+    swf_tagrecord * temp;
+    swf_setbackgroundcolour * col;
+    SWF_U8 * buffy;
+
+    temp = swf_make_tagrecord(error);
+
+    if (*error) {
+		return;
+    }
+
+    if ((col = (swf_setbackgroundcolour *) calloc ( 1, sizeof (swf_setbackgroundcolour))) == NULL) {
+      fprintf(stderr, "alloc fuckup\n");
+      return;
+    }
+
+    if ((col->colour = (swf_colour *) calloc ( 1, sizeof (swf_colour))) == NULL) {
+      fprintf(stderr, "alloc fuckup\n");
+      return;
+    }
+
+    if ((buffy = (SWF_U8 *) calloc ( 10, sizeof (SWF_U8))) == NULL) {
+      fprintf(stderr, "alloc fuckup\n");
+      return;
+    }
+
+    col->colour->r = 0;
+    col->colour->g = 255;
+    col->colour->b = 128;
+    col->colour->a = 0;
+
+    buffy[0] = col->colour->r;
+    buffy[1] = col->colour->g;
+    buffy[2] = col->colour->b;
+    buffy[3] = col->colour->a;
+
+    temp->next = NULL;
+    temp->id = 9;
+    temp->tag = col;
+    temp->serialised = 1;
+    temp->size = 4;
+    temp->buffer = buffy;
+
+    *(movie->lastp) = temp;
+    movie->lastp = &(temp->next);
+
+    return;
+}
+
+
 void
 swf_destroy_setbackgroundcolour (swf_setbackgroundcolour * tag)
 {
