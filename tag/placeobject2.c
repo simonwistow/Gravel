@@ -15,12 +15,17 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include "tag_handy.h"
-#define MAX_PLACE2_SIZE 64
 /*
  * This is very similar to swf_parse_placeobject, except that this more
  * complicated type includes ratio, clipdepth, a name and some
  * additional flags.
+ */
+
+#include "tag_handy.h"
+#define MAX_PLACE2_SIZE 512 
+
+/* MAX_PLACE2_SIZE has to be larger than MAX_PLACE_SIZE as 
+ * the name attribute alone could be 255 
  */
 
 swf_placeobject2 *
@@ -85,7 +90,7 @@ swf_parse_placeobject2 (swf_parser * context, int * error)
 }
 
 
-/* We also need 'ratio' (and ' move') attributes */
+/* We also need 'ratio' (and 'move') attributes */
 void
 swf_add_placeobject2 (swf_movie * movie, int * error, swf_matrix * mym, SWF_U16 char_id, SWF_U16 depth, swf_cxform * mycx, char * myname)
 {
@@ -142,7 +147,7 @@ swf_add_placeobject2 (swf_movie * movie, int * error, swf_matrix * mym, SWF_U16 
 		/* Not yet */
 	}
 	if (hasName) {
-		/* Not yet */
+		swf_buffer_put_string(temp->buffer, error, myname);
 	}
 
     temp->serialised = 1;

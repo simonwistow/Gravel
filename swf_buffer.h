@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_buffer.h,v 1.2 2002/05/10 17:07:51 kitty_goth Exp $	
+ * 	$Id: swf_buffer.h,v 1.3 2002/05/20 22:39:30 kitty_goth Exp $	
  */
 
 #include "swf_types.h"
@@ -27,3 +27,5 @@ extern void  swf_buffer_put_bits (swf_buffer * context, SWF_U8 n, SWF_U32 bits);
 extern void  swf_buffer_put_sbits (swf_buffer * context, SWF_U8 n, SWF_S32 bits);
 extern void  swf_buffer_put_word(swf_buffer * context, int * error, SWF_U16 word);
 extern void  swf_buffer_put_dword(swf_buffer * context, int * error, SWF_U32 dword);
+extern void  swf_buffer_put_string(swf_buffer * context, int * error, char * mystring);
+

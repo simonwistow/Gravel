@@ -66,6 +66,8 @@ int main (int argc, char *argv[]) {
     swf_matrix *matrix, *m2;
     swf_cxform *mycx, *cx2;
     int i;
+    char * myname;
+    
 
 /* First, get a parser up */
 
@@ -157,7 +159,7 @@ int main (int argc, char *argv[]) {
 	return 1;
     }
 
-/* Ensure we steal a good header... */
+/* Ensure we import a good header... */
 
     movie->header = hdr;
     movie->name = (char *) "ben3.swf";
@@ -168,6 +170,8 @@ int main (int argc, char *argv[]) {
     swf_dump_shape(movie, &error, temp);
 
     /* Do the frames */
+
+    myname = (char *) "pigdog";
 
     matrix->a  = matrix->c  = 256 * 256;
     matrix->b  = matrix->d  = 0;
@@ -189,7 +193,7 @@ int main (int argc, char *argv[]) {
 
     for (i=1; i<=NUMFRAMES; i++) {
       swf_add_placeobject2(movie, &error, matrix, obj_id, i, mycx, NULL);
-      swf_add_placeobject2(movie, &error, m2, obj_id, 1, cx2, NULL);
+      swf_add_placeobject2(movie, &error, m2, obj_id, 1, cx2, myname);
       swf_add_showframe(movie, &error);
 
       if (i < NUMFRAMES) {

@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_buffer.c,v 1.1 2002/05/10 15:37:18 kitty_goth Exp $	
+ * 	$Id: swf_buffer.c,v 1.2 2002/05/20 22:39:30 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -166,9 +166,8 @@ swf_buffer_put_sbits (swf_buffer * context, SWF_U8 n, SWF_S32 bits)
  * parse head on by two.
  */
 
-/* FIXME: Endian-ness */
-
-void swf_buffer_put_word(swf_buffer * context, int * error, SWF_U16 word)
+void 
+swf_buffer_put_word(swf_buffer * context, int * error, SWF_U16 word)
 {
     swf_buffer_initbits(context);
     swf_buffer_put_byte(context, error, (SWF_U8)((word << 8) >> 8));
@@ -180,9 +179,8 @@ void swf_buffer_put_word(swf_buffer * context, int * error, SWF_U16 word)
  * parse head on by four.
  */
 
-/* FIXME: Endian-ness */
-
-void swf_buffer_put_dword(swf_buffer * context, int * error, SWF_U32 dword)
+void 
+swf_buffer_put_dword(swf_buffer * context, int * error, SWF_U32 dword)
 {
     swf_buffer_initbits(context);
 
@@ -192,6 +190,15 @@ void swf_buffer_put_dword(swf_buffer * context, int * error, SWF_U32 dword)
     swf_buffer_put_byte(context, error, (SWF_U8)(dword >> 24));
 }
 
+void 
+swf_buffer_put_string(swf_buffer * context, int * error, char * mystring)
+{
+    int sp = 0;
 
+    swf_buffer_initbits(context);
 
+    while ( (sp < 255) && (mystring[sp]) ) {
+      swf_buffer_put_byte(context, error, mystring[sp++]);
+    }
+}
 
