@@ -241,6 +241,36 @@ swf_serialise_matrix (swf_buffer * buffer, int * error, swf_matrix * mym)
     swf_buffer_flush_bits(buffer);
 }
 
+/* This is a general composition of Flash 'matrices'. The 
+ * real matrix terms are multipled and the translations
+ * added
+ */
+
+swf_matrix *
+swf_matrix_mult(swf_matrix * m1, swf_matrix * m2)
+{
+    swf_matrix * matrix;
+
+    if ((matrix = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
+		return NULL;
+    }	
+
+	matrix->a = (SFIXED) ( ((double)m1->a / 256) * ((double)m2->a / 256) + 
+						   ((double)m1->b / 256) * ((double)m2->c / 256) );
+	// matrix->a = (m1->a / 256 ) * (m2->a / 256) + (m1->b / 256) * (m2->c / 256);
+	matrix->b = m1->a * m2->b / 65536 + m1->b * m2->d / 65536;
+
+	matrix->c = (SFIXED) ( ((double)m1->c / 256) * ((double)m2->b / 256) + 
+						   ((double)m1->d / 256) * ((double)m2->c / 256) );
+
+	matrix->d = m1->d * m2->d / 65536 + m1->c * m2->b / 65536;
+
+	matrix->tx = m1->tx + m2->tx;
+	matrix->ty = m1->ty + m2->ty;
+
+	return matrix;
+}
+
 void
 swf_destroy_matrix (swf_matrix * matrix)
 {
