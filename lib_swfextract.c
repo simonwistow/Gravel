@@ -16,6 +16,9 @@
  *
  *
  * $Log: lib_swfextract.c,v $
+ * Revision 1.9  2001/07/13 14:34:37  muttley
+ * Fix bug in parsing button2actions
+ *
  * Revision 1.8  2001/07/13 14:00:42  clampr
  * s/free/swf_free/
  *
@@ -129,7 +132,7 @@ load_swf (char * file, int * error)
     swf_destroy_parser(swf->parser);
     /* and set it to NULL to prevent free-ing errors later */
     swf->parser = NULL;
-    
+
     #ifdef DEBUG
     fprintf (stderr, "[load_swf : number of strings is %d]\n",swf->num_strings);
     for (i=0; i<swf->num_strings; i++)
@@ -250,47 +253,47 @@ get_text (swf_extractor * swf, int * error)
         }
 
         #ifdef DEBUG
-        //fprintf (stderr, "[get_text : next_id is %d]\n", next_id);
+        fprintf (stderr, "[get_text : next_id is %s]\n", swf_tag_to_string(next_id));
         #endif
 
 
-        switch (next_id) 
-	{
-	case tagDoAction:
+        switch (next_id)
+	    {
+	        case tagDoAction:
                 parse_doaction (swf, error);
                 break;
 
-	case tagDefineEditText:
-		parse_defineedittext (swf, error);
-		break;
-		
-	case tagDefineText:
+	        case tagDefineEditText:
+		        parse_defineedittext (swf, error);
+		        break;
+
+	        case tagDefineText:
                 parse_definetext (swf, error);
                 break;
 
-	case tagDefineText2:
-		parse_definetext2 (swf, error);
+	        case tagDefineText2:
+		        parse_definetext2 (swf, error);
                 break;
 
-	case tagDefineButton:
-		parse_definebutton (swf, error);
+	        case tagDefineButton:
+		        parse_definebutton (swf, error);
             	break;
 
-	case tagDefineButton2:
+	        case tagDefineButton2:
             	parse_definebutton2 (swf, error);
             	break;
 
-	case tagDefineFont:
-		parse_definefont (swf, error);
-		break;
+	        case tagDefineFont:
+		        parse_definefont (swf, error);
+		        break;
 
-	case tagDefineFont2:
-		parse_definefont2 (swf, error);
-		break;
+	        case tagDefineFont2:
+		        parse_definefont2 (swf, error);
+		        break;
 
-	case tagDefineFontInfo:
-		parse_definefontinfo (swf, error);
-		break;
+	        case tagDefineFontInfo:
+		        parse_definefontinfo (swf, error);
+		        break;
         }
 
         /* if there's been an error, bug out */
@@ -404,9 +407,6 @@ parse_defineedittext (swf_extractor * swf, int * error)
 void
 parse_definetext (swf_extractor * swf, int * error)
 {
-    int error2 = SWF_ENoError;
-    //todo simon : I have to define a new error variable.
-    //             otherwise it segafaults. Why? FIXME!
 
     swf_definetext * text = text = swf_parse_definetext (swf->parser, error);
     char * string = NULL;
@@ -419,7 +419,7 @@ parse_definetext (swf_extractor * swf, int * error)
     if (text == NULL || error != SWF_ENoError)
     {
         #ifdef DEBUG
-        fprintf (stderr, "[parse_definetext : fail! error was '%s']\n", swf_error_code_to_string (error2));
+        fprintf (stderr, "[parse_definetext : fail! error was '%s']\n", swf_error_code_to_string (*error));
         #endif
         return;
     }
@@ -524,13 +524,35 @@ parse_definebutton2 (swf_extractor * swf, int * error)
 {
 
     swf_definebutton2 * button = swf_parse_definebutton2 (swf->parser, error);
+    swf_button2action * node;
 
-    if (button == NULL || error != SWF_ENoError)
+    #ifdef DEBUG
+    fprintf (stderr, "[definebutton2 : checking to see if valid button2]\n");
+    #endif
+
+    if (!button || !button->actions|| error != SWF_ENoError)
     {
         return;
     }
 
-    /* todo : button 2 actions */
+    #ifdef DEBUG
+    fprintf (stderr, "[definebutton2 : examining button2 actions]\n");
+    #endif
+    node = button->actions->first;
+
+    #ifdef DEBUG
+    fprintf (stderr, "[definebutton2 : first button2action is %s NULL]\n",(node==NULL)?"":"not ");
+    #endif
+
+
+    while (node != NULL)
+    {
+        examine_doactions (swf, error, node->doactions);
+        node = node->next;
+    }
+
+
+
 
     swf_destroy_definebutton2 (button);
 }

@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.27  2001/07/13 14:35:18  muttley
+ * Fix bug in parsing button2actions
+ *
  * Revision 1.26  2001/07/13 14:02:51  clampr
  * s/free/swf_free/
  *
@@ -1489,7 +1492,7 @@ swf_parse_get_button2actions (swf_parser * context, int * error)
 
 
 
-    while (test<20)
+    while (TRUE)
     {
          action_offset = swf_parse_get_word (context);
          next_action   = swf_parse_tell (context) + action_offset - 2;
@@ -1521,7 +1524,7 @@ swf_parse_get_button2actions (swf_parser * context, int * error)
             break;
          }
 
-         swf_parse_skip (context, action_offset - 2);
+         swf_parse_seek (context, next_action);
          test++;
     }
 
