@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.26  2001/07/13 14:02:51  clampr
+ * s/free/swf_free/
+ *
  * Revision 1.25  2001/07/13 13:26:55  muttley
  * Added handling for button2actions.
  * We should be able to parse all URLs now
@@ -780,7 +783,7 @@ swf_parse_definefont (swf_parser * context, int * error)
 /* TODO swf_parse_get_shaperecords(context, error);*/
     }
 
-    free (offset_table);
+    swf_free (offset_table);
 
     return font;
 
@@ -1505,7 +1508,7 @@ swf_parse_get_button2actions (swf_parser * context, int * error)
          temp->condition = swf_parse_get_word (context);
          if ((temp->doactions = (swf_doaction_list *) swf_parse_get_doactions (context, error)) == NULL)
          {
-            free (temp);
+            swf_free (temp);
             goto FAIL;
          }
 
@@ -1880,7 +1883,7 @@ swf_parse_definefont2 (swf_parser * context, int * error)
 
         }
 
-    	free (offset_table);
+    	swf_free (offset_table);
 
 
         if (swf_parse_tell (context) != data_pos + code_offset)
@@ -2499,7 +2502,7 @@ swf_parse_definebuttonsound (swf_parser * context, int * error)
 
     }
 
-    free (state);
+    swf_free (state);
 
     return button;
 

@@ -16,6 +16,9 @@
  *
  *
  * $Log: lib_swfextract.c,v $
+ * Revision 1.8  2001/07/13 14:00:42  clampr
+ * s/free/swf_free/
+ *
  * Revision 1.7  2001/07/13 13:26:55  muttley
  * Added handling for button2actions.
  * We should be able to parse all URLs now
@@ -174,11 +177,11 @@ destroy_swf (swf_extractor * swf)
     /* delete each individual string */
     for (i=0; i< swf->num_strings; i++)
     {
-        free (swf->strings[i]);
+	    swf_free (swf->strings[i]);
     }
     swf->num_strings = 0;
     /* delete the pointer to the strings */
-    if (swf->strings) free (swf->strings);
+    swf_free (swf->strings);
 
 
     #ifdef DEBUG
@@ -188,12 +191,12 @@ destroy_swf (swf_extractor * swf)
     /* delete each individual url */
     for (i=0; i<swf->num_urls; i++)
     {
-        free (swf->urls[i]);
+        swf_free (swf->urls[i]);
     }
     swf->num_urls = 0;
 
     /* delete the pointer to the urls */
-    if (swf->urls) free (swf->urls);
+    swf_free (swf->urls);
 
     #ifdef DEBUG
     fprintf (stderr, "[destroy_swf : destroying parser]\n");
@@ -206,7 +209,7 @@ destroy_swf (swf_extractor * swf)
     fprintf (stderr, "[destroy_swf : destroying context]\n");
     #endif
     /* free the context */
-    free (swf);
+    swf_free (swf);
 
     /* and we're done! */
 
@@ -449,7 +452,7 @@ parse_definetext (swf_extractor * swf, int * error)
     #ifdef DEBUG
     fprintf (stderr, "[parse_definetext: text record is '%s']\n", string);
     #endif
-    free (string);
+    swf_free (string);
 
     FAIL:
     swf_destroy_definetext (text);
@@ -480,7 +483,7 @@ parse_definetext2 (swf_extractor * swf, int * error)
         add_string (swf, error, string);
     }
 
-    free (string);
+    swf_free (string);
     swf_destroy_definetext2 (text);
 
 
