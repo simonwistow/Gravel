@@ -1,0 +1,12 @@
+#ifndef _SIZES_H
+#define _SIZES_H
+
+typedef @SWF_U8@  SWF_U8,  *P_SWF_U8,  **PP_SWF_U8;
+typedef @SWF_S8@  SWF_S8,  *P_SWF_S8,  **PP_SWF_S8;
+typedef @SWF_U16@ SWF_U16, *P_SWF_U16, **PP_SWF_U16;
+typedef @SWF_S16@ SWF_S16, *P_SWF_S16, **PP_SWF_S16;
+typedef @SWF_U32@ SWF_U32, *P_SWF_U32, **PP_SWF_U32;
+typedef @SWF_S32@ SWF_S32, *P_SWF_S32, **PP_SWF_S32;
+
+#endif
+

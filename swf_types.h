@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.18  2001/07/12 13:00:47  muttley
+ * Use proper, configure generated architecture independant type sizes
+ *
  * Revision 1.17  2001/07/12 11:33:25  muttley
  * *cough* remove a couple of commented out bits so it actually works
  *
@@ -236,6 +239,7 @@
 
 
 /* Global Types*/
+/*
 typedef unsigned long SWF_U32, *P_U32, **PP_U32;
 typedef signed long SWF_S32, *P_S32, **PP_S32;
 typedef unsigned short SWF_U16, *P_U16, **PP_U16;
@@ -244,7 +248,8 @@ typedef unsigned char SWF_U8, *P_U8, **PP_U8;
 typedef signed char SWF_S8, *P_S8, **PP_S8;
 typedef signed long SFIXED, *P_SFIXED;
 typedef signed long SCOORD, *P_SCOORD;
-
+*/
+#include "swf_sizes.h"
 
 
 
