@@ -108,7 +108,6 @@ const char * swf_MPEG_Ver[4] = {"1","2","2.5","3?"};
 swf_mp3header_list *
 swf_parse_get_mp3headers (swf_parser * context, int * error, int samples_per_frame)
 {
-
     int frame_count = 0;
     int header_store_size  = 0;
     swf_mp3header_list * header_list;
@@ -146,6 +145,7 @@ swf_parse_get_mp3headers (swf_parser * context, int * error, int samples_per_fra
                 *error = SWF_EMallocFailure;
                 goto FAIL;
             }
+			header_list->header_count++;
 
             /* Get the MP3 frame header */
             for (i=0; i<4; i++) {
@@ -194,11 +194,9 @@ swf_parse_get_mp3headers (swf_parser * context, int * error, int samples_per_fra
                 break;
             }
             frame_count++;
-
         }
-    }
+	}
 
-    header_list->header_count = ++frame_count;
     return header_list;
 
  FAIL:
