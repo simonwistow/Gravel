@@ -24,7 +24,7 @@ $m->event($e);
 
 $m->make_timeline();
 
-#print STDERR DumperX $m;
+print STDERR DumperX $g;
 
 my $a = $m->bake_movie();
 

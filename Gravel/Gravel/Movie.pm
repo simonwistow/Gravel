@@ -95,6 +95,17 @@ sub name {
 
 sub size {
     my $self = shift;
+
+    my $cf = ref($_[0]);
+    my %conf;
+    
+    if ($cf eq 'HASH') {
+		%conf = %{$_[0]};
+    } else {
+		@conf{'_x1', '_y1', '_x2', '_y2'} = @_;
+    }
+
+	%{$self} = (%{$self}, %conf);
 }
 
 #
@@ -111,12 +122,13 @@ sub _prepare {
 sub bake_movie {
     my $self = shift;
 
-#	$self->{_baked} = Gravel::Movie->_bake_movie();
-
 	$self->_prepare();
 
 	my $b = Gravel::Movie->_create_baked();
 	$b->_bake_header($self);
+	$b->_bake_library($self);
+
+
 	$b->_bake_rest($self);
 
 	return $b;
@@ -146,20 +158,66 @@ typedef struct {
 void _bake_header(SV* obj, SV* self) {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
 	int error = SWF_ENoError;
-	HV* h; 
+	HV* h = (HV *)SvRV(self); 
 	SV** p_name;
-	SV* name;
-	
+	SV** p_num;
+	SCOORD x1, x2, y1, y2;
 
-    swf_make_header(m->movie, &error, -4000, 4000, -4000, 4000);
-    m->movie->name = "ben1.swf\0";
-	h = (HV *)SvRV(self);
+	p_num = hv_fetch(h, "_x1", 3, 0);
+	if (NULL != p_num) {
+		x1 = (SCOORD)(SvIV(*p_num));
+	}
+	p_num = hv_fetch(h, "_x2", 3, 0);
+	if (NULL != p_num) {
+		x2 = (SCOORD)(SvIV(*p_num));
+	}
+	p_num = hv_fetch(h, "_y1", 3, 0);
+	if (NULL != p_num) {
+		y1 = (SCOORD)(SvIV(*p_num));
+	}
+	p_num = hv_fetch(h, "_y2", 3, 0);
+	if (NULL != p_num) {
+		y2 = (SCOORD)(SvIV(*p_num));
+	}
+
+    swf_make_header(m->movie, &error, x1, x2, y1, y2);
+
 	p_name = hv_fetch(h, "_name", 5, 0);
 	if (NULL != p_name) {
-		m->movie->name = (const char *)SvPVX(*p_name);
+		m->movie->name = (char *)SvPVX(*p_name);
 	}
 }
 
+
+void _bake_library(SV* obj, SV* self) {
+	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
+	int error = SWF_ENoError;
+	HV* h = (HV *)SvRV(self); 
+	SV** p_lib;
+	SV** p_shape;
+	AV* lib;
+	SV* shape;
+	I32 lib_size, i;
+
+	p_lib = hv_fetch(h, "_library", 8, 0);
+	if (NULL != p_lib) {
+		lib = (AV *)SvRV(*p_lib);
+	}
+	lib_size = av_len(lib);
+	for (i=0; i<=lib_size; ++i) {
+		p_shape = av_fetch(lib, i, 0);
+		if (NULL != p_shape) {
+			shape = *p_shape;
+		}
+		
+// At this point, we have the shape to be turned 
+// into an unserialised defineShape 
+	
+	    shape 
+
+	}
+
+}
 
 SV* _create_baked(char* class) {
 	SV* obj_ref = newSViv(0);
