@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.43  2003/05/21 16:56:17  kitty_goth
+ * continue refactor. add more button code
+ *
  * Revision 1.42  2003/05/20 10:25:29  kitty_goth
  * Begin name refactor
  *
@@ -1035,8 +1038,8 @@ struct swf_buttonrecord {
 
 
 struct swf_buttonrecord_list {
-        swf_buttonrecord * first;   /* the first element in the list */
-        swf_buttonrecord ** lastp;  /* pointer to the last element in the list */
+	swf_buttonrecord * first;   /* the first element in the list */
+	swf_buttonrecord ** lastp;  /* pointer to the last element in the list */
 };
 
 

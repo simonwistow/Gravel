@@ -157,7 +157,7 @@ sub bake_movie {
 
 	$b->_bake_library($self);
 
-#	print STDERR DumperX $self;
+	print STDERR DumperX $self;
 
 	$b->_bake_frames($self);
 
@@ -341,88 +341,6 @@ SWF_U16 _shape_id(int * error, SV* shape) {
 	return 0;
 }
 
-swf_matrix* _matrix_from_frame(int * error, HV * h_frame) {
-	swf_matrix * matrix;
-	SV** ph_matrix;
-	HV*  h_matrix;
-	SV** p_num;
-	double num;
-
-	if (*error) {
-		return;
-	}
-
-	ph_matrix = hv_fetch(h_frame, "_matrix", 7, 0);	
-	if (NULL == ph_matrix) {
-		return NULL;
-	}
-
-	matrix = (swf_matrix *)_get_struct(*ph_matrix, "_make_struct");
-
-	return matrix;
-}
-
-void _bake_place(swf_movie * movie, int * error, HV * h_place) {
-	swf_matrix * matrix;
-	SWF_U16 depth, obj_id;
-	SV** p_depth;
-	SV** p_shape;
-	SV*  shape;
-
-	obj_id = 0;
-	depth = 1;
-
-	// When do we actually want to throw an exception?
-	if (*error) {
-		fprintf(stderr, "non-zero error code on entry to _bake_place\n");
-		return;
-	}
-
-	matrix = _matrix_from_frame(error, h_place);
-
-	p_shape = hv_fetch(h_place, "_shape", 6, 0);	
-	if (NULL != p_shape) {  
-		obj_id = _shape_id(error, *p_shape);
-	}
-
-	p_depth = hv_fetch(h_place, "_depth", 6, 0);
-	if (NULL != p_depth) {  
-		depth = (SWF_U16)(SvIV(*p_depth));
-	}
-
-	/* Paranoia */
-	*error = 0;
-
-	swf_add_placeobject(movie, error, matrix, obj_id, depth);
-
-	return;
-}
-
-/* FIXME: Do this properly... */
-
-void _bake_contents(SV * shape, int * error, SV * obj) {
-	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
-
-	if (sv_isobject(shape)) {
-		dSP;
-		ENTER;
-		SAVETMPS;
-
-		PUSHMARK(SP);
-		XPUSHs(shape);
-//		n = perl_call_method(item, G_ARRAY | G_EVAL);
-		PUTBACK;
-//		fprintf(stderr, "shape is an object\n");
-
-		FREETMPS;
-		LEAVE;
-	}
-
-	_bake_place(m->movie, error, (HV *)SvRV(shape));
-
-
-} 
-
 void _bake_remove(swf_movie * movie, int * error, HV * h_place) {
 	SWF_U16 depth, obj_id;
 	SV** p_depth;
@@ -465,7 +383,7 @@ void _bake_frames(SV* obj, SV* self) {
 	AV*  a_frames;
 	SV** pa_frame;
 	AV*  a_frame;
-	SV** ph_shape;
+	SV** ph_frame;
 	I32  i, j, num_frames;
 	U16  tmp = 0;
 
@@ -479,12 +397,11 @@ void _bake_frames(SV* obj, SV* self) {
 				a_frame = (AV *)SvRV(*pa_frame);
 
 				for (j=0; j<=av_len(a_frame); ++j) {
-					ph_shape = av_fetch(a_frame, j, 0);
-					if (NULL != ph_shape) {
-						/* FIXME: Need to delegate this to the perl object in question via _perl_ dispatch and split up this monolithic XS code... */
-						//_bake_place(m->movie, &error, (HV *)SvRV(*ph_shape));
-						_bake_contents(*ph_shape, &error, obj);
+					ph_frame = av_fetch(a_frame, j, 0);
+					if (NULL == ph_frame) {
+						return;
 					}
+					_call_foreign_method(*ph_frame, "_bake", obj);
 				}
 				swf_add_showframe(m->movie, &error);
 
@@ -492,10 +409,11 @@ void _bake_frames(SV* obj, SV* self) {
                    start of the next frame */
 				if (i < av_len(a_frames)) {
 					for (j=0; j<=av_len(a_frame); ++j) {
-						ph_shape = av_fetch(a_frame, j, 0);
-						if (NULL != ph_shape) {
-							_bake_remove(m->movie, &error, (HV *)SvRV(*ph_shape));
+						ph_frame = av_fetch(a_frame, j, 0);
+						if (NULL == ph_frame) {
+							return;
 						}
+						_bake_remove(m->movie, &error, (HV *)SvRV(*ph_frame));
 					}
 				}
 
@@ -549,33 +467,4 @@ void _call_foreign_method(SV* shape, char* method, SV * mov)
 	LEAVE;
 }
 
-void * 
-_get_struct(SV* obj, char* method) 
-{
-	int count;
-	int ret;
 
-	dSP;
-	ENTER;
-	SAVETMPS;
-
-	PUSHMARK(SP);
-	XPUSHs(obj);
-	PUTBACK;
-
-	count = call_method(method, G_SCALAR);
-
-	SPAGAIN ;
-
-	if (1 != count) {
-		croak("Big trouble\n") ;
-	}
-
-	ret = POPi;
-
-	PUTBACK;
-	FREETMPS;
-	LEAVE;
-
-	return (void *)ret;
-}

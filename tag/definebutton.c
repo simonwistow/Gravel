@@ -95,6 +95,13 @@ swf_make_definebutton(int * error, SWF_U32 button_id)
 		*error = SWF_EMallocFailure;
 		return NULL;
     }
+    if ((button->records = (swf_buttonrecord_list *) calloc (1, sizeof (swf_buttonrecord_list))) == NULL) {
+		*error = SWF_EMallocFailure;
+		return NULL;
+    }
+	button->records->first = NULL;
+    button->records->lastp = &(button->records->first);
+
 
 	button->tagid = button_id;
 

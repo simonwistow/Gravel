@@ -115,12 +115,13 @@ void _bake (SV * shape, SV * mov)
 	AV* states;
 	SV** p_bstate;
 	HV* bstate;
+	HV* shape;
 	int i, j, num_st, curr, seen;
 	int* p_bst;
 	swf_definebutton * button;
 	SV** p_matrix;
 	swf_matrix * mx;
-	SWF_U32 char_id, depth, hit_test, down, over, up;
+	SWF_U32 char_id, depth, hit_test, down, over, up, button_id;
 	SV** p_num;
 
 /*
@@ -193,14 +194,29 @@ void _bake (SV * shape, SV * mov)
     }
     depth = (SWF_U32)(SvIV(*p_num));
 
-	button = swf_make_definebutton(&error, ++m->movie->max_obj_id);
+    button_id = ++m->movie->max_obj_id;
+	button = swf_make_definebutton(&error, button_id);
+	hv_store(h, "_obj_id", 7, newSViv((IV)button_id), 0);
+
 	for (i=0; i<=num_st; ++i) {
 		p_state = av_fetch(states, i, 0);
 		if (NULL == p_state) {
 			return;
 		}
 		bstate = (HV *) SvRV(*p_state);
-        // char_id from shape lookup.
+
+        /* First get the shape character ID */
+	    p_shape = hv_fetch(bstate, "_shape", 6, 0);
+		if (NULL == p_state) {
+			return;
+		}
+        shape = (HV *) SvRV(*p_shape);
+        p_num = hv_fetch(shape, "_obj_id", 7, 0);
+        if (NULL == p_num) {
+			return;
+		}
+        char_id = (SWF_U32)(SvIV(*p_num));
+
      	p_matrix = hv_fetch(bstate, "_matrix", 7, 0);
 		if (NULL == p_matrix) {
 			return;
@@ -232,13 +248,8 @@ void _bake (SV * shape, SV * mov)
 		}
         over = (SWF_U32)(SvIV(*p_num));
 
-        fprintf(stderr, "about to add_buttonrec\n");
         swf_add_buttonrec(button, &error, char_id, mx, depth, hit_test, down, over, up);
-        fprintf(stderr, "back from add_buttonrec\n");
-
     }
-
-
 }
 
 
