@@ -36,7 +36,9 @@ typedef struct swf_tagrecord swf_tagrecord;
 typedef struct swf_triangle swf_triangle;
 
 /* 
- * NOTE: There's a lot of potential stream/file-orientated duplication here.
+ * NOTE: There's a lot of stream/file-orientated duplication here.
+ * Perhaps we should refactor into a stream adaptor shared by the
+ * generator and parser
  */
 
 struct swf_movie {
@@ -57,13 +59,11 @@ struct swf_movie {
 };
 
 struct swf_tagrecord {
-    int id; /* ID of tag */
+    SWF_U16 id; /* ID of tag */
     void * tag; /* This is a pointer to the tag structure */
 
-    int code; /* we may want to look this one up in a library sometime */
-
     int serialised;
-    long size;
+    SWF_U32 size;
     SWF_U8 * buffer; /* Raw buffer excluding header */
 
     swf_tagrecord *  next;     /* pointer to the next element in the list */
@@ -72,6 +72,7 @@ struct swf_tagrecord {
 /* 
  * High level for testing serialisation
  * (Dancing triangles flash movies, anyone?) 
+ * FIXME: This 
  */
 
 struct swf_triangle {
@@ -89,16 +90,12 @@ void swf_make_finalise(swf_movie * movie, int * error);
 swf_movie * swf_make_movie (int * error);
 void swf_destroy_movie (swf_movie * movie);
 
+
+swf_tagrecord * swf_make_tagrecord (int * error);
+
 swf_shaperecord_list * swf_make_shaperecords_for_triangle(int * error);
 
 swf_tagrecord * swf_make_triangle_as_tag(swf_movie * movie, int * error);
-
-
-SWF_U8 * swf_movie_make_streamed_translation_matrix(swf_movie * movie, int * error, SWF_U8 x, SWF_U8 y);
-
-
-void add_serialised_showframe(swf_movie * movie, int * error);
-void add_serialised_end(swf_movie * movie, int * error);
 
 
 void swf_get_nth_shape (swf_parser * swf, int * error, int which_shape, swf_tagrecord * mybuffer);
@@ -111,12 +108,15 @@ swf_linestyle * swf_make_linestyle(int * error);
 swf_fillstyle * swf_make_fillstyle(int * error);
 
 void swf_movie_initbits(swf_movie * movie);
+void swf_movie_flush_bits (swf_movie * context);
+
+void swf_movie_seek (swf_movie * context, int pos);
 
 void swf_movie_put_byte(swf_movie * context, int * error, SWF_U8 byte);
 void swf_movie_put_bytes (swf_movie * context, int * error, int nbytes, SWF_U8 * bytes);
 
-void swf_movie_put_bits (swf_movie * context, SWF_S32 n, SWF_S32 bits);
-void swf_movie_put_sbits (swf_movie * context, SWF_S32 n, SWF_S32 bits);
+void swf_movie_put_bits (swf_movie * context, SWF_U8 n, SWF_U32 bits);
+void swf_movie_put_sbits (swf_movie * context, SWF_U8 n, SWF_S32 bits);
 
 void swf_movie_put_word(swf_movie * context, int * error, SWF_U16 word);
 void swf_movie_put_dword(swf_movie * context, int * error, SWF_U32 dword);
