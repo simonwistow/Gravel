@@ -16,6 +16,10 @@
  *
  *
  * $Log: lib_swfextract.h,v $
+ * Revision 1.4  2001/07/13 13:26:55  muttley
+ * Added handling for button2actions.
+ * We should be able to parse all URLs now
+ *
  * Revision 1.3  2001/07/09 14:22:57  acme
  * Added newline to end of file
  *
@@ -29,7 +33,7 @@
  *
  */
 
-//#define DEBUG
+#define DEBUG
 
 #include "swf_types.h"
 #include "swf_parse.h"

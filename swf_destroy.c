@@ -16,6 +16,10 @@
  *
  *
  * $Log: swf_destroy.c,v $
+ * Revision 1.20  2001/07/13 13:26:55  muttley
+ * Added handling for button2actions.
+ * We should be able to parse all URLs now
+ *
  * Revision 1.19  2001/07/13 00:57:48  clampr
  * fixed a memory leak in swf_parser->font_chars deallocation
  * documented a magic number that needs slaying
@@ -589,6 +593,8 @@ swf_destroy_button2action (swf_button2action * action)
     if (action==NULL) {
         return;
     }
+
+    swf_destroy_doaction_list (action->doactions);
     free (action);
 
     return;
@@ -597,17 +603,22 @@ swf_destroy_button2action (swf_button2action * action)
 void
 swf_destroy_button2action_list (swf_button2action_list * list)
 {
-    int i=0;
+    swf_button2action * tmp, * node;
 
     if (list==NULL)  {
         return;
     }
 
+    *(list->lastp) = NULL;
+    node = list->first;
 
-    for (i=0; i<list->action_count; i++) {
-        swf_destroy_button2action(list->actions[i]);
+    while (node != NULL)
+    {
+        tmp = node;
+        node = node->next;
+
+	    swf_destroy_button2action(tmp);
     }
-    free (list->actions);
 
     free (list);
 

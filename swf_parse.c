@@ -16,8 +16,9 @@
  *
  *
  * $Log: swf_parse.c,v $
- * Revision 1.24  2001/07/13 12:58:22  clampr
- * electric fence fixes for swf_parse_ef against 3deng_01
+ * Revision 1.25  2001/07/13 13:26:55  muttley
+ * Added handling for button2actions.
+ * We should be able to parse all URLs now
  *
  * Revision 1.23  2001/07/13 00:57:48  clampr
  * fixed a memory leak in swf_parser->font_chars deallocation
@@ -1439,13 +1440,18 @@ swf_parse_definebutton2 (swf_parser *  context, int * error)
      */
 
     swf_parse_seek(context, next_action);
-    button->actions = swf_parse_get_button2actions (context, error);
+
+    #ifdef DEBUG
+    fprintf (stderr, "[parse_definebutton2 : getting button2actions]\n");
+    #endif
 
     if ((button->actions = swf_parse_get_button2actions (context, error)) == NULL)
     {
 	    goto FAIL;
 	}
-
+    #ifdef DEBUG
+    fprintf (stderr, "[parse_definebutton2 : button2actions are not NULL]\n");
+    #endif
     return button;
 
 
@@ -1454,9 +1460,82 @@ swf_parse_definebutton2 (swf_parser *  context, int * error)
  return NULL;
 }
 
+
+
 /*
- * ActionScript handler. Currently unimplemented.
- * TODO
+ * ActionScript Condition handler
+ */
+swf_button2action_list *
+swf_parse_get_button2actions (swf_parser * context, int * error)
+{
+    swf_button2action_list * list;
+    swf_button2action      * temp;
+    SWF_U32                  action_offset = 0;
+    SWF_U32                  next_action   = 0;
+    int test = 0;
+
+    if ((list = (swf_button2action_list *) calloc (1, sizeof(swf_button2action_list))) == NULL)
+    {
+        *error = SWF_EMallocFailure;
+    	return NULL;
+    }
+
+
+    list->first = NULL;
+    list->lastp = &(list->first);
+
+
+
+    while (test<20)
+    {
+         action_offset = swf_parse_get_word (context);
+         next_action   = swf_parse_tell (context) + action_offset - 2;
+
+         #ifdef DEBUG
+         fprintf (stderr, "[get_button2action_list : action_offset  = %lx %lx (%d)]\n", action_offset, next_action, test);
+         #endif
+
+         if ((temp  = (swf_button2action *) calloc (1, sizeof(swf_button2action))) == NULL)
+         {
+            *error = SWF_EMallocFailure;
+            goto FAIL;
+         }
+
+
+         temp->condition = swf_parse_get_word (context);
+         if ((temp->doactions = (swf_doaction_list *) swf_parse_get_doactions (context, error)) == NULL)
+         {
+            free (temp);
+            goto FAIL;
+         }
+
+         *(list->lastp) = temp;
+	     list->lastp = &(temp->next);
+
+
+         if (action_offset == 0)
+         {
+            break;
+         }
+
+         swf_parse_skip (context, action_offset - 2);
+         test++;
+    }
+
+
+    return list;
+
+    FAIL:
+    swf_destroy_button2action_list (list);
+    return NULL;
+
+
+
+}
+
+
+/*
+ * ActionScript handler.
  */
 swf_doaction_list *
 swf_parse_get_doactions (swf_parser * context, int * error)
@@ -1631,15 +1710,6 @@ swf_parse_get_doaction (swf_parser * context, int * error)
 }
 
 
-/*
- * ActionScript handler. Currently unimplemented.
- * TODO
- */
-swf_button2action_list *
-swf_parse_get_button2actions (swf_parser * context, int * error)
-{
-    return NULL;
-}
 
 swf_defineedittext *
 swf_parse_defineedittext (swf_parser * context, int * error)
@@ -1647,7 +1717,8 @@ swf_parse_defineedittext (swf_parser * context, int * error)
 
     swf_defineedittext * text;
 
-    if ((text = (swf_defineedittext *) calloc (1, sizeof(swf_defineedittext))) == NULL) {
+    if ((text = (swf_defineedittext *) calloc (1, sizeof(swf_defineedittext))) == NULL)
+    {
         *error = SWF_EMallocFailure;
     	return NULL;
     }
@@ -1705,7 +1776,7 @@ swf_parse_definefont2 (swf_parser * context, int * error)
     SWF_U32 code_offset;
     SWF_U32 * offset_table;
 
-    if ((font = (swf_definefont2 *) calloc (1, sizeof (swf_definefont2))) == NULL) {
+    if ((font = (swf_definefont2 *) calloc (1, sizeof (swf_definefont))) == NULL) {
         *error = SWF_EMallocFailure;
     	return NULL;
     }
@@ -1749,19 +1820,19 @@ swf_parse_definefont2 (swf_parser * context, int * error)
      * put checks in for that
      */
 
+    if ((context->font_chars [font->fontid] = (char *) calloc (font->glyph_count, sizeof (char))) == NULL)
+    {
+        *error = SWF_EMallocFailure;
+        goto FAIL;
+
+    }
+
+
+    data_pos = swf_parse_tell(context);
+
 
     if (font->glyph_count > 0)
     {
-	    if ((context->font_chars [font->fontid] = (char *) calloc (font->glyph_count, sizeof (char))) == NULL)
-	    {
-		    *error = SWF_EMallocFailure;
-		    goto FAIL;
-		    
-	    }
-
-
-	    data_pos = swf_parse_tell(context);
-
 
         /* Get the FontOffsetTable */
 
@@ -1867,12 +1938,10 @@ swf_parse_definefont2 (swf_parser * context, int * error)
 
     	font->nkerning_pairs = swf_parse_get_word (context);
 
-	if (font->nkerning_pairs) {
-		if ((font->kerning_pairs = (swf_kerningpair **) calloc (font->nkerning_pairs, sizeof(swf_kerningpair *))) == NULL) {
-			*error = SWF_EMallocFailure;
-			goto FAIL;
-		}
-	}
+        if ((font->kerning_pairs = (swf_kerningpair **) calloc (font->nkerning_pairs, sizeof(swf_kerningpair *))) == NULL) {
+            *error = SWF_EMallocFailure;
+            goto FAIL;
+        }
 
 
         for (i=0; i<font->nkerning_pairs; i++)

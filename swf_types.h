@@ -16,6 +16,10 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.20  2001/07/13 13:26:55  muttley
+ * Added handling for button2actions.
+ * We should be able to parse all URLs now
+ *
  * Revision 1.19  2001/07/12 13:16:28  muttley
  * Whoops, needed to uncomment the definitions for SCOORD
  *
@@ -242,6 +246,7 @@
 
 
 /* Global Types*/
+
 /*
 typedef unsigned long SWF_U32, *P_U32, **PP_U32;
 typedef signed long SWF_S32, *P_S32, **PP_S32;
@@ -251,7 +256,13 @@ typedef unsigned char SWF_U8, *P_U8, **PP_U8;
 typedef signed char SWF_S8, *P_S8, **PP_S8;
 */
 
+
+/*
+ * Hmm, this trhwos up lots of warnings so revoke to having
+ * everything
+ */
 #include "swf_sizes.h"
+
 typedef signed long SFIXED, *P_SFIXED;
 typedef signed long SCOORD, *P_SCOORD;
 
@@ -345,7 +356,7 @@ struct swf_parser {
     int headers_parsed;   /* have the headers been parsed yet */
 
     SWF_U32 cur_tag_len;  /* the length of the current tag we're parsing */
-    SWF_U32 filepos;   
+    SWF_U32 filepos;
     SWF_U32 next_tag_pos; /* what the position of the next tag is */
     SWF_U32 frame;        /* what the current frame we're on is */
 
@@ -984,14 +995,20 @@ struct swf_shaperecord_list {
     swf_shaperecord ** lastp;
 };
 
+/*
+ * all this does is define a condition
+ * that must be satisfied and then some
+ * DoActions
+ */
 struct swf_button2action {
-
-	SWF_U32 tagid;      /* todo simon */
+	SWF_U32 condition;
+    swf_doaction_list * doactions;
+    swf_button2action * next;
 };
 
 struct swf_button2action_list {
-        swf_button2action ** actions;   /* todo simon : this needs to be turned into a linked list */
-        int action_count;
+        swf_button2action *  first;
+        swf_button2action ** lastp;
 };
 
 

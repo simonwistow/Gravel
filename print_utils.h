@@ -16,6 +16,10 @@
  *
  *
  * $Log: print_utils.h,v $
+ * Revision 1.11  2001/07/13 13:26:55  muttley
+ * Added handling for button2actions.
+ * We should be able to parse all URLs now
+ *
  * Revision 1.10  2001/07/09 12:47:59  muttley
  * Changes for lib_swfextract and text_extract
  *
@@ -54,6 +58,7 @@ extern void print_doactions             (swf_doaction_list *, const char *);
 extern void print_doaction              (swf_doaction *, const char *);
 extern void print_imageguts             (swf_imageguts *, const char *);
 extern void print_button2actions        (swf_button2action_list *, const char *);
+extern void print_button2action         (swf_button2action *, const char *);
 extern void print_shape_records         (swf_shaperecord_list *);
 extern void print_mp3header_list        (swf_mp3header_list *, const char *);
 extern void print_adpcm                 (swf_adpcm *, const char *);

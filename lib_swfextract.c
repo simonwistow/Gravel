@@ -16,6 +16,10 @@
  *
  *
  * $Log: lib_swfextract.c,v $
+ * Revision 1.7  2001/07/13 13:26:55  muttley
+ * Added handling for button2actions.
+ * We should be able to parse all URLs now
+ *
  * Revision 1.6  2001/07/12 23:00:06  clampr
  * another test before free
  *
@@ -401,7 +405,7 @@ parse_definetext (swf_extractor * swf, int * error)
     //todo simon : I have to define a new error variable.
     //             otherwise it segafaults. Why? FIXME!
 
-    swf_definetext * text = text = swf_parse_definetext (swf->parser, &error2);
+    swf_definetext * text = text = swf_parse_definetext (swf->parser, error);
     char * string = NULL;
 
     #ifdef DEBUG

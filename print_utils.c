@@ -16,6 +16,10 @@
  *
  *
  * $Log: print_utils.c,v $
+ * Revision 1.12  2001/07/13 13:26:55  muttley
+ * Added handling for button2actions.
+ * We should be able to parse all URLs now
+ *
  * Revision 1.11  2001/07/09 15:48:54  acme
  * Renamed U32 to SWF_U32 and so on
  *
@@ -541,11 +545,34 @@ print_doaction (swf_doaction * action, const char * str)
 }
 
 void
-print_button2actions (swf_button2action_list * actions,const char * str)
+print_button2actions (swf_button2action_list * list,const char * str)
 {
-	//todo simon
+    swf_button2action * node;
+
+    if (list==NULL)
+    {
+        return;
+    }
+
+    node = list->first;
+
+    while (node != NULL)
+    {
+        print_button2action (node, str);
+        node = node->next;
+    }
+
 	return;
 }
+
+void
+print_button2action (swf_button2action * action, const char * str)
+{
+     printf("%sCondition: %04lx\n", str, action->condition);
+     print_doactions (action->doactions, str);
+
+}
+
 
 
 void
