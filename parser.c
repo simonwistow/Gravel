@@ -16,6 +16,9 @@
  *
  *
  * $Log: parser.c,v $
+ * Revision 1.14  2001/07/13 15:55:29  muttley
+ * Fix for font chars
+ *
  * Revision 1.13  2001/07/09 15:48:54  acme
  * Renamed U32 to SWF_U32 and so on
  *
@@ -970,7 +973,7 @@ parse_definefont2 (swf_parser * context, const char * str)
             if (font->flags & sfontFlagsWideOffsets) {
                 printf("%02x:[%04lx] ", i, font->code_table[i]);
             } else {
-                printf("%02x:[%lc] ", i, font->code_table[i]);
+                printf("%02x:[%c] ", i, (char) font->code_table[i]);
 	    }
 
             if ((i & 7) == 7) {
