@@ -16,8 +16,8 @@
  *
  *
  * $Log: print_utils.c,v $
- * Revision 1.6  2001/06/22 17:16:51  muttley
- * Fixed get_textrecords and get_textrecord and associated destructors and printers
+ * Revision 1.7  2001/06/26 13:45:03  muttley
+ * Add facilities for converting DefineFontInfo, DefineFont and DefineText info into 'real' text
  *
  */
 
@@ -130,7 +130,7 @@ print_button2actions (swf_button2action_list * actions,const char * str)
 
 
 void
-print_textrecord (swf_textrecord * node, const char * str)
+print_textrecord (swf_textrecord * node, const char * str, int *font_id)
 {
 
     int g;
@@ -142,6 +142,7 @@ print_textrecord (swf_textrecord * node, const char * str)
         if (node->flags & textHasFont)
         {
             printf("%s\tfontId: %ld\n", str, node->font_id);
+            *font_id = node->font_id;
         }
 
         if (node->flags & textHasColour)
@@ -177,6 +178,14 @@ print_textrecord (swf_textrecord * node, const char * str)
             printf("[%d,%d] ", node->glyphs[g][0], node->glyphs[g][1]);
         }
 
+        /*
+         * Send this node to the textrecord_to_text
+         * This relies on the fact that DefineFont has been called before
+         * for a given font id, then DefineFontInfo for that fontid
+         * and then finally that a text record has been set before this that sets
+         * the font_id variable. This is a h-h-hack.
+         */
+        printf(" (\"%s\")", textrecord_to_text (node, *font_id));
         printf("\n");
     }
 
@@ -184,18 +193,69 @@ print_textrecord (swf_textrecord * node, const char * str)
 
 }
 
+extern char* textrecord_to_text         (swf_textrecord * node, int font_id)
+{
+    int g;
+    char * str;
+
+    /* check to see that the font_id var has been set */
+    if (font_id == 0)
+    {
+        return NULL;
+    }
+
+    /*
+     * make sure this has the relevant data we require
+     * and not the TextControl stuff which will have
+     * previously set the font_id var.
+     */
+    if (node->flags & isTextControl)
+    {
+        return NULL;
+    }
+
+    /* malloc to the size of the string */
+    if ((str = (char *) calloc (node->glyph_count, sizeof (char))) == NULL)
+    {
+        return NULL;
+    }
+
+    /* check fontchars[font_id] */
+    if (font_chars[font_id] == NULL)
+    {
+        return NULL;
+    }
+
+    /* ... and then set it */
+    for (g=0; g< node->glyph_count; g++)
+    {
+        /* this requires that font_chars[font_id] has actually been set of course*/
+        str[g] = font_chars[font_id][node->glyphs[g][0]];
+
+    }
+
+    /* et voila */
+    return str;
+
+
+}
+
+
 void
-print_textrecords (swf_textrecord * node, const char * str)
+print_textrecords (swf_textrecord_list * list, const char * str)
 {
     swf_textrecord * tmp;
+    swf_textrecord * node;
+    int font_id = 0;
 
+    node = list->first;
 
     while (node != NULL)
     {
 
         tmp = node;
         node = node->next;
-        print_textrecord (tmp, str);
+        print_textrecord (tmp, str, &font_id);
     }
 
     return;

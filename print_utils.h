@@ -16,8 +16,8 @@
  *
  *
  * $Log: print_utils.h,v $
- * Revision 1.6  2001/06/22 17:16:51  muttley
- * Fixed get_textrecords and get_textrecord and associated destructors and printers
+ * Revision 1.7  2001/06/26 13:45:03  muttley
+ * Add facilities for converting DefineFontInfo, DefineFont and DefineText info into 'real' text
  *
  */
 
@@ -30,12 +30,14 @@
 
 #define INDENT  printf("      ");
 
+char ** font_chars;
+
 extern void print_cxform                (swf_cxform *, const char *);
 extern void print_matrix                (swf_matrix *, const char *);
 extern void print_rect                  (swf_rect   *  , const char *);
 extern void print_shaperecords          (swf_shaperecord_list *, const char *);
-extern void print_textrecord            (swf_textrecord *, const char *);
-extern void print_textrecords           (swf_textrecord *, const char *);
+extern void print_textrecord            (swf_textrecord *, const char *, int *);
+extern void print_textrecords           (swf_textrecord_list *, const char *);
 extern void print_buttonrecords         (swf_buttonrecord_list *, const char *);
 extern void print_doactions             (swf_doaction_list *, const char *);
 extern void print_imageguts             (swf_imageguts *, const char *);
@@ -46,6 +48,7 @@ extern void print_adpcm                 (swf_adpcm *, const char *);
 extern void print_startsound            (swf_startsound *, const char *);
 extern void print_soundstreamhead       (swf_soundstreamhead *, const char *, int);
 extern void print_shapestyle            (swf_shapestyle * style, const char * str);
+extern char* textrecord_to_text         (swf_textrecord *, int);
 
 #endif
 
