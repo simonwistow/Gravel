@@ -16,6 +16,9 @@
  *
  *
  * $Log: lib_swfextract.c,v $
+ * Revision 1.17  2001/07/19 23:05:07  clampr
+ * less returning from void functions
+ *
  * Revision 1.16  2001/07/16 00:39:07  clampr
  * goddammit - dereferenced pointers!
  *
@@ -315,8 +318,6 @@ get_text (swf_extractor * swf, int * error)
     #ifdef DEBUG
     fprintf (stderr, "[get_text: finished parsing ]\n");
     #endif
-
-    return;
 }
 
 
@@ -337,8 +338,6 @@ parse_doaction (swf_extractor * swf, int * error)
     examine_doactions (swf, error, list);
 
     swf_destroy_doaction_list (list);
-
-    return;
 }
 
 void
@@ -381,8 +380,6 @@ examine_doactions (swf_extractor * swf, int * error, swf_doaction_list * list)
 
         node = node->next;
     }
-
-
 }
 
 void
@@ -405,8 +402,6 @@ parse_defineedittext (swf_extractor * swf, int * error)
     }
 
     swf_destroy_defineedittext (text);
-
-    return;
 }
 
 void
@@ -459,14 +454,12 @@ parse_definetext (swf_extractor * swf, int * error)
     #endif
     swf_free (string);
 
-    FAIL:
+ FAIL:
     swf_destroy_definetext (text);
 
     #ifdef DEBUG
     fprintf (stderr, "[parse_definetext : have destroyed definetext]\n");
     #endif
-
-
 }
 
 void
@@ -490,8 +483,6 @@ parse_definetext2 (swf_extractor * swf, int * error)
 
     swf_free (string);
     swf_destroy_definetext2 (text);
-
-
 }
 
 
@@ -505,7 +496,6 @@ parse_definebutton (swf_extractor * swf, int * error)
     #endif
 
 
-
     if (button == NULL || *error != SWF_ENoError)
     {
         return;
@@ -517,17 +507,13 @@ parse_definebutton (swf_extractor * swf, int * error)
     #endif
     examine_doactions (swf, error, button->actions);
 
-
     swf_destroy_definebutton (button);
-
-    return;
-
 }
+
 
 void
 parse_definebutton2 (swf_extractor * swf, int * error)
 {
-
     swf_definebutton2 * button = swf_parse_definebutton2 (swf->parser, error);
     swf_button2action * node;
 
@@ -555,9 +541,6 @@ parse_definebutton2 (swf_extractor * swf, int * error)
         examine_doactions (swf, error, node->doactions);
         node = node->next;
     }
-
-
-
 
     swf_destroy_definebutton2 (button);
 }
@@ -661,7 +644,6 @@ add_text (int * error, char *** list, int * num, int * max, char * string)
     #endif
 
     (*num)++;
-    return;
 }
 
 
