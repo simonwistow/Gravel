@@ -19,9 +19,9 @@
 #define _HANDY_H
 
 #ifdef DEBUG
-#define dprintf(...) (fprintf (stderr, __VA_ARGS__))
+#define dprintf(format, args...) (fprintf (stderr, format, ## args))
 #else
-#define dprintf(...)
+#define dprintf(format, args...) /* this space left intentionally blank ;) */ 
 #endif
 
 #endif
