@@ -242,14 +242,32 @@ swf_shaperecord_list * swf_make_shaperecords_for_triangle(int * error) {
     return list;
 }
 
+
+void swf_get_raw_shape (swf_parser * swf, int * error, swf_tagrecord * mybuffer) {
+    SWF_U32 startpos;
+    int length;    
+
+    startpos = length = 0;
+
+    startpos = swf->filepos;
+    length = swf->cur_tag_len;
+
+/* CHECKME: Do we need this ? */
+    swf_parse_seek(swf, startpos);
+    
+    mybuffer->buffer = swf_parse_get_bytes(swf, length);
+    mybuffer->size = length;
+}
+
+
+void swf_get_nth_shape (swf_parser * swf, int * error, int which_shape, swf_tagrecord * mybuffer) {
 /*
  * Get a raw shape from the define shape frames.
  */
-void swf_get_raw_shape (swf_parser * swf, int * error, int which_shape, swf_shape_buffer * mybuffer) {
-    int next_id, i, length;
-    SWF_U32 startpos;
-    
-    startpos = i = length = 0;
+
+    int next_id, i, done;
+
+    i = done = 0;
     
     /* parse all the tags, looking for a defineshape  */
     do {
@@ -265,65 +283,39 @@ void swf_get_raw_shape (swf_parser * swf, int * error, int which_shape, swf_shap
 	}
 
         switch (next_id) {
-	    case tagDoAction:
-		break;
-		
-	    case tagDefineEditText:
-		break;
-		
-	    case tagDefineText:
-		break;
-				
-	    case tagDefineText2:
-		break;
-		
-	    case tagDefineButton:
-		break;
-		
-	    case tagDefineButton2:
-		break;
-		
-	    case tagDefineFont:
-		break;
-		
-	    case tagDefineFont2:
-		break;
-		
-	    case tagDefineFontInfo:
-		break;
-				
 	    case tagDefineShape:
 		if (i  == which_shape ) {
-		    startpos = swf->filepos;
-		    length = swf->cur_tag_len;
+		    swf_get_raw_shape(swf, error, mybuffer);
+		    mybuffer->id = next_id;
+		    mybuffer->serialised = TRUE;
+		    done = 1;
 		}
 		i++;
 		break;
 		
 	    case tagDefineShape2:
 		if (i  == which_shape ) {
-		    startpos = swf->filepos;
-		    length = swf->cur_tag_len;
-				}
+		    swf_get_raw_shape(swf, error, mybuffer);
+		    mybuffer->id = next_id;
+		    mybuffer->serialised = TRUE;
+		    done = 1;
+		}
 		i++;
 		break;
 				
 	    case tagDefineShape3:
 		if (i  == which_shape ) {
-		    startpos = swf->filepos;
-		    length = swf->cur_tag_len;
+		    swf_get_raw_shape(swf, error, mybuffer);
+		    mybuffer->id = next_id;
+		    mybuffer->serialised = TRUE;
+		    done = 1;
 		}
 		i++;
 		
 		break;
         }
-    } while ((!*error) && next_id && !length);
+    } while ((!*error) && next_id && !done);
 
-    swf_parse_seek(swf, startpos);
-    
-    mybuffer->buffer = swf_parse_get_bytes(swf, length);
-    mybuffer->size = length;
-    
     return;
 }
 
@@ -459,7 +451,7 @@ void swf_movie_put_bytes (swf_movie * context, int * error, int nbytes, SWF_U8 *
 
 void swf_movie_put_bits (swf_movie * context, SWF_S32 n, SWF_S32 bits)
 {
-    SWF_U32 v = 0;
+/*    SWF_U32 v = 0; */
 	
 /*    while (1) {
         SWF_S32 s = n - context->bitpos;

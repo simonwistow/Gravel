@@ -35,8 +35,6 @@ typedef struct swf_movie swf_movie;
 typedef struct swf_tagrecord swf_tagrecord;
 typedef struct swf_triangle swf_triangle;
 
-typedef struct swf_shape_buffer swf_shape_buffer;
-
 /* 
  * NOTE: There's a lot of stream/file-orientated duplication here.
  * Perhaps we should refactor into a stream adaptor shared by the
@@ -60,14 +58,13 @@ struct swf_movie {
     swf_tagrecord ** lastp;    /* pointer to the last element in the list */
 };
 
-struct swf_shape_buffer {
-    long size;
-    SWF_U8 * buffer;
-};
-
 struct swf_tagrecord {
     int id; /* ID of tag */
-    void * tag;
+    void * tag; /* This is a pointer to the tag structure */
+
+    int serialised;
+    long size;
+    SWF_U8 * buffer; /* Raw buffer excluding header */
 
     swf_tagrecord *  next;     /* pointer to the next element in the list */
 };
@@ -97,7 +94,9 @@ swf_shaperecord_list * swf_make_shaperecords_for_triangle(int * error);
 swf_tagrecord * swf_make_triangle_as_tag(swf_movie * movie, int * error);
 
 
-void swf_get_raw_shape (swf_parser * swf, int * error, int which_shape, swf_shape_buffer * mybuffer);
+void swf_get_nth_shape (swf_parser * swf, int * error, int which_shape, swf_tagrecord * mybuffer);
+
+void swf_get_raw_shape (swf_parser * swf, int * error, swf_tagrecord * mybuffer);
 
 void swf_destroy_tagrecord (swf_tagrecord * tagrec);
 
