@@ -43,41 +43,41 @@ AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
 
 case 1 in
-        $ac_cv_sizeof_char)  U8="unsigned char";    S8="signed char";;
+        $ac_cv_sizeof_char)  SWF_U8="unsigned char";    SWF_S8="signed char";;
 esac
 
 case 2 in
-        $ac_cv_sizeof_char)  U16="unsigned char";   S16="signed char";;
-        $ac_cv_sizeof_short) U16="unsigned short";  S16="signed short";;
-        $ac_cv_sizeof_int)   U16="unsigned int";    S16="signed int";;
+        $ac_cv_sizeof_char)  SWF_U16="unsigned char";   SWF_S16="signed char";;
+        $ac_cv_sizeof_short) SWF_U16="unsigned short";  SWF_S16="signed short";;
+        $ac_cv_sizeof_int)   SWF_U16="unsigned int";    SWF_S16="signed int";;
 esac
 
 case 4 in
-        $ac_cv_sizeof_short) U32="unsigned short";  S32="signed short";;
-        $ac_cv_sizeof_int)   U32="unsigned int";    S32="signed int";;
-        $ac_cv_sizeof_long)  U32="unsigned long";   S32="signed long";;
+        $ac_cv_sizeof_short) SWF_U32="unsigned short";  SWF_S32="signed short";;
+        $ac_cv_sizeof_int)   SWF_U32="unsigned int";    SWF_S32="signed int";;
+        $ac_cv_sizeof_long)  SWF_U32="unsigned long";   SWF_S32="signed long";;
 esac
 
-if test -z "$U8"; then
+if test -z "$SWF_U8"; then
         AC_MSG_ERROR(No 8 bit type found on this platform!)
 fi
-if test -z "$U16"; then
+if test -z "$SWF_U16"; then
         AC_MSG_ERROR(No 16 bit type found on this platform!)
 fi
-if test -z "$U32"; then
+if test -z "$SWF_U32"; then
         AC_MSG_ERROR(No 32 bit type found on this platform!)
 fi
 
 AC_SUBST(CC)
-AC_SUBST(U8)
-AC_SUBST(S8)
-AC_SUBST(U16)
-AC_SUBST(S16)
-AC_SUBST(U32)
-AC_SUBST(S32)
+AC_SUBST(SWF_U8)
+AC_SUBST(SWF_S8)
+AC_SUBST(SWF_U16)
+AC_SUBST(SWF_S16)
+AC_SUBST(SWF_U32)
+AC_SUBST(SWF_S32)
 
 dnl What to do with all this information
 
-AC_CONFIG_FILES([Makefile sizes.h])
+AC_CONFIG_FILES([Makefile swf_sizes.h])
 AC_OUTPUT
 
