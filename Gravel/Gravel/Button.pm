@@ -260,16 +260,13 @@ void _bake (SV * shape, SV * mov)
 		return;
 	}
 
-// FIXME: Button serialisation
-
-	/* Now serialise and dump */
-/*	swf_serialise_definebutton(temp->buffer, &error, (swf_definebutton *) temp->tag);
+	swf_serialise_definebutton(temp->buffer, &error, (swf_definebutton *) button);
 	temp->serialised = 1;
 	swf_dump_tag(m->movie, &error, temp);
 	if (SWF_ENoError != error) {
 		fprintf(stderr, "Non-zero error condition 10 detected\n");
 	}
-*/
+
 
 }
 

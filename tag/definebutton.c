@@ -190,11 +190,54 @@ swf_add_definebutton (swf_movie * movie, int * error, SWF_U16 button_id, SWF_U16
     return;
 }
 
+void 
+swf_serialise_buttonrecord(swf_buffer * buffer, int * error, swf_buttonrecord * rec)
+{
+	swf_buffer_put_bits(buffer, 4, 0); /* Undocumented bits, assume 0 */
+	swf_buffer_put_bits(buffer, 1, rec->state_hit_test); /* Used for HitTest */
+	swf_buffer_put_bits(buffer, 1, rec->state_down); /* Used for Down */
+	swf_buffer_put_bits(buffer, 1, rec->state_over); /* Used for Over */
+	swf_buffer_put_bits(buffer, 1, rec->state_up); /* Used for Up */
+    swf_buffer_flush_bits(buffer);
+	swf_buffer_put_word(buffer, error, rec->character);
+	swf_buffer_put_word(buffer, error, rec->layer);
+	swf_serialise_matrix(buffer, error, rec->matrix);
+
+	return;
+}
+
+
 
 void 
 swf_serialise_definebutton (swf_buffer * buffer, int * error, swf_definebutton * button)
 {
+	swf_buttonrecord * node;
+	swf_buttonrecord * temp;
+	SWF_U16 frame;
 
+	swf_buffer_initbits(buffer);
+
+	swf_buffer_put_word(buffer, error, button->tagid);
+	
+	node = button->records->first;
+	while (node != NULL) {
+		temp = node;
+		node = node->next;
+
+		swf_serialise_buttonrecord(buffer, error, temp);
+	}
+
+	/* End of button records marker */
+	swf_buffer_put_byte(buffer, error, 0);
+
+	/* Action records go here */
+	/* FIXME: Test code */
+	//	fprintf (stderr, "about to do actions\n");
+	frame = 1;
+	swf_action_put_gotoframe(buffer, error, frame);
+
+	/* End of action records marker */
+	swf_buffer_put_byte(buffer, error, 0);
 
 	return;
 }

@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: tagrecord.c,v 1.5 2002/07/29 16:41:48 kitty_goth Exp $	
+ * 	$Id: tagrecord.c,v 1.6 2003/05/22 15:11:57 kitty_goth Exp $	
  */
 
 #include <stdlib.h>
@@ -32,7 +32,7 @@ swf_make_tagrecord (int * error, SWF_U16 myid)
     swf_tagrecord * tag;
 
     if ((tag = (swf_tagrecord *) calloc (1, sizeof (swf_tagrecord))) == NULL) {
-	*error = SWF_EMallocFailure;
+	  *error = SWF_EMallocFailure;
 	return NULL;
     }
 
@@ -72,3 +72,10 @@ swf_destroy_tagrecord (swf_tagrecord * tag)
 }
 
 
+/* 
+Local Variables:
+mode: C
+c-basic-offset: 4
+tab-width: 4
+End:
+*/
