@@ -1,3 +1,6 @@
+# NOTE: don't edit this file!!!  Edit Makefile.in and rerun either
+# ./configure or ./config.status (if you've not changed configure)
+
 # external programs
 CC = @CC@
 LIBTOOL = ./libtool
@@ -52,6 +55,13 @@ swf_parse_debug: $(D_LIB_OBJECTS) $(D_OBJECTS)
 
 text_extract_debug: $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS)
 	$(CC) $(CFLAGS) -I . $(DEBUG) -o text_extract_debug $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS)
+
+text_extract_ccmalloc: $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS)
+	$(CC) $(CFLAGS) -I . $(DEBUG) -o text_extract_ccmalloc $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS) -lccmalloc -ldl
+
+text_extract_ef: $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS)
+	$(CC) $(CFLAGS) -I . $(DEBUG) -o text_extract_ef $(D_LIB_OBJECTS) $(D_TEXT_OBJECTS) -lefence
+
 
 install: all
 	echo richardc is really slack
