@@ -61,6 +61,7 @@ int main (int argc, char *argv[]) {
     swf_tagrecord * temp;
     SWF_U16 obj_id;
     swf_matrix * matrix;
+    swf_cxform * mycx;
 
 /* First, get a parser up */
 
@@ -113,6 +114,14 @@ int main (int argc, char *argv[]) {
       error = SWF_EMallocFailure;
       return 1;
     }
+    if ((mycx = (swf_cxform *) calloc (1, sizeof (swf_cxform))) == NULL) {
+      error = SWF_EMallocFailure;
+      return 1;
+    }
+
+    mycx->ra = 0;
+    mycx->ga = 0;
+    mycx->ba = 1;
 
 /* Now generate the output movie */
 
@@ -130,9 +139,8 @@ int main (int argc, char *argv[]) {
 
     swf_add_setbackgroundcolour(movie, &error, 0, 255, 0, 255);
     swf_dump_shape(movie, &error, temp);
-    printf("foo 5\n");
 
-    printf("foo A\n");
+    /* Start doing the frames */
 
     matrix->a  = matrix->c  = 512 * 100;
     matrix->b  = matrix->d  = 0;
@@ -148,7 +156,11 @@ int main (int argc, char *argv[]) {
     matrix->tx = 270 * 20;
     matrix->ty = 150 * 20;
 
-    swf_add_placeobject(movie, &error, obj_id, matrix);
+    mycx->rb = 0;
+    mycx->gb = 0;
+    mycx->bb = 1;
+
+    swf_add_placeobject_with_cxform(movie, &error, obj_id, matrix, mycx);
     swf_add_showframe(movie, &error);
 
     swf_add_removeobject(movie, &error, obj_id);
@@ -157,7 +169,11 @@ int main (int argc, char *argv[]) {
     matrix->tx = 240 * 20;
     matrix->ty = 150 * 20;
 
-    swf_add_placeobject(movie, &error, obj_id, matrix);
+    mycx->rb = 0;
+    mycx->gb = 0;
+    mycx->bb = 1;
+
+    swf_add_placeobject_with_cxform(movie, &error, obj_id, matrix, mycx);
     swf_add_showframe(movie, &error);
 
     swf_add_removeobject(movie, &error, obj_id);
@@ -166,7 +182,11 @@ int main (int argc, char *argv[]) {
     matrix->tx = 210 * 20;
     matrix->ty = 150 * 20;
 
-    swf_add_placeobject(movie, &error, obj_id, matrix);
+    mycx->rb = 0;
+    mycx->gb = 0;
+    mycx->bb = 1;
+
+    swf_add_placeobject_with_cxform(movie, &error, obj_id, matrix, mycx);
     swf_add_showframe(movie, &error);
 
     swf_add_removeobject(movie, &error, obj_id);
@@ -175,7 +195,11 @@ int main (int argc, char *argv[]) {
     matrix->tx = 180 * 20;
     matrix->ty = 150 * 20;
 
-    swf_add_placeobject(movie, &error, obj_id, matrix);
+    mycx->rb = 0;
+    mycx->gb = 0;
+    mycx->bb = 1;
+
+    swf_add_placeobject_with_cxform(movie, &error, obj_id, matrix, mycx);
     swf_add_showframe(movie, &error);
 
     swf_add_removeobject(movie, &error, obj_id);
@@ -184,7 +208,11 @@ int main (int argc, char *argv[]) {
     matrix->tx = 150 * 20;
     matrix->ty = 150 * 20;
 
-    swf_add_placeobject(movie, &error, obj_id, matrix);
+    mycx->rb = 0;
+    mycx->gb = 0;
+    mycx->bb = 1;
+
+    swf_add_placeobject_with_cxform(movie, &error, obj_id, matrix, mycx);
     swf_add_showframe(movie, &error);
 
     swf_add_removeobject(movie, &error, obj_id);
@@ -193,7 +221,11 @@ int main (int argc, char *argv[]) {
     matrix->tx = 120 * 20;
     matrix->ty = 150 * 20;
 
-    swf_add_placeobject(movie, &error, obj_id, matrix);
+    mycx->rb = 0;
+    mycx->gb = 0;
+    mycx->bb = 1;
+
+    swf_add_placeobject_with_cxform(movie, &error, obj_id, matrix, mycx);
     swf_add_showframe(movie, &error);
 
     swf_add_removeobject(movie, &error, obj_id);
@@ -202,15 +234,19 @@ int main (int argc, char *argv[]) {
     matrix->tx =  90 * 20;
     matrix->ty = 150 * 20;
 
-    swf_add_placeobject(movie, &error, obj_id, matrix);
+    mycx->rb = 0;
+    mycx->gb = 0;
+    mycx->bb = 1;
+
+    swf_add_placeobject_with_cxform(movie, &error, obj_id, matrix, mycx);
     swf_add_showframe(movie, &error);
 
 
     swf_add_end(movie, &error);
 
     swf_make_finalise(movie, &error);
-    printf("foo 7\n");
 
+    swf_free(mycx);
     swf_free(matrix);
     swf_destroy_movie(movie);
 

@@ -57,7 +57,7 @@ swf_parse_placeobject (swf_parser * context, int * error)
 
 
 void
-swf_add_placeobject (swf_movie * movie, int * error, SWF_U16 char_id, swf_matrix * mym)
+swf_add_placeobject_with_cxform (swf_movie * movie, int * error, SWF_U16 char_id, swf_matrix * mym, swf_cxform * mycx)
 {
 	swf_tagrecord * temp;
 	SWF_U16 depth;
@@ -86,14 +86,26 @@ swf_add_placeobject (swf_movie * movie, int * error, SWF_U16 char_id, swf_matrix
     temp->buffer->size = 4;
 
 	swf_serialise_matrix(temp->buffer, error, mym);
-	
+
+	if (mycx != NULL) {
+		swf_serialise_cxform(temp->buffer, error, mycx);
+	}
+
     temp->serialised = 1;
 	
-	printf("foo D\n");
 /* Footer ... */
 
     *(movie->lastp) = temp;
     movie->lastp = &(temp->next);
+
+    return;
+}
+
+/* FIXME: Make this function a macro */
+void
+swf_add_placeobject (swf_movie * movie, int * error, SWF_U16 char_id, swf_matrix * mym)
+{
+	swf_add_placeobject_with_cxform(movie, error, char_id, mym, NULL);
 
     return;
 }
