@@ -7,3 +7,4 @@ text_extract
 *.lo
 *.la
 .libs
+libtool
