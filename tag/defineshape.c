@@ -91,7 +91,7 @@ swf_parse_defineshape_aux (swf_parser * context, int * error, int with_alpha)
 void
 swf_buffer_shaperecord(swf_buffer * buffer, int * error, swf_shaperecord * s, swf_shapestyle * st)
 {
-	SWF_U8 i, max;	
+	SWF_U8 i, max, n;	
 
 	swf_buffer_put_bits(buffer, 1, s->is_edge);
 	
@@ -109,6 +109,23 @@ swf_buffer_shaperecord(swf_buffer * buffer, int * error, swf_shaperecord * s, sw
         /* TODO: Process a move to. */
         if (s->flags & eflagsMoveTo) {
 
+			max = 0;
+			if (abs(s->y) > max) {
+				max = abs(s->y);
+			}
+			if (abs(s->x) > max) {
+				max = abs(s->x);
+			}
+			
+			i = 2; /* 2 for sbits */
+			while (1 < max) {
+				i++;
+				max = max >> 1;
+			}
+			swf_buffer_put_bits(buffer, 5, i);
+
+			swf_buffer_put_sbits(buffer, i, s->x);
+			swf_buffer_put_sbits(buffer, i, s->y);				
 
 			/*            nbits = (SWF_U16) swf_parse_get_bits(context, 5);
             s->x = swf_parse_get_sbits(context, nbits);
@@ -165,6 +182,7 @@ swf_buffer_shaperecord(swf_buffer * buffer, int * error, swf_shaperecord * s, sw
 				i++;
 				max = max >> 1;
 			}
+			printf("putting bits : %i\n", i);
 			swf_buffer_put_bits(buffer, 4, i);
 			i += 2;
 
@@ -172,8 +190,13 @@ swf_buffer_shaperecord(swf_buffer * buffer, int * error, swf_shaperecord * s, sw
 				/* Vertical / Horizontal line */
 				swf_buffer_put_bits(buffer, 1, 0);
 				
-				swf_buffer_put_bits(buffer, 1, 0 == s->x ? 1 : 0);
-				swf_buffer_put_bits(buffer, i, s->x | s->y);
+				if (0 == s->x) {
+					swf_buffer_put_bits(buffer, 1, 1);
+					swf_buffer_put_bits(buffer, i, s->y);
+				} else {
+					swf_buffer_put_bits(buffer, 1, 0);
+					swf_buffer_put_bits(buffer, i, s->x);
+				}
 
 			} else {
 				/* General Line */
