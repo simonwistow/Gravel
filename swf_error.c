@@ -16,15 +16,23 @@
  *
  *
  * $Log: swf_error.c,v $
- * Revision 1.7  2001/06/22 17:16:51  muttley
- * Fixed get_textrecords and get_textrecord and associated destructors and printers
+ * Revision 1.8  2001/06/26 14:41:19  muttley
+ * Remove debugging code
  *
  */
 #include "swf_error.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 const char *
 swf_error_code_to_string (int code)
 {
+    /* Code to print out the error code passed, for debugging only
+     *
+     * char * str = calloc (256, sizeof (char));
+     * sprintf (str, "%ld", code);
+     * return str;
+     */
 
     switch (code)
     {
