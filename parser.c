@@ -16,8 +16,8 @@
  *
  *
  * $Log: parser.c,v $
- * Revision 1.7  2001/06/22 17:16:51  muttley
- * Fixed get_textrecords and get_textrecord and associated destructors and printers
+ * Revision 1.8  2001/06/26 13:43:56  muttley
+ * Store info from DefineFont, DefineFontInfo and DefineText to extract text properly
  *
  */
 
@@ -77,6 +77,7 @@ init_tags (void)
     return tag;
 }
 
+
 /*
  * The main function
  */
@@ -86,7 +87,7 @@ main (int argc, char *argv[])
 {
     swf_parser * swf;
     swf_header * header;
-    int        error;
+    int        error = SWF_ENoError;
 
     const char ** tag;
     const char * str = "";
@@ -94,6 +95,12 @@ main (int argc, char *argv[])
 
     U32 next_id;
     tag = (const char **) init_tags();
+
+    if ((font_chars = (char **) calloc (256, sizeof (char *))) == NULL)
+    {
+        fprintf (stderr, "Couldn't malloc font_chars table\n");
+        return -1;
+    }
 
     /* Check the argument count. */
     if (argc < 2) {
@@ -133,50 +140,58 @@ main (int argc, char *argv[])
     /* parse all the tags */
     do
     {
-        next_id = swf_parse_nextid(swf, &error);
 
-            printf ("%s [%ld]\n",tag[next_id], next_id);
-        	switch (next_id)
-        	{
+        next_id = swf_parse_nextid(swf, &error);
+        if (error != SWF_ENoError)
+        {
+	        fprintf (stderr, "ERROR: There was an error parsing the next id  : '%s'\n",  swf_error_code_to_string(error));
+
+        }
+
+        error = SWF_ENoError;
+
+        printf ("%s [%ld]\n",tag[next_id], next_id);
+        switch (next_id)
+        {
 		    case tagEnd :
-			parse_end (swf, str);
-			break;
+			            parse_end (swf, str);
+			            break;
 
 		    case tagShowFrame:
-			parse_frame (swf, str);
-			break;
+			            parse_frame (swf, str);
+			            break;
 
 		    case tagSetBackgroundColour:
-			parse_setbackgroundcolour (swf, str);
-			break;
+			            parse_setbackgroundcolour (swf, str);
+			            break;
 
 		    case tagDefineFont:
-			parse_definefont (swf, str);
-			break;
+			            parse_definefont (swf, str);
+			            break;
 
         	    case tagDefineFont2:
-			parse_definefont2 (swf, str);
-			break;
+			            parse_definefont2 (swf, str);
+			            break;
 
 		    case tagDefineFontInfo:
-			parse_definefontinfo (swf, str);
-			break;
+			            parse_definefontinfo (swf, str);
+			            break;
 
 		    case tagPlaceObject:
-			parse_placeobject (swf, str);
-			break;
+			            parse_placeobject (swf, str);
+			            break;
 
 		    case tagPlaceObject2:
-			parse_placeobject2 (swf, str);
+			            parse_placeobject2 (swf, str);
         			    break;
 
 		    case tagRemoveObject:
-			parse_removeobject (swf, str);
-			break;
+			            parse_removeobject (swf, str);
+			            break;
 
 		    case tagRemoveObject2:
-			parse_removeobject2 (swf, str);
-			break;
+            			parse_removeobject2 (swf, str);
+			            break;
 
 		    case tagDefineShape:
             	    	parse_defineshape (swf, str);
@@ -191,8 +206,8 @@ main (int argc, char *argv[])
             	    	break;
 
 		    case tagDefineMorphShape:
-			parse_definemorphshape (swf, str);
-			break;
+			            parse_definemorphshape (swf, str);
+			            break;
 
 		    case tagFreeCharacter:
             	    	parse_freecharacter (swf, str);
@@ -214,8 +229,8 @@ main (int argc, char *argv[])
             	        break;
 
 		    case tagDefineBits:
-			parse_definebits (swf, str);
-			break;
+			            parse_definebits (swf, str);
+			            break;
 
 		    case tagJPEGTables:
             	        parse_jpegtables (swf, str);
@@ -250,8 +265,8 @@ main (int argc, char *argv[])
                         break;
 
 		    case tagDefineEditText:
-			parse_defineedittext (swf, str);
-			break;
+			            parse_defineedittext (swf, str);
+			            break;
 
 		    case tagDefineSound:
                         parse_definesound (swf, str);
@@ -266,8 +281,8 @@ main (int argc, char *argv[])
                         break;
 
 		    case tagSoundStreamBlock:
-			parse_soundstreamblock (swf, str);
-			break;
+			            parse_soundstreamblock (swf, str);
+			            break;
 
 		    case tagSoundStreamHead:
                         parse_soundstreamhead (swf, str);
@@ -280,6 +295,12 @@ main (int argc, char *argv[])
 		    default:
 			printf ("%s%s [%ld]\n", str, tag[next_id], next_id);
 			break;
+        }
+
+        if (error != SWF_ENoError)
+        {
+	        fprintf (stderr, "ERROR: There was an error parsing the last tag : '%s'  : '%s'\n", tag[next_id], swf_error_code_to_string(error));
+
         }
 
     }
@@ -321,7 +342,7 @@ parse_end (swf_parser * context, const char * str)
 void
 parse_setbackgroundcolour (swf_parser * context, const char * str)
 {
-    int error;
+    int error = SWF_ENoError;
 	U32 colour;
 
 	swf_setbackgroundcolour * back = swf_parse_setbackgroundcolour (context, &error);
@@ -347,7 +368,7 @@ void
 parse_definefont (swf_parser * context, const char * str)
 {
 
-    int error;
+    int error = SWF_ENoError;
     int n=0;
 
 	swf_definefont * font = swf_parse_definefont (context, &error);
@@ -373,8 +394,13 @@ parse_definefont (swf_parser * context, const char * str)
         print_shaperecords (font->shape_records [n++], str);
     }
 
+    if ((font_chars [font->fontid] = (char *) calloc (font->glyph_count, sizeof (char))) == NULL)
+    {
+        fprintf (stderr, "ERROR: couldn't allocate memory for font_chars lookup table for font id '%ld'\n", font->fontid);
+        return;
+    }
 
-	//swf_destroy_definefont (font);
+	swf_destroy_definefont (font);
 
 	return;
 
@@ -387,7 +413,7 @@ void
 parse_definefontinfo (swf_parser * context, const char * str)
 {
 
-    int error;
+    int error = SWF_ENoError;
 	int n;
 
 	swf_definefontinfo * info = swf_parse_definefontinfo (context, &error);
@@ -411,6 +437,7 @@ parse_definefontinfo (swf_parser * context, const char * str)
 	for(n=0; n < context->glyph_counts [info->fontid]; n++)
 	{
         	printf("[%d,'%c'] ", info->code_table[n], (char) info->code_table[n]);
+            font_chars [info->fontid][n] = (char) info->code_table[n];
     }
 
 	printf("\n\n");
@@ -425,7 +452,7 @@ parse_definefontinfo (swf_parser * context, const char * str)
 void
 parse_placeobject (swf_parser * context, const char * str)
 {
-    int error;
+    int error = SWF_ENoError;
     swf_placeobject * place = (swf_placeobject *) swf_parse_placeobject (context, &error);
 
     if (place == NULL)
@@ -454,7 +481,7 @@ parse_placeobject (swf_parser * context, const char * str)
 void
 parse_placeobject2 (swf_parser * context, const char * str)
 {
-    int error;
+    int error = SWF_ENoError;
     swf_placeobject2 * place = swf_parse_placeobject2 (context, &error);
 
     if (place == NULL)
@@ -536,7 +563,7 @@ usage (void)
 void
 parse_defineshape_aux (swf_parser * context, int with_alpha, const char * str)
 {
-    int error;
+    int error = SWF_ENoError;
     swf_defineshape * shape = swf_parse_defineshape_aux (context, &error, with_alpha);
 
 
@@ -587,7 +614,7 @@ parse_defineshape3 (swf_parser * context, const char * str)
 void
 parse_freecharacter (swf_parser * context, const char * str)
 {
-    int error;
+    int error = SWF_ENoError;
     swf_freecharacter * character = swf_parse_freecharacter (context, &error);
 
     if (character == NULL)
@@ -609,7 +636,7 @@ parse_freecharacter (swf_parser * context, const char * str)
 void
 parse_removeobject (swf_parser * context, const char * str)
 {
-    int error;
+    int error = SWF_ENoError;
     swf_removeobject * object = swf_parse_removeobject (context, &error);
 
     if (object == NULL)
@@ -631,7 +658,7 @@ void
 parse_removeobject2 (swf_parser * context, const char * str)
 {
 
-    int error;
+    int error = SWF_ENoError;
     swf_removeobject2 * object = swf_parse_removeobject2 (context, &error);
 
     if (object == NULL)
@@ -652,7 +679,7 @@ void
 parse_startsound (swf_parser *  context, const char * str)
 {
 
-   int error;
+   int error = SWF_ENoError;
     swf_startsound * sound = swf_parse_startsound (context, &error);
 
     printf("%stagStartSound \ttagid %-5lu\n", str, sound->tagid);
@@ -673,7 +700,7 @@ parse_stopsound (swf_parser * context, const char * str)
 void
 parse_definebits (swf_parser * context, const char * str)
 {
-    int error;
+    int error = SWF_ENoError;
     swf_definebits * bits  = swf_parse_definebits (context, &error);
 
 
@@ -693,7 +720,7 @@ parse_definebits (swf_parser * context, const char * str)
 void
 parse_definebitsjpeg2 (swf_parser * context, const char * str)
 {
-   int error;
+   int error = SWF_ENoError;
     swf_definebitsjpeg2 * bits = swf_parse_definebitsjpeg2 (context, &error);
 
     if (bits == NULL) {
@@ -714,7 +741,7 @@ parse_definebitsjpeg2 (swf_parser * context, const char * str)
 void
 parse_definebitsjpeg3 (swf_parser * context, const char * str)
 {
-    int error;
+    int error = SWF_ENoError;
     swf_definebitsjpeg3 * bits = swf_parse_definebitsjpeg3 (context, &error);
 
     if (bits == NULL) {
@@ -734,7 +761,7 @@ parse_definebitsjpeg3 (swf_parser * context, const char * str)
 void
 parse_jpegtables (swf_parser * context, const char * str)
 {
-    int error;
+    int error = SWF_ENoError;
     swf_jpegtables * tables = swf_parse_jpegtables (context, &error);
 
     if (tables == NULL) {
@@ -758,7 +785,7 @@ parse_jpegtables (swf_parser * context, const char * str)
 void
 parse_definetext (swf_parser * context, const char * str)
 {
-    int error;
+    int error = SWF_ENoError;
     swf_definetext * text = swf_parse_definetext (context, &error);
 
     if (text == NULL) {
@@ -768,6 +795,8 @@ parse_definetext (swf_parser * context, const char * str)
 
     printf("%stagDefineText \t\ttagid %-5lu\n", str, text->tagid);
 
+
+
     print_rect(text->rect, str);
 
     print_matrix(text->matrix, str);
@@ -776,10 +805,10 @@ parse_definetext (swf_parser * context, const char * str)
 
     printf("%s\tnGlyphBits: nAdvanceBits:\n", str);
 
-    print_textrecords (text->records, str);
+    //print_textrecords (text->records, str);
     printf("\n");
 
-    swf_destroy_definetext (text);
+    //swf_destroy_definetext (text);
 
     return;
 
@@ -788,7 +817,7 @@ parse_definetext (swf_parser * context, const char * str)
 void
 parse_definetext2 (swf_parser * context, const char * str)
 {
-    int error;
+    int error = SWF_ENoError;
     swf_definetext2 * text = swf_parse_definetext2 (context, &error);
 
     if (text == NULL) {
@@ -806,6 +835,7 @@ parse_definetext2 (swf_parser * context, const char * str)
 
     printf("%s\tnGlyphBits: nAdvanceBits:\n", str);
 
+
     print_textrecords (text->records, str);
     printf("\n");
 
@@ -818,7 +848,7 @@ parse_definetext2 (swf_parser * context, const char * str)
 void
 parse_definebutton (swf_parser * context, const char * str)
 {
-    int error;
+    int error = SWF_ENoError;
     swf_definebutton * button = swf_parse_definebutton (context, &error);
 
     if (button == NULL) {
@@ -839,7 +869,7 @@ parse_definebutton (swf_parser * context, const char * str)
 void
 parse_definebutton2 (swf_parser * context, const char * str)
 {
-    int error;
+    int error = SWF_ENoError;
     swf_definebutton2 * button = swf_parse_definebutton2 (context, &error);
 
     if (button == NULL) {
@@ -861,7 +891,7 @@ parse_definebutton2 (swf_parser * context, const char * str)
 void
 parse_defineedittext (swf_parser * context, const char * str)
 {
-    int error;
+    int error = SWF_ENoError;
     swf_defineedittext * text = swf_parse_defineedittext (context, &error);
 
     if (text == NULL) {
@@ -900,7 +930,7 @@ void
 parse_definefont2 (swf_parser * context, const char * str)
 {
     int i, n;
-    int error;
+    int error = SWF_ENoError;
     swf_definefont2 * font = swf_parse_definefont2 (context, &error);
 
     if (font == NULL) {
@@ -974,7 +1004,7 @@ parse_definefont2 (swf_parser * context, const char * str)
 void
 parse_definemorphshape (swf_parser * context, const char * str)
 {
-    int error;
+    int error = SWF_ENoError;
     swf_definemorphshape * shape = swf_parse_definemorphshape (context, &error);
 
     if (shape == NULL) {
@@ -1013,7 +1043,7 @@ print_shape_records (swf_shaperecord_list * records)
 void
 parse_definesound (swf_parser * context, const char * str)
 {
-    int error;
+    int error = SWF_ENoError;
 
     const char* Compression[3]    = {"uncompressed", "ADPCM", "MP3"};
     const char* SampleRate[4]     = {"5.5", "11", "22", "44"};
@@ -1072,7 +1102,7 @@ parse_definesound (swf_parser * context, const char * str)
 void
 parse_framelabel (swf_parser * context, const char * str)
 {
-    int error;
+    int error = SWF_ENoError;
     swf_framelabel *label = swf_parse_framelabel (context, &error);
 
     if (label == NULL) {
@@ -1090,7 +1120,7 @@ parse_framelabel (swf_parser * context, const char * str)
 void
 parse_namecharacter (swf_parser * context, const char * str)
 {
-    int error;
+    int error = SWF_ENoError;
     swf_namecharacter *name = swf_parse_namecharacter (context, &error);
 
     if (name == NULL) {
@@ -1109,7 +1139,7 @@ parse_namecharacter (swf_parser * context, const char * str)
 void
 parse_definebuttoncxform (swf_parser * context, const char * str)
 {
-    int error;
+    int error = SWF_ENoError;
     swf_definebuttoncxform * button = swf_parse_definebuttoncxform (context, &error);
     int i;
 
@@ -1130,7 +1160,7 @@ parse_definebuttoncxform (swf_parser * context, const char * str)
 void
 parse_definebuttonsound (swf_parser * context, const char * str)
 {
-    int error;
+    int error = SWF_ENoError;
     swf_definebuttonsound * button = swf_parse_definebuttonsound (context, &error);
 
     if (button == NULL) {
@@ -1157,7 +1187,7 @@ parse_definebuttonsound (swf_parser * context, const char * str)
 void
 parse_soundstreamblock (swf_parser * context, const char * str)
 {
-    int error;
+    int error = SWF_ENoError;
     swf_soundstreamblock * block = swf_parse_soundstreamblock (context, &error);
 
     if (block == NULL) {
@@ -1195,7 +1225,7 @@ parse_soundstreamblock (swf_parser * context, const char * str)
 void
 parse_soundstreamhead (swf_parser * context, const char * str)
 {
-    int error;
+    int error = SWF_ENoError;
     swf_soundstreamhead * head = swf_parse_soundstreamhead (context, &error);
 
     if (head == NULL) {

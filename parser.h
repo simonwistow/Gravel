@@ -16,8 +16,8 @@
  *
  *
  * $Log: parser.h,v $
- * Revision 1.6  2001/06/22 17:16:51  muttley
- * Fixed get_textrecords and get_textrecord and associated destructors and printers
+ * Revision 1.7  2001/06/26 13:43:56  muttley
+ * Store info from DefineFont, DefineFontInfo and DefineText to extract text properly
  *
  */
 
@@ -65,9 +65,15 @@ extern void parse_soundstreamblock      (swf_parser *, const char *);
 extern void parse_soundstreamhead       (swf_parser *, const char *);
 extern void parse_soundstreamhead2      (swf_parser *, const char *);
 
+
+
+
 extern void usage                       (void);
 
 const char ** init_tags                 (void);
+
+
+
 
 #endif
 
