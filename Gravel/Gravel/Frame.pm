@@ -27,6 +27,8 @@ sub new {
     }
 
 	$self->{_contents} = {};
+	$self->{_shape} = $conf{shape};
+	$self->{_matrix} = $conf{matrix};
 
     bless $self => $class;
 

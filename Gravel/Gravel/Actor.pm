@@ -91,7 +91,20 @@ sub end {
 # FIXME: Multiple effects
 sub frames {
 	my $self = shift;
-	return $self->{_effects}->[0]->frames($self->{_shape});
+#	return $self->{_effects}->[0]->frames($self->{_shape});
+
+	my $m = [];
+
+	my $ra_m = $self->{_effects}->[0]->matrices();
+	my $start = $self->{_effects}->[0]->start;
+	my $end = $self->{_effects}->[0]->end;
+	for (my $i = $start; $i < $end; ++$i ) {
+		my $mx = $ra_m->[$i];
+		my $f = Gravel::Frame->new({matrix => $mx, shape => $self->{_shape}});
+		$m->[$i] = $f;
+	}
+
+	return $m;
 }
 
 #

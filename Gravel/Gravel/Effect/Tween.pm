@@ -100,7 +100,10 @@ sub matrices {
 	return $ra_m;
 }
 
+#
 
+sub start { return (shift)->{_start}; }
+sub end { return (shift)->{_end}; }
 
 #
 
