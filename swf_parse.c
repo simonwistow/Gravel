@@ -16,6 +16,14 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.13  2001/06/29 15:10:11  muttley
+ * The printing of the actual text of a DefineText (and DefineText2 now)
+ * is no longer such a big hack. Font information is kept in the swf_parser
+ * context and the function that will take a text_record_list and print out
+ * the text (textrecord_list_to_text) has been moved to swf_parse.c ...
+ *
+ * A couple of potential bugs have also been fixed and some more 'todo's added
+ *
  * Revision 1.12  2001/06/27 12:42:15  kitty_goth
  * Debug shaperecord handling --Kitty
  *
@@ -84,6 +92,15 @@ swf_parse_create (char * name, int * error)
       context->bitbuf = 0;
       context->headers_parsed = 0;
       context->frame  = 0;
+
+
+      if ((context->font_chars = (char **) calloc (256, sizeof (char *))) == NULL)
+      {
+	    *error = SWF_EMallocFailure;
+	    return NULL;
+      }
+      context->number_of_fonts = 0;
+
 
       return context;
 }
@@ -437,13 +454,19 @@ swf_parse_definefontinfo (swf_parser * context, int * error)
     /* Read in the glyphs present in this font, taking account of whether
        they are 8-bit or 16-bit values.
      */
-    for(n=0; n < glyph_count; n++) {
+    for(n=0; n < glyph_count; n++)
+    {
         if (info->flags & FONT_WIDE_CODES) {
             info->code_table[n] = (int) swf_parse_get_word (context);
         } else {
-	    info->code_table[n] = (int) swf_parse_get_byte (context);
-	}
+	        info->code_table[n] = (int) swf_parse_get_byte (context);
+        }
+
+        context->font_chars [info->fontid][n] = (char) info->code_table[n];
+
     }
+
+
 
     return info;
 
@@ -679,7 +702,25 @@ swf_parse_definefont (swf_parser * context, int * error)
     font->offset = swf_parse_get_word (context);
 
     font->glyph_count = font->offset/2;
+
+
     context->glyph_counts[font->fontid] = font->glyph_count;
+
+    context->number_of_fonts++;
+    /* todo :
+     * maybe the number of fonts and the font id will get out of sync.
+     * Should we have a lookup up table?
+     * Also, what happens if we define more than 255 fonts? Should
+     * put checks in for that
+     */
+
+    if ((context->font_chars [font->fontid] = (char *) calloc (font->glyph_count, sizeof (char))) == NULL)
+    {
+        *error = SWF_EMallocFailure;
+        goto FAIL;
+
+    }
+
 
     if  ((offset_table =  (int *) calloc (font->glyph_count, sizeof (int))) == NULL) {
 	*error = SWF_EMallocFailure;
@@ -1483,7 +1524,12 @@ swf_parse_definefont2 (swf_parser * context, int * error)
     font->kerning_pairs = NULL;
     font->bounds = NULL;
 
-    font->tagid = swf_parse_get_word (context);
+    font->fontid = swf_parse_get_word (context);
+
+
+
+
+
     font->flags = swf_parse_get_word (context);
     font->name_len = swf_parse_get_byte (context);
 
@@ -1497,24 +1543,43 @@ swf_parse_definefont2 (swf_parser * context, int * error)
     }
 
     /* Get the number of glyphs. */
-    font->nglyphs = swf_parse_get_word(context);
+    font->glyph_count = swf_parse_get_word(context);
+
+
+    context->glyph_counts[font->fontid] = font->glyph_count;
+
+    context->number_of_fonts++;
+    /* todo :
+     * maybe the number of fonts and the font id will get out of sync.
+     * Should we have a lookup up table?
+     * Also, what happens if we define more than 255 fonts? Should
+     * put checks in for that
+     */
+
+    if ((context->font_chars [font->fontid] = (char *) calloc (font->glyph_count, sizeof (char))) == NULL)
+    {
+        *error = SWF_EMallocFailure;
+        goto FAIL;
+
+    }
+
 
     data_pos = swf_parse_tell(context);
 
 
-    if (font->nglyphs > 0)
+    if (font->glyph_count > 0)
     {
 
         /* Get the FontOffsetTable */
 
 
-        if ((offset_table = (U32 *) calloc (font->nglyphs, sizeof (U32))) == NULL)
+        if ((offset_table = (U32 *) calloc (font->glyph_count, sizeof (U32))) == NULL)
         {
 	        *error = SWF_EMallocFailure;
             goto FAIL;
         }
 
-        for (n=0; n<font->nglyphs; n++) {
+        for (n=0; n<font->glyph_count; n++) {
             if (font->flags & sfontFlagsWideOffsets) {
                 offset_table[n] = swf_parse_get_dword(context);
             } else {
@@ -1533,12 +1598,12 @@ swf_parse_definefont2 (swf_parser * context, int * error)
 	}
 
         /* Get the Glyphs */
-	if ((font->glyphs = (swf_shaperecord_list **) calloc (font->nglyphs, sizeof(swf_shaperecord_list *))) == NULL) {
+	if ((font->glyphs = (swf_shaperecord_list **) calloc (font->glyph_count, sizeof(swf_shaperecord_list *))) == NULL) {
         goto FAIL;
 	}
 
 
-        for(n=0; n<font->nglyphs; n++)
+        for(n=0; n<font->glyph_count; n++)
         {
 
     	    swf_parse_seek (context, data_pos + offset_table[n]);
@@ -1561,13 +1626,13 @@ swf_parse_definefont2 (swf_parser * context, int * error)
     	    swf_parse_seek(context, data_pos + code_offset);
         }
 
-    	if ((font->code_table = (U32 *) calloc (font->nglyphs, sizeof (U32))) == NULL) {
+    	if ((font->code_table = (U32 *) calloc (font->glyph_count, sizeof (U32))) == NULL) {
             *error = SWF_EMallocFailure;
             goto FAIL;
 	    }
 
     	/* Get the CodeTable */
-        for (i=0; i<font->nglyphs; i++)
+        for (i=0; i<font->glyph_count; i++)
         {
             if (font->flags & sfontFlagsWideOffsets) {
                 font->code_table [i] = swf_parse_get_word (context);
@@ -1589,17 +1654,17 @@ swf_parse_definefont2 (swf_parser * context, int * error)
 
         /* Skip Advance table */
 	    /* todo simon : does this need to be done ???*/
-        swf_parse_skip (context, font->nglyphs * 2);
+        swf_parse_skip (context, font->glyph_count * 2);
 
 
 
         /* Get BoundsTable */
-	    if ((font->bounds = (swf_rect **) calloc (font->nglyphs, sizeof(swf_rect*))) == NULL) {
+	    if ((font->bounds = (swf_rect **) calloc (font->glyph_count, sizeof(swf_rect*))) == NULL) {
             *error = SWF_EMallocFailure;
             goto FAIL;
 	    }
 
-        for (i=0; i<font->nglyphs; i++)
+        for (i=0; i<font->glyph_count; i++)
         {
            if  ((font->bounds[i] = swf_parse_get_rect (context, error)) == NULL) {
                 goto FAIL;
@@ -2397,7 +2462,7 @@ swf_parse_get_shaperecords (swf_parser * context, int * error)
 	*error = SWF_EMallocFailure;
 	goto FAIL;
     }
-    
+
     while (!at_end) {
         if (list->record_count > block_size) {
             block_size += 10;
@@ -2406,7 +2471,7 @@ swf_parse_get_shaperecords (swf_parser * context, int * error)
                 *error = SWF_EMallocFailure;
                 goto FAIL;
             }
-		
+
 	}
 
         /* TODO */
@@ -2544,7 +2609,7 @@ swf_parse_get_buttonrecord (swf_parser * context, int * error, int byte, int wit
  */
 
 swf_shaperecord *
-swf_parse_get_shaperecord (swf_parser * context, int * error, int * at_end, int xlast, int ylast, int with_alpha) 
+swf_parse_get_shaperecord (swf_parser * context, int * error, int * at_end, int xlast, int ylast, int with_alpha)
 {
     /* Determine if this is an edge. */
     swf_shaperecord * record;
@@ -2606,7 +2671,7 @@ swf_parse_get_shaperecord (swf_parser * context, int * error, int * at_end, int 
         }
 
         *at_end = record->flags & eflagsEnd ? TRUE : FALSE;
-        
+
 	return record;
 
     } else {
@@ -2670,3 +2735,78 @@ swf_parse_get_shaperecord (swf_parser * context, int * error, int * at_end, int 
 
 
 
+char *
+swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_textrecord_list * list)
+{
+    int g;
+    int font_id = -1;
+    char * str = NULL;
+    swf_textrecord *node, *tmp;
+
+
+    node = list->first;
+
+    while (node != NULL)
+    {
+        if (node->flags & isTextControl)
+        {
+            if ( node->flags & textHasFont)
+            {
+                font_id = node->font_id;
+            }
+        }else{
+
+            /* malloc to the size of the string */
+            if ((str = (char *) calloc (node->glyph_count+1, sizeof (char))) == NULL)
+            {
+                *error = SWF_EMallocFailure;
+                return NULL;
+            }
+
+            /* check fontchars[font_id] */
+            if (context->font_chars[font_id] == NULL)
+            {
+                *error = SWF_EFontNotSet;
+                return NULL;
+            }
+
+
+            /* ... and then set it */
+            for (g=0; g< node->glyph_count; g++)
+            {
+                /* this requires that font_chars[font_id] has actually been set of course*/
+                str[g] = context->font_chars[font_id][node->glyphs[g][0]];
+
+            }
+            str[g]='\0';
+
+            /* sometimes there's more than one peice of text ... we shoudl probably cope with that as well */
+            return str;
+        }
+
+
+
+        tmp = node;
+        node = node->next;
+    }
+
+
+
+
+
+    if (font_id == -1) {
+        /* somethings gone wrong */
+        *error = SWF_EFontNotSet;
+        return NULL;
+    }
+
+    if (str == NULL) {
+        /* somethings gone wrong */
+        *error = SWF_EFontNotSet;
+        return NULL;
+    }
+    /* et voila */
+    return str;
+
+
+}

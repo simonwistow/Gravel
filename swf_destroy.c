@@ -16,6 +16,14 @@
  *
  *
  * $Log: swf_destroy.c,v $
+ * Revision 1.11  2001/06/29 15:10:11  muttley
+ * The printing of the actual text of a DefineText (and DefineText2 now)
+ * is no longer such a big hack. Font information is kept in the swf_parser
+ * context and the function that will take a text_record_list and print out
+ * the text (textrecord_list_to_text) has been moved to swf_parse.c ...
+ *
+ * A couple of potential bugs have also been fixed and some more 'todo's added
+ *
  * Revision 1.10  2001/06/27 12:42:15  kitty_goth
  * Debug shaperecord handling --Kitty
  *
@@ -38,6 +46,7 @@
 void
 swf_destroy_parser (swf_parser * context)
 {
+    int i;
     if (context==NULL) {
         return;
     }
@@ -45,6 +54,11 @@ swf_destroy_parser (swf_parser * context)
     free(context->name);
     free(context->header);
     free (context);
+
+    for (i=0; i<context->number_of_fonts; i++) {
+        free (context->font_chars[i]);
+    }
+    free (context->font_chars);
 
     return;
 }
@@ -602,17 +616,15 @@ swf_destroy_definefont2 (swf_definefont2 * font)
         return;
     }
 
-    for (i=0; i<font->nglyphs; i++) {
+    for (i=0; i<font->glyph_count; i++) {
         swf_destroy_shaperecord_list (font->glyphs[i]);
+        swf_destroy_rect (font->bounds[i]);
     }
 
     free (font->glyphs);
     free (font->name);
     free (font->code_table);
-
-    for (i=0; i<font->nglyphs; i++) {
-        swf_destroy_rect (font->bounds[i]);
-    }
+    free (font->bounds);
 
     for (i=0; i<font->nkerning_pairs; i++) {
         swf_destroy_kerningpair (font->kerning_pairs[i]);

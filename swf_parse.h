@@ -16,6 +16,14 @@
  *
  *
  * $Log: swf_parse.h,v $
+ * Revision 1.9  2001/06/29 15:10:11  muttley
+ * The printing of the actual text of a DefineText (and DefineText2 now)
+ * is no longer such a big hack. Font information is kept in the swf_parser
+ * context and the function that will take a text_record_list and print out
+ * the text (textrecord_list_to_text) has been moved to swf_parse.c ...
+ *
+ * A couple of potential bugs have also been fixed and some more 'todo's added
+ *
  * Revision 1.8  2001/06/27 12:42:15  kitty_goth
  * Debug shaperecord handling --Kitty
  *
@@ -126,6 +134,8 @@ extern swf_definemorphshape    * swf_parse_definemorphshape    (swf_parser * , i
 //swf_defineshape2             * swf_parse_defineshape2        (swf_parser * , int *);
 extern swf_freecharacter       * swf_parse_freecharacter       (swf_parser * , int *);
 extern swf_namecharacter       * swf_parse_namecharacter       (swf_parser * , int *);
+
+extern char                    * swf_parse_textrecords_to_text (swf_parser * , int *, swf_textrecord_list *);
 
 #endif
 

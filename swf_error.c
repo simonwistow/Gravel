@@ -16,6 +16,14 @@
  *
  *
  * $Log: swf_error.c,v $
+ * Revision 1.9  2001/06/29 15:10:11  muttley
+ * The printing of the actual text of a DefineText (and DefineText2 now)
+ * is no longer such a big hack. Font information is kept in the swf_parser
+ * context and the function that will take a text_record_list and print out
+ * the text (textrecord_list_to_text) has been moved to swf_parse.c ...
+ *
+ * A couple of potential bugs have also been fixed and some more 'todo's added
+ *
  * Revision 1.8  2001/06/26 14:41:19  muttley
  * Remove debugging code
  *
@@ -63,7 +71,9 @@ swf_error_code_to_string (int code)
         case SWF_EInvalidMP3Header:
                 return "Badly formed MP3 header";
                 break;
-
+        case SWF_EFontNotSet:
+                return "Attempting to accessa  font which has not been defined yet";
+                break;
         default:
             return "invalid error";
     }

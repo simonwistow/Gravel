@@ -16,8 +16,13 @@
  *
  *
  * $Log: swf_error.h,v $
- * Revision 1.6  2001/06/22 17:16:51  muttley
- * Fixed get_textrecords and get_textrecord and associated destructors and printers
+ * Revision 1.7  2001/06/29 15:10:11  muttley
+ * The printing of the actual text of a DefineText (and DefineText2 now)
+ * is no longer such a big hack. Font information is kept in the swf_parser
+ * context and the function that will take a text_record_list and print out
+ * the text (textrecord_list_to_text) has been moved to swf_parse.c ...
+ *
+ * A couple of potential bugs have also been fixed and some more 'todo's added
  *
  */
 
@@ -40,6 +45,7 @@
 #define SWF_EInvalidMP3Header               (12)
 #define SWF_ETooManyFriends                 (13)
 #define SWF_EByGum                          (14)
+#define SWF_EFontNotSet                     (15)
 
 
 

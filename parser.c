@@ -16,6 +16,14 @@
  *
  *
  * $Log: parser.c,v $
+ * Revision 1.10  2001/06/29 15:10:11  muttley
+ * The printing of the actual text of a DefineText (and DefineText2 now)
+ * is no longer such a big hack. Font information is kept in the swf_parser
+ * context and the function that will take a text_record_list and print out
+ * the text (textrecord_list_to_text) has been moved to swf_parse.c ...
+ *
+ * A couple of potential bugs have also been fixed and some more 'todo's added
+ *
  * Revision 1.9  2001/06/26 14:39:20  muttley
  * Make it actually work (forgot to uncomment a line)
  *
@@ -96,11 +104,6 @@ main (int argc, char *argv[])
     U32 next_id;
     tag = (const char **) init_tags();
 
-    if ((font_chars = (char **) calloc (256, sizeof (char *))) == NULL)
-    {
-        fprintf (stderr, "Couldn't malloc font_chars table\n");
-        return -1;
-    }
 
     /* Check the argument count. */
     if (argc < 2) {
@@ -169,7 +172,7 @@ main (int argc, char *argv[])
 			            parse_definefont (swf, str);
 			            break;
 
-        	    case tagDefineFont2:
+        	case tagDefineFont2:
 			            parse_definefont2 (swf, str);
 			            break;
 
@@ -394,11 +397,6 @@ parse_definefont (swf_parser * context, const char * str)
         print_shaperecords (font->shape_records [n++], str);
     }
 
-    if ((font_chars [font->fontid] = (char *) calloc (font->glyph_count, sizeof (char))) == NULL)
-    {
-        fprintf (stderr, "ERROR: couldn't allocate memory for font_chars lookup table for font id '%ld'\n", font->fontid);
-        return;
-    }
 
 	swf_destroy_definefont (font);
 
@@ -437,7 +435,7 @@ parse_definefontinfo (swf_parser * context, const char * str)
 	for(n=0; n < context->glyph_counts [info->fontid]; n++)
 	{
         	printf("[%d,'%c'] ", info->code_table[n], (char) info->code_table[n]);
-            font_chars [info->fontid][n] = (char) info->code_table[n];
+
     }
 
 	printf("\n\n");
@@ -805,7 +803,7 @@ parse_definetext (swf_parser * context, const char * str)
 
     printf("%s\tnGlyphBits: nAdvanceBits:\n", str);
 
-    print_textrecords (text->records, str);
+    print_textrecords (text->records, str, context);
     printf("\n");
 
     swf_destroy_definetext (text);
@@ -836,7 +834,7 @@ parse_definetext2 (swf_parser * context, const char * str)
     printf("%s\tnGlyphBits: nAdvanceBits:\n", str);
 
 
-    print_textrecords (text->records, str);
+    print_textrecords (text->records, str, context);
     printf("\n");
 
     swf_destroy_definetext2 (text);
@@ -938,15 +936,15 @@ parse_definefont2 (swf_parser * context, const char * str)
 	    return;
     }
 
-    printf("%stagDefineFont2 \ttagid %-5lu flags:%04x nGlyphs:%d\n", str, font->tagid, font->flags, font->nglyphs);
+    printf("%stagDefineFont2 \ttagid %-5lu flags:%04x nGlyphs:%d\n", str, font->fontid, font->flags, font->glyph_count);
 
-    if (font->nglyphs > 0)
+    if (font->glyph_count > 0)
     {
 
 
 
         /* Get the Glyphs */
-        for(n=0; n<font->nglyphs; n++)
+        for(n=0; n<font->glyph_count; n++)
         {
             printf("\n\t%s>>> Glyph:%d", str, n);
     	    /* todo simon : printshaperecords */
@@ -957,7 +955,7 @@ parse_definefont2 (swf_parser * context, const char * str)
 
         printf("\n%sCodeTable:\n%s", str, str);
 
-        for (i=0; i<font->nglyphs; i++)
+        for (i=0; i<font->glyph_count; i++)
         {
             if (font->flags & sfontFlagsWideOffsets) {
                 printf("%02x:[%04lx] ", i, font->code_table[i]);
@@ -979,7 +977,7 @@ parse_definefont2 (swf_parser * context, const char * str)
         printf("\n%sHasLayout: iAscent:%d iDescent:%d iLeading:%d\n", str, font->ascent, font->descent, font->leading);
 
         /* Get BoundsTable */
-        for (i=0; i<font->nglyphs; i++)
+        for (i=0; i<font->glyph_count; i++)
         {
             printf("rBounds: (%ld,%ld)(%ld,%ld)\n", font->bounds[i]->xmin, font->bounds[i]->ymin, font->bounds[i]->xmax, font->bounds[i]->ymax);
         }

@@ -16,6 +16,14 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.11  2001/06/29 15:10:11  muttley
+ * The printing of the actual text of a DefineText (and DefineText2 now)
+ * is no longer such a big hack. Font information is kept in the swf_parser
+ * context and the function that will take a text_record_list and print out
+ * the text (textrecord_list_to_text) has been moved to swf_parse.c ...
+ *
+ * A couple of potential bugs have also been fixed and some more 'todo's added
+ *
  * Revision 1.10  2001/06/26 17:40:30  kitty_goth
  * Bug fix for swf_parse_get_bytes to fix sound stream stuff. --Kitty
  *
@@ -266,7 +274,7 @@ struct swf_parser {
     int fill_bits;
     int line_bits;
 
-    	/* Font glyph counts (gotta save it somewhere!) */
+    /* Font glyph counts (gotta save it somewhere!) */
     int glyph_counts [256];
 
     U8* src_adpcm;
@@ -281,6 +289,9 @@ struct swf_parser {
     int stream_sample_stereo_mono;
     int n_stream_samples;
 
+
+    char ** font_chars; /* the actual characters defined by font and font info tags */
+    int  number_of_fonts;
 };
 
 struct swf_tag {
@@ -514,11 +525,11 @@ struct swf_defineedittext {
 };
 
 struct swf_definefont2 {
-	U32 tagid;
+	U32 fontid;
 	U16 flags;
 	int name_len;
 	char * name;
-	U16 nglyphs;
+	U16 glyph_count;
 	swf_shaperecord_list ** glyphs;
 	U32 * code_table;
 	S16 ascent;
