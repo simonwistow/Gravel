@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.38  2002/07/04 15:45:46  kitty_goth
+ * some test stuff for PNG support. A ways to go yet.
+ *
  * Revision 1.37  2002/07/03 08:05:20  kitty_goth
  * Add support for gradient fills in generation. These need to be tested along
  * with curves. New test script. Fix some segfaults (still weirdness in
@@ -1127,7 +1130,6 @@ struct swf_button2action_list {
 	swf_button2action *  first;
 	swf_button2action ** lastp;
 };
-
 
 #endif /*SWFTYPES*/
 

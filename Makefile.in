@@ -94,7 +94,7 @@ DATE=$(shell date +%Y-%m-%d)
 	$(LIBTOOL) $(CC) $(CFLAGS) -I. -c -o $@ $<
 
 ## Targets
-all: swf_parse text_extract gen_test1 gen_test2 gen_test3 gen_test4 write_through
+all: swf_parse text_extract gen_test4 gen_test3 write_through
 
 static: swf_parse_static text_extract_static
 debug: swf_parse_debug text_extract_debug
@@ -124,6 +124,9 @@ gen_test3: gen_test3.do libswfparse.la
 
 gen_test4: gen_test4.do libswfparse.la shape/triangle.do
 	$(LIBTOOL) $(CC) $(CFLAGS) -o gen_test4 gen_test4.do shape/triangle.do libswfparse.la $(LIBS) -static
+
+gen_test5: gen_test5.do libswfparse.la 
+	$(LIBTOOL) $(CC) $(CFLAGS) -o gen_test5 gen_test5.do swf_png.do libswfparse.la $(LIBS) -lpng -static
 
 matrix_test1: matrix_test1.do libswfparse.la
 	$(LIBTOOL) $(CC) $(CFLAGS) -o matrix_test1 matrix_test1.do print_utils.o libswfparse.la $(LIBS) -static
