@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_destroy.h,v $
+ * Revision 1.11  2002/05/29 16:40:47  kitty_goth
+ * Carry on at home
+ *
  * Revision 1.10  2002/05/22 11:49:31  kitty_goth
  * Start having a proper destructor block. Make valgrind a bit happier
  *
@@ -35,13 +38,6 @@
 extern void init_destructors(void (**shiva)(), int * error);
 
 extern void swf_destroy_parser (swf_parser *);
-extern void swf_destroy_tag (swf_tag *);
-extern void swf_destroy_rect (swf_rect *);
-extern void swf_destroy_header (swf_header *);
-extern void swf_destroy_colour (swf_colour *);
-extern void swf_destroy_gradcolour (swf_gradcolour *);
-extern void swf_destroy_cxform (swf_cxform *);
-extern void swf_destroy_matrix (swf_matrix *);
 extern void swf_destroy_shapestyle (swf_shapestyle *);
 extern void swf_destroy_linestyle (swf_linestyle *);
 extern void swf_destroy_linestyle2 (swf_linestyle2 *);
@@ -94,6 +90,18 @@ extern void swf_destroy_definebuttonsound (swf_definebuttonsound *);
 extern void swf_destroy_soundstreamblock (swf_soundstreamblock *);
 extern void swf_destroy_soundstreamhead (swf_soundstreamhead *);
 extern void swf_destroy_shapestyle (swf_shapestyle * style);
+
+/* Now do the types */
+
+extern void swf_destroy_tagrecord (swf_tagrecord * tagrec);
+extern void swf_destroy_tag (swf_tag *);
+extern void swf_destroy_rect (swf_rect *);
+extern void swf_destroy_header (swf_header *);
+extern void swf_destroy_colour (swf_colour *);
+extern void swf_destroy_gradcolour (swf_gradcolour *);
+extern void swf_destroy_cxform (swf_cxform *);
+extern void swf_destroy_matrix (swf_matrix *);
+
 #endif
 
 /* 

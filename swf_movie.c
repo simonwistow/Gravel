@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.22 2002/05/28 17:12:21 kitty_goth Exp $	
+ * 	$Id: swf_movie.c,v 1.23 2002/05/29 16:40:47 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -29,100 +29,6 @@
 
 #include <stdio.h>
 
-
-void
-init_destructors(void (**shiva)(), int * error) 
-{
-
-  shiva[tagDefineShape]         = swf_destroy_defineshape;
-  shiva[tagSetBackgroundColour] = swf_destroy_setbackgroundcolour;
-  shiva[tagDefineButton]        = swf_destroy_definebutton;
-  shiva[tagPlaceObject]         = swf_destroy_placeobject;
-  shiva[tagPlaceObject2]        = swf_destroy_placeobject2;
-
-}
-
-void 
-swf_make_header_blank (swf_movie * movie, int * error, int ver, int speed) 
-{
-    swf_header * header;
-
-    if ((ver < 0) || (ver > MAXVER) || (speed < 0) || (speed > MAXSPEED) ) {
-	*error = SWF_EMallocFailure;
-	return;
-    }
-
-    if (0 == ver) {
-	ver = MAXVER;
-    }
-
-    if ((header = (swf_header *) calloc (1, sizeof (swf_header))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return;
-    }
-
-/* 
- * Hardwired, because this is an illegal size to indicate
- * this movie needs to be finalised - ie have its frames
- * counted, size checked, etc., before
- * serialisation 
- */
-    header->size = 20; 
-
-
-
-    header->version = ver; 
-    header->rate = speed; 
-    header->count = 1;
-    header->bounds = NULL;
-
-    movie->header = header;
-
-    return;
-}
-
-
-void
-swf_make_header_raw (swf_movie * movie, int * error, swf_rect * rect) 
-{
-    swf_header * header;
-
-    header = movie->header;
-
-    if (!header) {
-	swf_make_header_blank(movie, error, MAXVER, TYPICALSPEED);
-	header = movie->header;
-    }
-
-    /* Throw the error further up the stack */
-    if (*error) {
-	return;
-    }
-
-    header->bounds = rect;
-
-    return;
-}
-
-void
-swf_make_header (swf_movie * movie, int * error, SCOORD x1, SCOORD x2, SCOORD y1, SCOORD y2) 
-{
-    swf_rect * rect;
-
-    if ((rect = (swf_rect *) calloc (1, sizeof (swf_rect))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return;
-    }
-
-    rect->xmin = x1;
-    rect->xmax = x2;
-    rect->ymin = y1;
-    rect->ymax = y2;
-
-    swf_make_header_raw(movie, error, rect);
-
-    return;
-}
 
 swf_movie * 
 swf_make_movie (int * error) 
@@ -149,64 +55,14 @@ swf_make_movie (int * error)
     return movie;
 }
 
-swf_tagrecord * 
-swf_make_tagrecord (int * error, SWF_U16 myid) 
-{
-    swf_tagrecord * tag;
-
-    if ((tag = (swf_tagrecord *) calloc (1, sizeof (swf_tagrecord))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
-    }
-
-    if ((tag->buffer = (swf_buffer *) calloc (1, sizeof (swf_buffer))) == NULL) {
-	*error = SWF_EMallocFailure;
-	return NULL;
-    }
-    tag->buffer->raw  = NULL;
-    tag->buffer->size = 0;
-
-    tag->next = NULL;
-    tag->id = myid;
-    tag->tag = NULL;
-    tag->serialised = 0;
-
-    return tag;
-}
-
 /* add a tagrecord to a movie */
-
+/* Turn this into a macro */
 void 
 swf_dump_shape (swf_movie * movie, int * error, swf_tagrecord * temp) 
 {
     *(movie->lastp) = temp;
     movie->lastp = &(temp->next);
 }
-
-
-
-/* destroy a tag record */
-void
-swf_destroy_tagrecord (swf_tagrecord * tag)
-{
-	if (tag == NULL)
-	{
-	  return;
-	}
-	tag->next = NULL;
-
-	if (tag->buffer != NULL) {
-	  swf_free (tag->buffer->raw);
-	}
-	swf_free (tag->buffer);
-	/* We don't want to free the next tag. It's probably still valid */
-//	swf_free (tag->next);
-	swf_free (tag->tag);
-	swf_free (tag);
-}
-
-
-/* Replace with an array of function pointers */
 
 void 
 swf_destroy_movie (swf_movie * movie) 
@@ -879,8 +735,6 @@ swf_movie_put_word(swf_movie * context, int * error, SWF_U16 word)
  * Put a 32-bit dword to the stream, and move the
  * parse head on by four.
  */
-
-/* FIXME: Endian-ness */
 
 void 
 swf_movie_put_dword(swf_movie * context, int * error, SWF_U32 dword)

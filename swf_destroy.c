@@ -28,6 +28,8 @@
  * Free up the memory of context.
  */
 
+
+
 void
 swf_destroy_parser (swf_parser * context)
 {
@@ -52,6 +54,20 @@ swf_destroy_parser (swf_parser * context)
 	swf_free (context->src_adpcm);
     swf_free (context);
 }
+
+void
+init_destructors(void (**shiva)(), int * error) 
+{
+
+  shiva[tagDefineShape]         = swf_destroy_defineshape;
+  shiva[tagSetBackgroundColour] = swf_destroy_setbackgroundcolour;
+  shiva[tagDefineButton]        = swf_destroy_definebutton;
+  shiva[tagPlaceObject]         = swf_destroy_placeobject;
+  shiva[tagPlaceObject2]        = swf_destroy_placeobject2;
+
+}
+
+
 
 void
 swf_destroy_fillstyle (swf_fillstyle * style)
