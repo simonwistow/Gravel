@@ -91,8 +91,6 @@ swf_parse_get_shaperecord (swf_parser * context, int * error, int * at_end, int 
             /* Handle a line */
             nbits = (SWF_U16) swf_parse_get_bits(context, 4) + 2;   /* nbits is biased by 2 */
 
-			printf("nbits of line: %x\n", nbits);
-
             /* Save the deltas */
             if (swf_parse_get_bits(context, 1)) {
                 /* Handle a general line. */
@@ -211,7 +209,6 @@ swf_buffer_shaperecord(swf_buffer * buffer, int * error, swf_shaperecord * s, sw
 	if (!s->is_edge) {
 		/* State change */
 		
-		printf("Putting non-edge.. flags : %u\n", s->flags);
 		swf_buffer_put_bits(buffer, 5, s->flags);
 
         /* Are we at the end? */
@@ -262,18 +259,16 @@ swf_buffer_shaperecord(swf_buffer * buffer, int * error, swf_shaperecord * s, sw
 
 		return;
 	} else {
-		printf("Putting edge..\n");
 
 		if (s->x | s->y) {
 			if (s->ax | s->ay | s->cx | s->cy) {
-				printf("Putting weirdness..\n");
+				dprintf("Putting weirdness..\n");
 				/* We're trying to be a line and a curve all at once */
 				*error = SWF_ENotValidSWF;
 				return;
 			}
 
 			/* we're a straight line */
-			printf("Putting line..\n");
 
 			swf_buffer_put_bits(buffer, 1, 1);
 			
@@ -287,11 +282,9 @@ swf_buffer_shaperecord(swf_buffer * buffer, int * error, swf_shaperecord * s, sw
 			
 			i = 0; /* 2 for sbits, -2 from spec */
 			while (1 < max) {
-				printf("max = %i ; i = %i\n", max, i);
 				i++;
 				max = max >> 1;
 			}
-			printf("putting bits : %i\n", i);
 			swf_buffer_put_bits(buffer, 4, i);
 			i += 2;
 
@@ -300,11 +293,9 @@ swf_buffer_shaperecord(swf_buffer * buffer, int * error, swf_shaperecord * s, sw
 				swf_buffer_put_bits(buffer, 1, 0);
 				
 				if (0 == s->x) {
-					printf("Putting vert line..\n");
 					swf_buffer_put_bits(buffer, 1, 1);
 					swf_buffer_put_sbits(buffer, i, s->y);
 				} else {
-					printf("Putting horiz line..\n");
 					swf_buffer_put_bits(buffer, 1, 0);
 					swf_buffer_put_sbits(buffer, i, s->x);
 				}

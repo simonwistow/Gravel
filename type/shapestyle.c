@@ -96,7 +96,7 @@ swf_parse_get_shapestyle (swf_parser * context, int * error, int with_alpha)
             styles->fills[i]->matrix = swf_parse_get_matrix (context, error);
         } else {
             /* A solid color */
-            styles->fills[i]->colour = swf_parse_get_colour (context, error,  with_alpha);
+            styles->fills[i]->col = swf_parse_get_col(context, error, with_alpha);
         }
     }
 
@@ -120,9 +120,13 @@ swf_parse_get_shapestyle (swf_parser * context, int * error, int with_alpha)
 			*error = SWF_EMallocFailure;
 			goto FAIL;
         }
+        if ((styles->lines[i]->col = (swf_colour *) calloc (1, sizeof (swf_colour))) == NULL) {
+			*error = SWF_EMallocFailure;
+			goto FAIL;
+        }
 
-        styles->lines[i]->width  = swf_parse_get_word   (context);
-        styles->lines[i]->colour = swf_parse_get_colour (context, error,  with_alpha);
+        styles->lines[i]->width  = swf_parse_get_word(context);
+        styles->lines[i]->col = swf_parse_get_col(context, error, with_alpha);
     }
 
     return styles;
@@ -161,13 +165,7 @@ swf_buffer_shapestyle(swf_buffer * buffer, int * error, swf_shapestyle * s)
 			fprintf(stderr, "Warning! Unsupported fill type...\n");
 		} else {
 			/* Solid Fill */
-			/* Test code */
-			swf_buffer_put_byte(buffer, error, 0);
-			swf_buffer_put_byte(buffer, error, 0);
-			swf_buffer_put_byte(buffer, error, 0);
-
-			/* FIXME: The code uses SWF_U32 instead of a colour type for fillstyle->colour atm */
-			//			swf_serialise_cxform(buffer, error, s->fills[i]->colour);
+			swf_buffer_colour(buffer, error, s->fills[i]->col, NO_ALPHA);
 		}
 	}
 
@@ -181,13 +179,7 @@ swf_buffer_shapestyle(swf_buffer * buffer, int * error, swf_shapestyle * s)
 	for (i=0; i < s->nlines; i++) {
 		printf("putting line %i\n", i);
 		swf_buffer_put_word (buffer, error, s->lines[i]->width);
-		/* Test code */
-		swf_buffer_put_byte(buffer, error, 0);
-		swf_buffer_put_byte(buffer, error, 0);
-		swf_buffer_put_byte(buffer, error, 0);
-
-		/* FIXME: The code uses SWF_U32 instead of a colour type for fillstyle->colour atm */
-		//		swf_serialise_cxform(buffer, error, s->lines[i]->colour);
+		swf_buffer_colour(buffer, error, s->lines[i]->col, NO_ALPHA);
 	}
 
 	swf_buffer_put_bits(buffer, 4, s->fillbits);

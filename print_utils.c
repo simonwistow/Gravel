@@ -16,6 +16,10 @@
  *
  *
  * $Log: print_utils.c,v $
+ * Revision 1.19  2002/06/20 17:02:15  kitty_goth
+ * Coloured fills work properly. Got rid of the SWF_U32 nasty representation
+ * of colours.
+ *
  * Revision 1.18  2002/06/08 13:47:30  kitty_goth
  * This is still a bit broken but defineshape generation is actually starting to
  * produce stuff
@@ -650,7 +654,7 @@ print_shapestyle (swf_shapestyle * style,const char * str)
         else
         {
             /* A solid color */
-            printf("%s\tSolid Color Fill RGB_HEX %06"pSWF_U32"x\n", str, style->fills[i]->colour);
+            printf("%s\tSolid Color Fill in R:G:B HEX: %02"pSWF_U8":%02"pSWF_U8":%02"pSWF_U8":x\n", str, style->fills[i]->col->r, style->fills[i]->col->g, style->fills[i]->col->b);
         }
     }
 
@@ -658,8 +662,7 @@ print_shapestyle (swf_shapestyle * style,const char * str)
 
     /* Get each of the line styles. */
     for (i = 0; i < style->nlines && style->lines[i] != NULL; i++) {
-        printf("%s\tLine style %-5u width %g color RGB_HEX %06"pSWF_U32"x\n", 
-			   str, i+1, (double)style->lines[i]->width/20.0, style->lines[i]->colour);
+        printf("%s\tLine style %-5u width %g color RGB_HEX %02"pSWF_U8":%02"pSWF_U8":%02"pSWF_U8":x\n", str, i+1, (double)style->lines[i]->width/20.0, style->lines[i]->col->r, style->lines[i]->col->g, style->lines[i]->col->b);
     }
 }
 

@@ -103,6 +103,9 @@ swf_destroy_fillstyle (swf_fillstyle * style)
 	if (*style->colours != NULL) {
 		swf_free (style->colours);
 	}
+	if (style->col != NULL) {
+		swf_free (style->col);
+	}
 
 	swf_free (style->matrix);
 

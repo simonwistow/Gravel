@@ -16,6 +16,10 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.35  2002/06/20 17:02:16  kitty_goth
+ * Coloured fills work properly. Got rid of the SWF_U32 nasty representation
+ * of colours.
+ *
  * Revision 1.34  2002/06/10 16:44:02  kitty_goth
  * Refactor and a bit of a cleanup.
  *
@@ -291,6 +295,12 @@
 #define sactionBranchIfTrue             (0x9D)
 #define sactionCallFrame                (0x9E)
 #define sactionGotoExpression           (0x9F)
+
+
+/* Alpha transaparency codes */
+#define NO_ALPHA 0
+#define WITH_ALPHA 1
+#define FORCE_ALPHA 2
 
 
 /* Global Types*/
@@ -605,15 +615,15 @@ struct swf_fillstyle {
     swf_matrix * matrix;              /* the transformation matrix for the bitmap */
     swf_rgba_pos ** colours;          /* the colours used in the gradient fill and the positions they're in*/
 
-	/* FIXME: This is supposed to be a proper colour */
-	    SWF_U32 colour;                  
-    swf_colour col;                   /* the colour used in the solid fill */
+    swf_colour * col;                   /* the colour used in the solid fill */
 };
 
 struct swf_linestyle {
     SWF_U16 width;                    /* the width of the line */
+    swf_colour * col;                   /* the colour fo the line */
+
 	/* FIXME: This is supposed to be a proper colour */
-    SWF_U32 colour;                   /* the colour fo the line */
+	//    SWF_U32 colour;                   /* the colour fo the line */
 };
 
 struct swf_rgba_pos {

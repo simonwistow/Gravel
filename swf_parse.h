@@ -16,6 +16,10 @@
  *
  *
  * $Log: swf_parse.h,v $
+ * Revision 1.14  2002/06/20 17:02:16  kitty_goth
+ * Coloured fills work properly. Got rid of the SWF_U32 nasty representation
+ * of colours.
+ *
  * Revision 1.13  2001/07/16 15:05:16  clampr
  * get rid of glib due to randomness (I suspect it may have been a dynamic linking issue)
  *
@@ -93,6 +97,7 @@ extern swf_defineshape         * swf_parse_defineshape_aux     (swf_parser * , i
 
 extern swf_adpcm               * swf_parse_adpcm_decompress    (swf_parser * , int *, int, int, int, int);
 extern SWF_U32                       swf_parse_get_colour          (swf_parser * , int *, int);
+extern swf_colour * swf_parse_get_col (swf_parser * context, int * error, int with_alpha);
 extern char                    * swf_parse_get_string          (swf_parser * , int *);
 
 extern swf_textrecord          * swf_parse_get_textrecord      (swf_parser * , int *, int, int, int);

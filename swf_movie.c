@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.32 2002/06/10 16:44:02 kitty_goth Exp $	
+ * 	$Id: swf_movie.c,v 1.33 2002/06/20 17:02:15 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -242,6 +242,10 @@ swf_make_fillstyle(int * error)
 	*error = SWF_EMallocFailure;
 	return NULL;
     }
+    if ((mystyle->col = (swf_colour *) calloc (1, sizeof (swf_colour *))) == NULL) {
+	*error = SWF_EMallocFailure;
+	return NULL;
+    }
 
     mystyle->fill_style = 0; /* Just do solid fill for now */
     mystyle->ncolours = 1; /* Just do solid fill for now */
@@ -249,7 +253,10 @@ swf_make_fillstyle(int * error)
     mystyle->matrix = NULL; /* Just do solid fill for now */
     mystyle->colours = (swf_rgba_pos **) &(mystyle->matrix); /* Just do solid fill for now */
 
-    mystyle->colour = 0; /* Black shape */
+    mystyle->col->r = 0xff; 
+    mystyle->col->g = 0; 
+    mystyle->col->b = 0; 
+    mystyle->col->a = 0xff; 
 
     return mystyle;
 }
@@ -265,9 +272,16 @@ swf_make_linestyle(int * error)
 	*error = SWF_EMallocFailure;
 	return NULL;
     }
+    if ((mystyle->col = (swf_colour *) calloc (1, sizeof (swf_colour *))) == NULL) {
+	*error = SWF_EMallocFailure;
+	return NULL;
+    }
 
-    /* FIXME: This is borken in swf_types.h */
-    mystyle->colour = 0; /* Black lines */
+    mystyle->col->r = 0; 
+    mystyle->col->g = 0; 
+    mystyle->col->b = 0xff; 
+    mystyle->col->a = 0xff; 
+
     mystyle->width = 2 * 20; /* Thin lines, 2 pixels wide */
 
     return mystyle;

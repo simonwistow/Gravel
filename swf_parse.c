@@ -410,6 +410,7 @@ swf_parse_get_string (swf_parser * context, int * error)
 }
 
 
+
 SWF_U32
 swf_parse_get_colour (swf_parser * context, int * error, int with_alpha)
 {
@@ -782,6 +783,10 @@ swf_parse_textrecords_to_text         (swf_parser * context, int * error, swf_te
 
 /*
  * $Log: swf_parse.c,v $
+ * Revision 1.52  2002/06/20 17:02:16  kitty_goth
+ * Coloured fills work properly. Got rid of the SWF_U32 nasty representation
+ * of colours.
+ *
  * Revision 1.51  2002/06/10 16:44:02  kitty_goth
  * Refactor and a bit of a cleanup.
  *
