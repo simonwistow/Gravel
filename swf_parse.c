@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.30  2001/07/13 14:58:44  clampr
+ * avoid a calloc(0)
+ *
  * Revision 1.29  2001/07/13 14:51:41  clampr
  * paper over some cracks fond in 3deng_01.swf
  *
@@ -1832,19 +1835,20 @@ swf_parse_definefont2 (swf_parser * context, int * error)
      * put checks in for that
      */
 
-    if ((context->font_chars [font->fontid] = (char *) calloc (font->glyph_count, sizeof (char))) == NULL)
+    if (font->glyph_count > 0)
     {
-        *error = SWF_EMallocFailure;
-        goto FAIL;
 
-    }
+	    if ((context->font_chars [font->fontid] = (char *) calloc (font->glyph_count, sizeof (char))) == NULL)
+	    {
+		    *error = SWF_EMallocFailure;
+		    goto FAIL;
+		    
+	    }
 
 
     data_pos = swf_parse_tell(context);
 
 
-    if (font->glyph_count > 0)
-    {
 
         /* Get the FontOffsetTable */
 
