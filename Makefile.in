@@ -37,7 +37,6 @@ DATE=$(shell date +%Y-%m-%d)
 	$(LIBTOOL) $(CC) $(CFLAGS) -c -o $@ $<
 
 ## Targets
-
 all: swf_parse text_extract
 
 debug: swf_parse_debug text_extract_debug
