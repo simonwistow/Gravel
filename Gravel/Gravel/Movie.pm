@@ -161,6 +161,10 @@ sub bake_movie {
 
 	$b->_bake_frames($self);
 
+	my $num = $b->_count_frames($self);
+
+	print STDERR "Tags found: $num\n";
+
 #	$b->_bake_test($self);
 #	$b->_bake_test($self);
 #	$b->_bake_test($self);
@@ -191,6 +195,24 @@ typedef struct {
   swf_movie * movie;
 } SWF_Movie;
 
+
+U16 _count_frames(SV* obj, SV* self) {
+	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
+	int error = SWF_ENoError;
+	HV* h = (HV *)SvRV(self); 
+	swf_tagrecord *temp, *node;
+	U16 num = 0;
+	
+	node = m->movie->first;
+
+	while (node != NULL) {
+		temp = node;
+		node = node->next;
+		++num;
+	}
+
+	return num;
+}
 
 void _bake_header(SV* obj, SV* self) {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
@@ -583,8 +605,10 @@ void _bake_place(swf_movie * movie, int * error, HV * h_place) {
 			obj_id = _shape_id(error, *p_shape);
 		}
 
-		fprintf(stderr, "baking a place for %i\n", obj_id);
+		/* Paranoia */
+		*error = 0;
 		swf_add_placeobject(movie, error, matrix, obj_id, 1);
+		fprintf(stderr, "baking a place for %i, with error code %i\n", obj_id, *error);		
 	}
 	return;
 }
@@ -599,6 +623,7 @@ void _bake_frames(SV* obj, SV* self) {
 	AV*  a_frame;
 	SV** ph_shape;
 	I32  i, j, num_frames;
+	U16  tmp = 0;
 
     pa_frames = hv_fetch(h_tl, "_timeline", 9, 0);	
 	if (NULL != pa_frames) {
@@ -618,6 +643,8 @@ void _bake_frames(SV* obj, SV* self) {
 				}
 				swf_add_showframe(m->movie, &error);
 			}
+			tmp = swf_movie_tag_count(m->movie, &error);
+			fprintf(stderr, "tags so far %i\n", tmp);
 		}
 	}
 	return;

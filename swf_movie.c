@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.39 2003/03/14 16:14:27 kitty_goth Exp $	
+ * 	$Id: swf_movie.c,v 1.40 2003/03/27 09:16:08 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -351,6 +351,25 @@ swf_make_linestyle(int * error)
     return mystyle;
 }
 
+
+SWF_U16 
+swf_movie_tag_count (swf_movie * movie, int * error) {
+	swf_tagrecord *temp, *node;
+	SWF_U16 i = 0;
+
+	node = movie->first;
+
+	while (node != NULL) {
+		temp = node;
+		node = node->next;
+		++i;
+	}
+
+	return i;
+}
+
+
+
 /* Calculate size et all, and stream out */
 
 /* NOTE: We'll need to keep the
@@ -360,56 +379,56 @@ swf_make_linestyle(int * error)
 void 
 swf_make_finalise(swf_movie * movie, int * error) 
 {
-  SWF_U8 * file_buf;
-  SWF_U32 tmp_32, tmp_size;
-  SWF_U16 tmp_16;
-  swf_tagrecord *temp, *node;
-  int i ;
+	SWF_U8 * file_buf;
+	SWF_U32 tmp_32, tmp_size;
+	SWF_U16 tmp_16;
+	swf_tagrecord *temp, *node;
+	int i ;
 
-  /* allocate a tag buffer */
-  if ((file_buf = (SWF_U8 *) calloc (1, SWF_OUT_STREAM)) == NULL) {
-    *error = SWF_EMallocFailure;
-    return;
-  }
+	/* allocate a tag buffer */
+	if ((file_buf = (SWF_U8 *) calloc (1, SWF_OUT_STREAM)) == NULL) {
+		*error = SWF_EMallocFailure;
+		return;
+	}
 
-  /* Open the file for writing. */
-  movie->file = fopen(movie->name, "wb");
+	/* Open the file for writing. */
+	movie->file = fopen(movie->name, "wb");
   
-  /* Did we open the file? */
-  if (movie->file == NULL) {
-    *error = SWF_EFileOpenFailure;
-    return;
-  }
+	/* Did we open the file? */
+	if (movie->file == NULL) {
+		*error = SWF_EFileOpenFailure;
+		return;
+	}
 
-  file_buf[0] = 'F';
-  file_buf[1] = 'W';
-  file_buf[2] = 'S';
-  tmp_32 = movie->header->version;
-  file_buf[3] = (SWF_U8)(tmp_32 & 0xff); 
+	file_buf[0] = 'F';
+	file_buf[1] = 'W';
+	file_buf[2] = 'S';
+	tmp_32 = movie->header->version;
+	file_buf[3] = (SWF_U8)(tmp_32 & 0xff); 
 
 /* let's build up the size. 
  * start with the header, version and total length bytes.
  */
-  tmp_size = 8; 
+	tmp_size = 8; 
 
 /* Because of the way swf_serialise_rect is, we need to have a 
  * temp value in length and overseek properly. Oh well...
  */
-  file_buf[4] = tmp_size >> 24;
-  file_buf[5] = (tmp_size << 8) >> 24;
-  file_buf[6] = (tmp_size << 16) >> 24;
-  file_buf[7] = (tmp_size << 24) >> 24;
+	file_buf[4] = tmp_size >> 24;
+	file_buf[5] = (tmp_size << 8) >> 24;
+	file_buf[6] = (tmp_size << 16) >> 24;
+	file_buf[7] = (tmp_size << 24) >> 24;
 
-  swf_movie_put_bytes(movie, error, 8, file_buf);
-  swf_serialise_rect(movie, error, movie->header->bounds);
+	swf_movie_put_bytes(movie, error, 8, file_buf);
+	swf_serialise_rect(movie, error, movie->header->bounds);
 
 /* set the backup byte counter to be the next vacant place. In case we 
  * need to seek later due to fuckups.
  */
-  i = movie->filepos; 
-  tmp_size = i;
+	i = movie->filepos; 
+	tmp_size = i;
 
-  printf("File position is: %i\n", i);
+	// printf("File position is: %i\n", i);
 
   /* Rate and count go next... */
 
@@ -417,68 +436,68 @@ swf_make_finalise(swf_movie * movie, int * error)
    * consider using a backseek in production code..?
    */
   
-  tmp_16 = 0;
+	tmp_16 = 0;
 
-  node = movie->first;
+	node = movie->first;
 
-  while (node != NULL) {
-    temp = node;
-    node = node->next;
+	while (node != NULL) {
+		temp = node;
+		node = node->next;
     
-    if (tagShowFrame == temp->id) {
-      tmp_16++;
-    }
-  }
+		if (tagShowFrame == temp->id) {
+			tmp_16++;
+		}
+	}
 
-  movie->header->count = tmp_16;
-  printf("Frame count = %i\n", tmp_16);
+	movie->header->count = tmp_16;
+	printf("Frame count = %i\n", tmp_16);
 
-  /* rate and count....... */
+	/* rate and count....... */
 
-  swf_movie_put_word(movie, error, (SWF_U16) movie->header->rate);
-  swf_movie_put_word(movie, error, (SWF_U16) movie->header->count);
+	swf_movie_put_word(movie, error, (SWF_U16) movie->header->rate);
+	swf_movie_put_word(movie, error, (SWF_U16) movie->header->count);
 
-  tmp_size += 4; /* for the rate and count */
+	tmp_size += 4; /* for the rate and count */
 
-  /* Next: Walk the LL of tags...  
-   * Build a size as we do this...
-   */
+	/* Next: Walk the LL of tags...  
+	 * Build a size as we do this...
+     */
 
-  node = movie->first;
+	node = movie->first;
 
-  while (node != NULL) {
-    temp = node;
-    node = node->next;
+	while (node != NULL) {
+		temp = node;
+		node = node->next;
     
-    if (0 == temp->serialised) {
-      fprintf(stderr, "HELP: This tag isn't serialised...\n");
-    }
+		if (0 == temp->serialised) {
+			fprintf(stderr, "HELP: This tag isn't serialised...\n");
+		}
 
-    tmp_16 = temp->id << 6;
+		tmp_16 = temp->id << 6;
 
-    if (temp->buffer->size >= 0x3f) {
-      tmp_16 |= 0x3f;
-      swf_movie_put_word(movie, error, tmp_16);
-      swf_movie_put_dword(movie, error, (SWF_U32) temp->buffer->size);
-      tmp_size += 6; /* for the tag header */
-    } else {
-      tmp_16 |= (SWF_U16) temp->buffer->size;
-      swf_movie_put_word(movie, error, tmp_16);
-      tmp_size += 2; /* for the tag header */
-    }
-    swf_movie_put_bytes(movie, error, temp->buffer->size, temp->buffer->raw);
-    tmp_size += temp->buffer->size;
-  }
+		if (temp->buffer->size >= 0x3f) {
+			tmp_16 |= 0x3f;
+			swf_movie_put_word(movie, error, tmp_16);
+			swf_movie_put_dword(movie, error, (SWF_U32) temp->buffer->size);
+			tmp_size += 6; /* for the tag header */
+		} else {
+			tmp_16 |= (SWF_U16) temp->buffer->size;
+			swf_movie_put_word(movie, error, tmp_16);
+			tmp_size += 2; /* for the tag header */
+		}
+		swf_movie_put_bytes(movie, error, temp->buffer->size, temp->buffer->raw);
+		tmp_size += temp->buffer->size;
+	}
 
-  printf("File size is: %"pSWF_U16"\n", tmp_size);
+	printf("File size is: %"pSWF_U16"\n", tmp_size);
 
-  /* Backseek to fix up file size. */
+	/* Backseek to fix up file size. */
 
-  swf_movie_seek(movie, 4);
-  swf_movie_put_dword(movie, error, tmp_size);
+	swf_movie_seek(movie, 4);
+	swf_movie_put_dword(movie, error, tmp_size);
 
-  fclose(movie->file);
-  free(file_buf);
+	fclose(movie->file);
+	free(file_buf);
 }
 
 
