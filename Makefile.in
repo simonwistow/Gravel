@@ -106,13 +106,11 @@ text_extract: libswfextract.la $(TEXT_OBJECTS)
 	$(LIBTOOL) $(CC) $(CFLAGS) -o text_extract $(TEXT_OBJECTS) libswfextract.la $(LIBS)
 
 
-## Gen stuff. Someone more versed in build procedure than I can fix this
+gen_test1: gen_test1.do libswfparse.la
+	$(LIBTOOL) $(CC) $(CFLAGS) -o gen_test1 gen_test1.do libswfparse.la $(LIBS) -static
 
-gen_test1: gen_test1.do $(D_LIB_OBJECTS)
-	$(CC) $(CFLAGS) -I . $(DEBUG) -o gen_test1 gen_test1.do $(D_LIB_OBJECTS) $(LIBS) -static
-
-gen_test2: gen_test2.do $(D_LIB_OBJECTS)
-	$(CC) $(CFLAGS) -I . $(DEBUG) -o gen_test2 gen_test2.do $(D_LIB_OBJECTS) $(LIBS) -static
+gen_test2: gen_test2.do libswfparse.la
+	$(LIBTOOL) $(CC) $(CFLAGS) -o gen_test2 gen_test2.do libswfparse.la $(LIBS) -static
 
 ## static, but quiet
 
