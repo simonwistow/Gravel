@@ -25,8 +25,7 @@ swf_parse_definefont2 (swf_parser * context, int * error)
     SWF_U32 code_offset;
     SWF_U32 * offset_table;
 	swf_font_extra *extra;
-
-	printf("definefont2\n");
+	gint fontid;
 
     if ((font = (swf_definefont2 *) calloc (1, sizeof (swf_definefont2))) == NULL) {
         *error = SWF_EMallocFailure;
@@ -39,7 +38,7 @@ swf_parse_definefont2 (swf_parser * context, int * error)
     font->kerning_pairs = NULL;
     font->bounds = NULL;
 
-    font->fontid = swf_parse_get_word (context);
+    fontid = font->fontid = swf_parse_get_word (context);
     font->flags = swf_parse_get_word (context);
     font->name_len = swf_parse_get_byte (context);
 
@@ -62,7 +61,8 @@ swf_parse_definefont2 (swf_parser * context, int * error)
 
     if (font->glyph_count > 0)
     {
-	    if ((extra->chars = (char *) calloc (font->glyph_count, sizeof (char))) == NULL)
+	    if ( (!(extra->chars  = (char *) calloc (font->glyph_count, sizeof (char)))) ||
+			 (!(extra->glyphs = (char *) calloc (font->glyph_count, sizeof (char)))))
 	    {
 		    *error = SWF_EMallocFailure;
 		    goto FAIL;
@@ -195,13 +195,12 @@ swf_parse_definefont2 (swf_parser * context, int * error)
         }
     }
 
-	g_hash_table_insert(context->font_extras, &font->fontid, extra);
+	g_hash_table_insert(context->font_extras, &fontid, extra);
     return font;
 
-    FAIL:
+ FAIL:
     swf_destroy_definefont2 (font);
     return NULL;
-
 }
 
 void
@@ -228,8 +227,6 @@ swf_destroy_definefont2 (swf_definefont2 * font)
     }
 
     swf_free (font);
-
-    return;
 }
 
 
