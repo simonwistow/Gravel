@@ -26,7 +26,7 @@ sub to {
     my ($x, $y) = @_;
     
     push @{$self->{_points}}, [$x, $y];
-    return scalar(@{$self->{_points});
+    return scalar(@{$self->{_points}});
 }
 
 # hack for now
@@ -35,7 +35,7 @@ sub set_stroke {
     my $self = shift;
 #    my 
 
-    $self->{_styles}->{0} = 
+#    $self->{_styles}->{0} = 
 }
 
 # hack for now
