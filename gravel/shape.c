@@ -17,10 +17,11 @@
  */
 
 #include "swf_types.h"
-#include "swf_parse.h"
 #include "swf_movie.h"
+#include "swf_error.h"
 #include "swf_destroy.h"
 #include "swf_serialise.h"
+#include "gravel.h"
 
 #include <stdio.h>
 
@@ -92,7 +93,7 @@ gravel_make_shaperecords(int * error)
  * Process main records
  */
 swf_tagrecord * 
-gravel_create_shape(swf_movie * movie, int * error) 
+gravel_create_shape(swf_movie * movie, int * error, SCOORD xmin, SCOORD xmax, SCOORD ymin, SCOORD ymax)
 {
     swf_tagrecord * tag;
     swf_defineshape * shape;
@@ -109,11 +110,20 @@ gravel_create_shape(swf_movie * movie, int * error)
 	  *error = SWF_EMallocFailure;
 	  goto FAIL;
     }
+    shape->tagid = ++(movie->max_obj_id);
+
 
     if ((canvas = (swf_rect *) calloc (1, sizeof (swf_rect))) == NULL) {
 	  *error = SWF_EMallocFailure;
 	  goto FAIL;
     }
+    canvas->xmin = xmin;
+    canvas->xmax = xmax;
+    canvas->ymin = ymin;
+    canvas->ymax = ymax;
+    shape->rect = canvas;
+
+
 
     if ((mystyle = (swf_shapestyle *) calloc (1, sizeof (swf_shapestyle))) == NULL) {
 	*error = SWF_EMallocFailure;
@@ -128,9 +138,10 @@ gravel_create_shape(swf_movie * movie, int * error)
 	  goto FAIL;
     }
 
-    shape->tagid = ++(movie->max_obj_id);
 
-    shape->record = swf_make_shaperecords_for_triangle(error);
+
+
+	shape->style = mystyle;
 
     tag->tag = (void *) shape;
 

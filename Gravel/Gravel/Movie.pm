@@ -113,8 +113,19 @@ sub size {
 sub _prepare {
     my $self = shift;
 
+	# Set up the canvases for the individual shapes
+	# FIXME: Do this in C instead.
 	foreach my $s (@{$self->library}) {
-		
+		my %tmp = %$s;
+		my ($xmin, $ymin, $xmax, $ymax) = @tmp{'_xmin', '_ymin', '_xmax', '_ymax'};
+		foreach my $v (@{$s->vertices}) {
+			$xmin = $v->[0] if $xmin and $v->[0] < $xmin; 
+			$ymin = $v->[1] if $ymin and $v->[1] < $ymin; 
+			$xmax = $v->[0] if $xmax and $v->[0] > $xmax; 
+			$ymax = $v->[1] if $ymax and $v->[1] > $ymax; 
+		}
+		($s->{_xmin}, $s->{_ymin}, $s->{_xmax}, $s->{_ymax}) 
+			= ($xmin, $ymin, $xmax, $ymax);
 	}
 
 }
@@ -197,7 +208,11 @@ void _bake_library(SV* obj, SV* self) {
 	SV** p_shape;
 	AV* lib;
 	SV* shape;
+	HV* h_sh;
 	I32 lib_size, i;
+	swf_tagrecord * temp;
+	SCOORD x1, x2, y1, y2;
+	SV** p_num;
 
 	p_lib = hv_fetch(h, "_library", 8, 0);
 	if (NULL != p_lib) {
@@ -212,8 +227,27 @@ void _bake_library(SV* obj, SV* self) {
 		
 // At this point, we have the shape to be turned 
 // into an unserialised defineShape 
-	
-	    shape 
+	    h_sh = (HV *) SvRV(shape); 
+
+		p_num = hv_fetch(h, "_xmin", 5, 0);
+		if (NULL != p_num) {
+			x1 = (SCOORD)(SvIV(*p_num));
+		}
+		p_num = hv_fetch(h, "_xmax", 5, 0);
+		if (NULL != p_num) {
+			x2 = (SCOORD)(SvIV(*p_num));
+		}
+		p_num = hv_fetch(h, "_ymin", 5, 0);
+		if (NULL != p_num) {
+			y1 = (SCOORD)(SvIV(*p_num));
+		}
+		p_num = hv_fetch(h, "_ymax", 5, 0);
+		if (NULL != p_num) {
+			y2 = (SCOORD)(SvIV(*p_num));
+		}
+
+	    temp = gravel_create_shape(m->movie, &error, x1, x2, y1, y2);
+
 
 	}
 

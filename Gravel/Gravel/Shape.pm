@@ -69,6 +69,10 @@ sub vertex {
 
 #
 
+sub vertices { return (shift)->{_vertices}; }
+
+#
+
 sub line {
     my $self = shift;
     my ($x1, $y1, $x2, $y2) = @_;
