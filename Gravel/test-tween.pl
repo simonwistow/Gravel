@@ -11,6 +11,8 @@ use Gravel::Effect::Tween;
 use Data::Dumper qw/DumperX/;
 
 my $m = Gravel::Movie->new();
+$m->name('foo.swf');
+$m->size(0, 0, 2000, 2000);
 
 my $g = Gravel::Shape->new();
 $g->poly(400, 400, 400, 800, 800, 800, 800, 400, );
@@ -22,7 +24,7 @@ $m->event($e);
 
 $m->make_timeline();
 
-print STDERR DumperX $m;
+#print STDERR DumperX $m;
 
 my $a = $m->bake_movie();
 

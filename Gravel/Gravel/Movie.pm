@@ -83,13 +83,41 @@ sub make_timeline {
 
 #
 
+sub name {
+	my $self = shift;
+	my $name = shift;
+	$self->{_name} = $name if $name;
+	return $self->{_name};
+}
+
+
+#
+
+sub size {
+    my $self = shift;
+}
+
+#
+
+sub _prepare {
+    my $self = shift;
+
+	foreach my $s (@{$self->library}) {
+		
+	}
+
+}
+
 sub bake_movie {
     my $self = shift;
 
 #	$self->{_baked} = Gravel::Movie->_bake_movie();
 
+	$self->_prepare();
+
 	my $b = Gravel::Movie->_create_baked();
 	$b->_bake_header($self);
+	$b->_bake_rest($self);
 
 	return $b;
 }
@@ -118,11 +146,18 @@ typedef struct {
 void _bake_header(SV* obj, SV* self) {
 	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
 	int error = SWF_ENoError;
+	HV* h; 
+	SV** p_name;
+	SV* name;
+	
 
     swf_make_header(m->movie, &error, -4000, 4000, -4000, 4000);
     m->movie->name = "ben1.swf\0";
-//    m->movie->name = self
-
+	h = (HV *)SvRV(self);
+	p_name = hv_fetch(h, "_name", 5, 0);
+	if (NULL != p_name) {
+		m->movie->name = (const char *)SvPVX(*p_name);
+	}
 }
 
 
@@ -147,25 +182,12 @@ SV* _create_baked(char* class) {
 }
 
 
-SV* _bake_movie (char* class) {
-	SV* obj_ref = newSViv(0);
-	SV*     obj = newSVrv(obj_ref, class);
-    SWF_Movie * m;
+SV* _bake_rest(SV* obj, SV* self) {
+	SWF_Movie* m = (SWF_Movie*)SvIV(SvRV(obj));
     int error;
     swf_tagrecord * temp;
 
     error = 0;
-
-    if ((m = (SWF_Movie *) calloc (1, sizeof(SWF_Movie))) == NULL) {
-		return NULL;
-    }
-
-    if ((m->movie = swf_make_movie(&error)) == NULL) {
-		return NULL;
-    }
-
-    swf_make_header(m->movie, &error, -4000, 4000, -4000, 4000);
-    m->movie->name = "ben1.swf\0";
 
     temp = swf_make_triangle(m->movie, &error);
 
@@ -197,9 +219,6 @@ SV* _bake_movie (char* class) {
 
 	fprintf(stderr, "Foo 6\n");
 
-	sv_setiv(obj, (IV)m);
-	SvREADONLY_on(obj);
-	return obj_ref;
 }
 
 
