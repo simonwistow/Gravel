@@ -61,9 +61,13 @@ swf_movie * swf_make_movie (int * error);
 void swf_destroy_movie (swf_movie * movie);
 
 
+swf_shaperecord * swf_make_shaperecord(int * error, int isEdge);
+void swf_add_shaperecord (swf_shaperecord_list * list, int * error, swf_shaperecord * temp);
+
+
 swf_tagrecord * swf_make_tagrecord (int * error, SWF_U16 myid);
 swf_shaperecord_list * swf_make_shaperecords_for_triangle(int * error);
-swf_tagrecord * swf_make_triangle_as_tag(swf_movie * movie, int * error);
+swf_tagrecord * swf_make_triangle(swf_movie * movie, int * error);
 
 
 /*

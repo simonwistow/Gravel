@@ -45,7 +45,8 @@ swf_parse_get_rect (swf_parser * context, int * error)
 }
 
 
-void swf_serialise_rect(swf_movie * p, int * error, swf_rect * rect) 
+void 
+swf_serialise_rect(swf_movie * p, int * error, swf_rect * rect) 
 {
   SWF_U16 max;
   SWF_U8 i=2;
@@ -75,6 +76,40 @@ void swf_serialise_rect(swf_movie * p, int * error, swf_rect * rect)
   swf_movie_put_sbits(p, i, rect->ymin);
   swf_movie_put_sbits(p, i, rect->ymax);
   swf_movie_flush_bits(p);
+}
+
+void 
+swf_buffer_rect(swf_buffer * p, int * error, swf_rect * rect) 
+{
+  SWF_U16 max;
+  SWF_U8 i; 
+
+  max = 0;
+  if (abs(rect->xmin) > max) {
+    max = abs(rect->xmin);
+  }
+  if (abs(rect->xmax) > max) {
+    max = abs(rect->xmax);
+  }
+  if (abs(rect->ymin) > max) {
+    max = abs(rect->ymin);
+  }
+  if (abs(rect->xmax) > max) {
+    max = abs(rect->ymax);
+  }
+
+  i = 2; /* i=2 because we're doing signed bits here for the rect values.. */
+  while (1 < max) {
+    i++;
+    max = max >> 1;
+  }
+
+  swf_buffer_put_bits(p, 5, i);
+  swf_buffer_put_sbits(p, i, rect->xmin);
+  swf_buffer_put_sbits(p, i, rect->xmax);
+  swf_buffer_put_sbits(p, i, rect->ymin);
+  swf_buffer_put_sbits(p, i, rect->ymax);
+  swf_buffer_flush_bits(p);
 }
 
 void

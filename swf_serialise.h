@@ -26,3 +26,6 @@ extern void swf_serialise_matrix (swf_buffer * buffer, int * error, swf_matrix *
 
 extern void swf_serialise_cxform(swf_buffer * buffer, int * error, swf_cxform * mycx);
 extern void swf_serialise_cxform_force_alpha (swf_buffer * buffer, int * error, swf_cxform * mycx);
+
+
+extern void swf_serialise_defineshape (swf_buffer * buffer, int * error, swf_defineshape * shape);

@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_types.h,v $
+ * Revision 1.31  2002/06/06 17:51:28  kitty_goth
+ * Start working on some lower-level stuff
+ *
  * Revision 1.30  2002/06/05 21:29:06  kitty_goth
  *  start doing some more action stuff
  *
@@ -563,7 +566,7 @@ struct swf_placeobject2 {
 };
 
 struct swf_defineshape {
-    SWF_U32 tagid;                   /* the id of the object we're creating */
+    SWF_U16 tagid;                   /* the id of the object we're creating */
     swf_rect * rect;                 /* the bounds of the shape */
     swf_shapestyle * style;          /* the style of the shape */
     swf_shaperecord_list * record;   /* the records defining the shape */
@@ -1038,23 +1041,40 @@ struct swf_doaction_list {
 
 
 struct swf_shaperecord {
-
+	/* General */
     int is_edge;                 /* is this an edge? 1 = yes, 0 = no */
-    SWF_U16 flags;               /* some flags */ /* todo simon - is this necessary? */
-    SWF_S32 x;                   /* move to X value, relative to shape origin i.e draw line from last point to here */
-    SWF_S32 y;                   /* move to Y value, relative to shape origin */
-    int fillstyle0;              /* fill style 0 change flag */
-    int fillstyle1;              /* fill style 1 change flag */
-    int linestyle;               /* line style change flag */
+    swf_shaperecord * next;      /* next element in the list */
+
+	/* TODO: simon - is this necessary? */
+    SWF_U16 flags;               /* some flags */ 
+
+	/* For non-edges */
+	/* TODO: New Styles... */
+	/* TODO: MoveTo... */
     swf_shapestyle * shapestyle; /* the stle of the shape */
+
+	/* For Edges */
+    int change_fs0;              /* fill style 0 change flag */
+    int change_fs1;              /* fill style 0 change flag */
+    int change_ls;               /* line style change flag */
+
+	/* As a UB[4] can be at most 15, this is safe, for now... */
+	/* FIXME: More styles, and widening this to SWF_U32... */
+    SWF_U16 fillstyle0;          /* fill style 0 */
+    SWF_U16 fillstyle1;          /* fill style 1 */
+    SWF_U16 linestyle;           /* line style change flag */
+
+	/* For Straight Edges */
+    SWF_S32 x;                   /* dX value, relative to lastY */
+    SWF_S32 y;                   /* dY value, relative to lastY */
+
+    /* todo simon : this is extremley b0rked at the moment I think */
+	/* For curved edges */
     SWF_S32 ax;                  /* the x anchor for a curve */
     SWF_S32 ay;                  /* the y anchor for a curve */
     SWF_S32 cx;                  /* the x end point for a curve */
     SWF_S32 cy;                  /* the y end point for a curve */
 
-    swf_shaperecord * next;      /* next element in the list */
-
-    /* todo simon : this is extremley b0rked at the moment I think */
 };
 
 struct swf_shaperecord_list {

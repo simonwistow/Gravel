@@ -34,7 +34,10 @@ void usage (char * name) {
 
 int main (int argc, char *argv[]) {
     swf_movie * movie;
-    int error = 0;
+    int error;
+    swf_tagrecord * temp;
+
+    error = 0;
 
     if ((movie = swf_make_movie(&error)) == NULL) {
 	fprintf (stderr, "Fail\n");
@@ -44,16 +47,17 @@ int main (int argc, char *argv[]) {
     swf_make_header(movie, &error, -4000, 4000, -4000, 4000);
     movie->name = "ben1.swf\0";
 
-    swf_add_setbackgroundcolour(movie, &error, 0, 255, 0, 255);
-    swf_add_showframe(movie, &error);
-    swf_add_showframe(movie, &error);
+
+    temp = swf_make_triangle(movie, &error);
+
     swf_add_protect(movie, &error);
+    swf_add_setbackgroundcolour(movie, &error, 0, 255, 0, 255);
+    //    swf_dump_shape(movie, &error, temp);
+
     swf_add_showframe(movie, &error);
     swf_add_end(movie, &error);
 
-    fprintf(stderr, "foo b\n");
     swf_make_finalise(movie, &error);
-    fprintf(stderr, "foo c\n");    
 
     swf_destroy_movie(movie);
 

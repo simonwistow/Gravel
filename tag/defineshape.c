@@ -16,6 +16,7 @@
  */
 
 #include "tag_handy.h"
+
 /*
  * Thin wrapper over swf_parse_defineshape_aux.
  * The spec has defineshape, defineshape2, etc but rather than
@@ -80,7 +81,26 @@ swf_parse_defineshape_aux (swf_parser * context, int * error, int with_alpha)
 }
 
 
+void
+swf_serialise_defineshape (swf_buffer * buffer, int * error, swf_defineshape * shape)
+{
+	swf_shaperecord *node, *temp;
 
+	swf_buffer_initbits(buffer);
+	swf_buffer_put_word(buffer, error, shape->tagid);
+	swf_buffer_rect(buffer, error, shape->rect);
+	
+	swf_buffer_shapestyle(buffer, error, shape->style);
+
+	node = shape->record->first;
+
+	while (node != NULL) {
+		temp = node;
+		node = node->next;
+		// FIXME: Do stuff...
+	}
+
+}
 
 void
 swf_destroy_defineshape (swf_defineshape * shape)

@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * 	$Id: swf_movie.c,v 1.25 2002/06/03 22:28:34 kitty_goth Exp $	
+ * 	$Id: swf_movie.c,v 1.26 2002/06/06 17:51:28 kitty_goth Exp $	
  */
 
 #define SWF_OUT_STREAM 10240
@@ -270,7 +270,7 @@ swf_make_linestyle(int * error)
 }
 
 swf_shaperecord *
-swf_make_shaperecord(int * error) 
+swf_make_shaperecord(int * error, int isEdge) 
 {
     swf_shaperecord * record;
 
@@ -278,6 +278,19 @@ swf_make_shaperecord(int * error)
       *error = SWF_EMallocFailure;
       return NULL;
     }
+
+    record->is_edge = isEdge;
+    record->change_fs0 = 0;
+    record->change_fs1 = 0;
+    record->change_ls = 0;
+
+    record->x =0;
+    record->y =0;
+
+    record->ax =0;
+    record->ay =0;
+    record->cx =0;
+    record->cy =0;
 
     return record;
 }
@@ -308,7 +321,7 @@ swf_make_shaperecords_for_triangle(int * error)
     /* This list has five records in it */
 
 /* First, we need a non-edge, change of style record */ 
-    record = swf_make_shaperecord(error);
+    record = swf_make_shaperecord(error, 0);
 
 
 
@@ -316,28 +329,28 @@ swf_make_shaperecords_for_triangle(int * error)
     swf_add_shaperecord(list, error, record);
 
 /* Then we need three edges */
-    record = swf_make_shaperecord(error);
+    record = swf_make_shaperecord(error, 1);
+    record->x = 50 * 20;
+
+
+    swf_add_shaperecord(list, error, record);
+
+    record = swf_make_shaperecord(error, 1);
+    record->y = 75 * 20;
 
 
 
     swf_add_shaperecord(list, error, record);
 
-    record = swf_make_shaperecord(error);
-
-
-
-
-    swf_add_shaperecord(list, error, record);
-
-    record = swf_make_shaperecord(error);
-
-
+    record = swf_make_shaperecord(error, 1);
+    record->x = -50 * 20;
+    record->y = -75 * 20;
 
 
     swf_add_shaperecord(list, error, record);
 
 /* Then we need an end-of-shape edge */
-    record = swf_make_shaperecord(error);
+    record = swf_make_shaperecord(error, 0);
 
 
 
@@ -355,7 +368,9 @@ swf_make_shaperecords_for_triangle(int * error)
  * Linestyle (just one for now)
  * three edges (straight lines)
  */
-swf_tagrecord * swf_make_triangle_as_tag(swf_movie * movie, int * error) {
+swf_tagrecord * 
+swf_make_triangle(swf_movie * movie, int * error) 
+{
     swf_tagrecord * triangle;
     swf_defineshape * shape;
     swf_rect * canvas;
@@ -385,9 +400,9 @@ swf_tagrecord * swf_make_triangle_as_tag(swf_movie * movie, int * error) {
     shape->tagid = ++(movie->max_obj_id);
 
     canvas->xmin = 0 * 20;
-    canvas->xmax = 50 * 20;
+    canvas->xmax = 100 * 20;
     canvas->ymin = 0 * 20;
-    canvas->ymax = 50 * 20;
+    canvas->ymax = 100 * 20;
 
     shape->rect = canvas;
 
@@ -485,8 +500,6 @@ swf_make_finalise(swf_movie * movie, int * error)
     temp = node;
     node = node->next;
     
-/* printf("Walking waka-waka : id = %i\n", temp->id); */
-
     if (tagShowFrame == temp->id) {
       tmp_16++;
     }

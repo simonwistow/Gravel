@@ -132,6 +132,38 @@ swf_parse_get_shapestyle (swf_parser * context, int * error, int with_alpha)
     return NULL;
 }
 
+/* TODO: Buffer out the shapestyles... */
+void
+swf_buffer_shapestyle(swf_buffer * buffer, int * error, swf_shapestyle * s)
+{
+	SWF_U16 max;
+	SWF_U8 i;
+
+	for (i=0; i < s->nfills; i++) {
+		// buffer out the fillstyles...
+	}
+
+	for (i=0; i < s->nlines; i++) {
+		// buffer out the linestyles...
+	}
+
+
+	i = 1; /* The nbits is a UB value, so i = 1 here*/
+	max = 0;
+	if (s->nfills > max) {
+		max = s->nfills;
+	}
+	if (s->lines > max) {
+		max = s->lines;
+	}
+
+	while (1 < max) {
+		i++;
+		max = max >> 1;
+	}
+
+	swf_buffer_put_bits(buffer, 5, i);
+}
 
 /*
  * Shapestyle's are reasonably complicated types.
