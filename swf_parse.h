@@ -120,3 +120,4 @@ extern swf_freecharacter       * swf_parse_freecharacter       (swf_parser * , i
 extern swf_namecharacter       * swf_parse_namecharacter       (swf_parser * , int *);
 
 #endif
+

@@ -2717,3 +2717,4 @@ swf_parse_get_shaperecord (swf_parser * context, int * error, int at_end, int xl
     return NULL;
 */
 }
+

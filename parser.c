@@ -1224,3 +1224,4 @@ parse_soundstreamhead2 (swf_parser * context, const char * str)
     return;
 
 }
+
