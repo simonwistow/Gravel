@@ -19,6 +19,8 @@ swf_destroy.[ch]  : the destructor routines
 swf_error.[ch]    : error codes and code->string routine
 swf_types.h       : the types
 print_utils.[ch]  : utilities for printing our various types
+configure.in      : configure macros
+sizes.h.in        : cope with architecture independant U32 etc
 oldswfparse.cpp   : the official Macromedia code
 gpl.txt           : the Gnu General Public licence
 todo              : stuff left todo
