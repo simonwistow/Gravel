@@ -16,6 +16,9 @@
  *
  *
  * $Log: swf_parse.c,v $
+ * Revision 1.29  2001/07/13 14:51:41  clampr
+ * paper over some cracks fond in 3deng_01.swf
+ *
  * Revision 1.28  2001/07/13 14:47:34  clampr
  * malloc the right type
  *
@@ -1947,7 +1950,7 @@ swf_parse_definefont2 (swf_parser * context, int * error)
 
     	font->nkerning_pairs = swf_parse_get_word (context);
 
-        if ((font->kerning_pairs = (swf_kerningpair **) calloc (font->nkerning_pairs, sizeof(swf_kerningpair *))) == NULL) {
+        if (font->nkerning_pairs && (font->kerning_pairs = (swf_kerningpair **) calloc (font->nkerning_pairs, sizeof(swf_kerningpair *))) == NULL) {
             *error = SWF_EMallocFailure;
             goto FAIL;
         }
