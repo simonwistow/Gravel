@@ -43,79 +43,11 @@ SWF_U16 swf_get_object_id(swf_tagrecord * mytag, int * error);
 SWF_U16 
 swf_get_object_id(swf_tagrecord * mytag, int * error)
 {
-    return (((SWF_U16) mytag->buffer->raw[1]) << 8) | (SWF_U16) mytag->buffer->raw[0];
+  swf_defineshape * shape = (swf_defineshape *) mytag->tag;
+
+  return ((SWF_U16) shape->tagid);
+  //    return (((SWF_U16) mytag->buffer->raw[1]) << 8) | (SWF_U16) mytag->buffer->raw[0];
 }
-
-
-swf_tagrecord *
-swf_get_nth_bitmap (swf_parser * swf, int * error, int which_shape) 
-{
-    int next_id, i, done;
-    swf_tagrecord * temp = NULL;
-	
-
-    if (*error != SWF_ENoError) 
-    {
-	fprintf(stderr,"error wasn't reset in get_nth_shape\n");
-	return NULL;
-    } 
-    *error = SWF_ENoError;            
-
-
-
-
-    i = done = 0;
-    
-    /* parse all the tags, looking for a defineshape  */
-    do {
-        /* reset the error, just to be paranoid */
-        *error = SWF_ENoError;
-
-        /* get the next id */
-        next_id = swf_parse_nextid(swf, error);
-
-        /* if there's been an error, bug out */
-        if (*error != SWF_ENoError) {
-	    goto FAIL;
-	}
-
-        /* Use default fall-through, just for perversity */
-
-        switch (next_id) {
-	    case tagDefineBitsLossless:
-	    case tagDefineBitsLossless2:
-		if (i  == which_shape ) {
-		    temp = swf_get_raw_shape(swf, error);
-
-		    if (temp == NULL || *error != SWF_ENoError)
-		    {
-			goto FAIL;
-		    }
-
-		    temp->id = next_id;
-		    temp->serialised = TRUE;
-		    done = 1;
-		}
-		i++;
-		
-		break;
-        }
-    } while ((!*error) && next_id && !done);
-
-    if (i<=which_shape)
-    {
-	*error = SWF_ENoSuchShape;
-	goto FAIL;
-    } 
-
-    return temp;
-
-FAIL:
-    swf_destroy_tagrecord(temp);
-    return NULL;
-
-}
-
 
 int main (int argc, char *argv[]) {
     swf_movie * movie;
@@ -170,21 +102,6 @@ int main (int argc, char *argv[]) {
 
     printf("\n----- Reading movie details -----\n");
 
-/* Right, now we need a tagrecord.. */
-
-    temp = swf_get_nth_bitmap(parser, &error, shape_num);
-
- 
-    if (error == SWF_ENoSuchShape) {
-      fprintf(stderr,"No such shape : %d\n",shape_num);
-      exit(1);
-    } else if (error != SWF_ENoError || temp == NULL) {
-      fprintf(stderr,"Error getting %dth shape : %s\n", shape_num, swf_error_code_to_string(error));
-      exit(1);
-    } 
-
-    obj_id = swf_get_object_id(temp, &error);
-
     if ((matrix = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
       error = SWF_EMallocFailure;
       return 1;
@@ -234,6 +151,16 @@ int main (int argc, char *argv[]) {
     movie->name = (char *) "ben3.swf";
 
     movie->header->rate = FRAMERATE * 256;
+
+/* Right, now we need a tagrecord.. */
+	temp = swf_make_triangle(movie, &error);
+ 
+	if (error != SWF_ENoError || temp == NULL) {
+      fprintf(stderr,"Error getting %dth shape : %s\n", shape_num, swf_error_code_to_string(error));
+      exit(1);
+    } 
+
+    obj_id = swf_get_object_id(temp, &error);
 
     swf_add_setbackgroundcolour(movie, &error, 0, 255, 0, 255);
     swf_dump_tag(movie, &error, temp);
