@@ -83,12 +83,12 @@ int main (int argc, char *argv[]) {
     }
 
     printf("FWS\n");
-    printf("File version \t%lu\n", hdr->version);
-    printf("File size \t%lu\n", hdr->size);
+    printf("File version \t%"pSWF_U32"\n", hdr->version);
+    printf("File size \t%"pSWF_U32"\n", hdr->size);
     printf("Movie width \t%lu\n", (hdr->bounds->xmax - hdr->bounds->xmin) / 20);
     printf("Movie height \t%lu\n", (hdr->bounds->ymax - hdr->bounds->ymin) / 20);
-    printf("Frame rate \t%lu\n", hdr->rate);
-    printf("Frame count \t%lu\n", hdr->count);
+    printf("Frame rate \t%"pSWF_U32"\n", hdr->rate);
+    printf("Frame count \t%"pSWF_U32"\n", hdr->count);
 
     printf("\n----- Reading movie details -----\n");
 
@@ -111,7 +111,7 @@ int main (int argc, char *argv[]) {
 
     if ((matrix = (swf_matrix *) calloc (1, sizeof (swf_matrix))) == NULL) {
       error = SWF_EMallocFailure;
-      return;
+      return 1;
     }
 
 /* Now generate the output movie */
@@ -124,7 +124,7 @@ int main (int argc, char *argv[]) {
 /* Ensure we steal a good header... */
 
     movie->header = hdr;
-    movie->name = "ben3.swf\0";
+    movie->name = (char *) "ben3.swf";
 
     swf_add_setbackgroundcolour(movie, &error, 0, 255, 0, 255);
     swf_dump_shape(movie, &error, temp);
